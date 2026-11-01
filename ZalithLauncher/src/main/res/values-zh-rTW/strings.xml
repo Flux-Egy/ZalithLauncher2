@@ -433,6 +433,7 @@
     <string name="plugin_download_summary">下載外掛，以應用程式的方式進行安裝，重新打開啟動器即可自動載入！</string>
     <!--  帳號  -->
     <string name="account_no_account">找不到可用帳號</string>
+    <string name="account_credentials_insecure">此裝置無法使用安全憑證儲存，您的帳號權杖與密碼將以未加密形式儲存。</string>
     <string name="account_login">登入</string>
     <string name="account_logging_in">%s 登入中</string>
     <string name="account_logging_in_failed">登入失敗</string>

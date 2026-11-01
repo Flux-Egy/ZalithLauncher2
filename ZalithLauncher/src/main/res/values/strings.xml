@@ -869,6 +869,7 @@
     <string name="plugin_download_summary">Download the plugin and install it as an app. Just reopen the launcher and it will load automatically!</string>
     <!-- Placeholder shown in the account list when no account has been added -->
     <string name="account_no_account">No accounts available</string>
+    <string name="account_credentials_insecure">Secure credential storage is unavailable on this device. Your account tokens and passwords are stored unencrypted.</string>
     <!-- Confirm button of the Microsoft login tip dialog, starting the login -->
     <string name="account_login">Login</string>
     <!-- Progress text while signing in; %s is the player name; shown when launching or adding an account -->

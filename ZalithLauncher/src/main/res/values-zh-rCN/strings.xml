@@ -476,6 +476,7 @@
     <string name="plugin_download_summary">下载插件，以应用的形式进行安装，重新打开启动器即可自动加载！</string>
     <!--  账号  -->
     <string name="account_no_account">未找到可用账号</string>
+    <string name="account_credentials_insecure">此设备无法使用安全凭据存储，您的账号令牌和密码将以未加密形式保存。</string>
     <string name="account_login">登录</string>
     <string name="account_logging_in">%s 登录中</string>
     <string name="account_logging_in_failed">登录失败</string>

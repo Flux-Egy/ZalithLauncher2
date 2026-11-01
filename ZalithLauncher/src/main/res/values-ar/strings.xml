@@ -361,6 +361,7 @@
     <string name="renderer_version_storage_permissions">يمكن ضبط العارض الحالي %s عبر ملف إعدادات. يرجى تفعيل إذن الوصول إلى وحدة التخزين الخارجية للمشغل أولاً، وإلا فلن يتمكن من قراءة وتحميل إعدادات العارض!</string>
     <string name="renderer_version_storage_permissions_sdk30">يمكن ضبط العارض الحالي %s عبر ملف إعدادات. يرجى تفعيل إذن \'إدارة جميع الملفات\' للمشغل أولاً، وإلا فلن يتمكن من قراءة وتحميل إعدادات العارض!</string>
     <string name="account_no_account">لا توجد حسابات متاحة</string>
+    <string name="account_credentials_insecure">التخزين الآمن لبيانات الاعتماد غير متاح على هذا الجهاز. يتم حفظ رموز حساباتك وكلمات المرور دون تشفير.</string>
     <string name="account_login">تسجيل الدخول</string>
     <string name="account_logging_in">جارِ تسجيل الدخول كـ %s</string>
     <string name="account_logging_in_failed">فشل تسجيل الدخول</string>

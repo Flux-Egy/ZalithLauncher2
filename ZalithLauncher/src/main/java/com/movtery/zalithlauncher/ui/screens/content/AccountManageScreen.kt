@@ -18,6 +18,10 @@
 
 package com.movtery.zalithlauncher.ui.screens.content
 
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.painterResource
+import androidx.compose.material3.Icon
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -672,6 +676,7 @@ private fun AccountsLayout(
 ) {
     val ctx = rememberAnimatedContext(isVisible = isVisible)
     val context = LocalContext.current
+    val credentialsInsecure by AccountsManager.credentialStorageInsecure.collectAsStateWithLifecycle()
 
     AccountOperation(accountOperation, actions)
 
@@ -699,7 +704,16 @@ private fun AccountsLayout(
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 state = scrollState,
             ) {
-                items(accounts, key = { it.uniqueUUID }) { account ->
+                if (credentialsInsecure) {
+                    item(key = "credentials_insecure_banner", contentType = "banner") {
+                        CredentialsInsecureBanner(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp)
+                        )
+                    }
+                }
+                items(accounts, key = { it.uniqueUUID }, contentType = { "account" }) { account ->
                     AccountItem(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -743,6 +757,35 @@ private fun AccountsLayout(
                     text = stringResource(R.string.account_no_account)
                 )
             }
+        }
+    }
+}
+
+/**
+ * Shown when AndroidKeyStore is unavailable and credentials are stored unencrypted.
+ */
+@Composable
+private fun CredentialsInsecureBanner(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                painter = painterResource(R.drawable.ic_warning_filled),
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = stringResource(R.string.account_credentials_insecure),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
