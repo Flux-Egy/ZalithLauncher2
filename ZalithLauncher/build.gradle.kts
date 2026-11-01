@@ -214,6 +214,17 @@ androidComponents {
     }
 }
 
+// Some unit tests talk to real external services (paste-site uploads, live server ping).
+// CI passes -PexcludeNetworkTests to skip them so PR checks are hermetic and do not
+// spam public services. Local runs are unchanged.
+if (providers.gradleProperty("excludeNetworkTests").isPresent) {
+    tasks.withType<Test>().configureEach {
+        filter {
+            excludeTestsMatching("com.movtery.zalithlauncher.crashlogs.TestAbstractAPI")
+            excludeTestsMatching("com.movtery.zalithlauncher.game.version.multiplayer.TestServers")
+        }
+    }
+}
 
 kotlin {
     compilerOptions {
