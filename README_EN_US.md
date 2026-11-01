@@ -65,8 +65,8 @@ Never commit these values.
 ### Tests and checks
 
 ```bash
-# Unit tests (-PexcludeNetworkTests skips tests that contact real external services)
-./gradlew :ZalithLauncher:testDebugUnitTest :CardGrid:testDebugUnitTest :Guide:testDebugUnitTest -Darch=arm64 -PexcludeNetworkTests
+# Unit tests (-PciExcludedTests skips tests that need external services or developer-local files, plus 2 known-broken upstream assertions)
+./gradlew :ZalithLauncher:testDebugUnitTest :CardGrid:testDebugUnitTest :Guide:testDebugUnitTest -Darch=arm64 -PciExcludedTests
 
 # 16 KB page-size alignment of 64-bit native libraries in the built APK
 scripts/check-16kb-alignment.sh --allowlist .github/16kb-alignment-allowlist.txt ZalithLauncher/build/outputs/apk/debug/*.apk

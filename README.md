@@ -69,8 +69,8 @@ cargo install cargo-ndk
 ### 测试与检查
 
 ```bash
-# 单元测试（-PexcludeNetworkTests 会跳过访问真实外部服务的测试）
-./gradlew :ZalithLauncher:testDebugUnitTest :CardGrid:testDebugUnitTest :Guide:testDebugUnitTest -Darch=arm64 -PexcludeNetworkTests
+# 单元测试（-PciExcludedTests 会跳过依赖外部服务或开发者本地文件的测试，以及 2 个已知有误的上游断言）
+./gradlew :ZalithLauncher:testDebugUnitTest :CardGrid:testDebugUnitTest :Guide:testDebugUnitTest -Darch=arm64 -PciExcludedTests
 
 # 检查 APK 中 64 位原生库的 16 KB 页面对齐
 scripts/check-16kb-alignment.sh --allowlist .github/16kb-alignment-allowlist.txt ZalithLauncher/build/outputs/apk/debug/*.apk

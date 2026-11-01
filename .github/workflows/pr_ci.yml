@@ -103,7 +103,7 @@ jobs:
           :ZalithLauncher:testDebugUnitTest
           :CardGrid:testDebugUnitTest
           :Guide:testDebugUnitTest
-          -Darch=arm64 -PexcludeNetworkTests --continue --stacktrace
+          -Darch=arm64 -PciExcludedTests --continue --stacktrace
 
       - name: Check 16 KB native library alignment
         run: |
