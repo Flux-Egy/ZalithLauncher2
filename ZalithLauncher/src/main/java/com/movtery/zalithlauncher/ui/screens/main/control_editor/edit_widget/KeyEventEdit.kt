@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.main.control_editor.edit_widget
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,7 +28,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -93,8 +93,10 @@ fun KeyEventEdit(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        items(
-            provider.clickEvents.filter { it.type == ClickEvent.Type.Key }
+        uniqueItems(
+            provider.clickEvents.filter { it.type == ClickEvent.Type.Key },
+            id = { it.key },
+            contentType = { "key_event" }
         ) { event ->
             EditKeyItem(
                 modifier = Modifier.fillMaxWidth(),

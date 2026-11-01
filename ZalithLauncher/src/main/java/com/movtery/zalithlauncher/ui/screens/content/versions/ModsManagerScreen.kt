@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.versions
 
+import com.movtery.zalithlauncher.ui.components.lazy.identityKey
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -48,7 +50,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -1103,7 +1104,7 @@ private fun ModsList(
             }
 
             val list = modsList ?: emptyList()
-            items(list) { mod ->
+            uniqueItems(list, id = { identityKey(it) }, contentType = { "mod" }) { mod ->
                 ModItemLayout(
                     modifier = Modifier.fillMaxWidth(),
                     mod = mod,

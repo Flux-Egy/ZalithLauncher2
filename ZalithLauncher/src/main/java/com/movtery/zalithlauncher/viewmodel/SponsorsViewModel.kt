@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.viewmodel
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +34,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
@@ -416,7 +416,7 @@ fun SponsorsDialog(
                                         contentPadding = PaddingValues(all = 12.dp),
                                         verticalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
-                                        items(operation.data.sponsors) { sponsor ->
+                                        uniqueItems(operation.data.sponsors, id = { "${it.user.name}|${it.time}" }, contentType = { "sponsor" }) { sponsor ->
                                             SponsorItem(
                                                 sponsor = sponsor,
                                                 effectClock = effectClock,
@@ -516,7 +516,7 @@ private fun LastMonthReportDialog(
                         contentPadding = PaddingValues(all = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(report.list) { sponsor ->
+                        uniqueItems(report.list, id = { "${it.user.name}|${it.time}" }, contentType = { "sponsor" }) { sponsor ->
                             SponsorItem(
                                 sponsor = sponsor,
                                 effectClock = effectClock,

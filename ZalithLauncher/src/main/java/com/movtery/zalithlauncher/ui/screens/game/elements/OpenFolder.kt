@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.game.elements
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -41,7 +42,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
@@ -244,7 +244,7 @@ fun OpenFolderLayer(
                                 contentPadding = PaddingValues(all = 12.dp),
                                 state = scrollState,
                             ) {
-                                items(files) { file ->
+                                uniqueItems(files, id = { it.absolutePath }, contentType = { "file" }) { file ->
                                     FileItem(
                                         modifier = Modifier.fillMaxWidth(),
                                         file = file,

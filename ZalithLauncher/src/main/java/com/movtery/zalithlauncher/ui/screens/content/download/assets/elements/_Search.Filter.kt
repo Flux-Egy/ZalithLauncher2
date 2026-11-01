@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.download.assets.elements
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
@@ -39,7 +40,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -466,7 +466,7 @@ fun <E> FilterListLayout(
                         .padding(vertical = 4.dp),
                     contentPadding = PaddingValues(horizontal = 4.dp)
                 ) {
-                    items(items) { item ->
+                    uniqueItems(items, id = { it.toString() }) { item ->
                         val isSelected = selectedItems.contains(item)
                         FilterListItem(
                             modifier = Modifier

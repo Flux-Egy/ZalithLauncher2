@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.versions
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.content.Context
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
@@ -45,7 +46,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -708,7 +708,7 @@ private fun ServerListBody(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 state = scrollState,
             ) {
-                items(list) { server ->
+                uniqueItems(list, id = { "${it.name}|${it.originIp}" }, contentType = { "server" }) { server ->
                     ServerItem(
                         modifier = Modifier.fillMaxWidth(),
                         item = server,
