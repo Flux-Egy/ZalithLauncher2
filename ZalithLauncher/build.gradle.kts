@@ -1,4 +1,5 @@
 import com.android.build.api.variant.FilterConfiguration.FilterType.ABI
+import com.android.build.api.variant.HasUnitTest
 import com.android.build.api.variant.impl.VariantOutputImpl
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -215,10 +216,35 @@ androidComponents {
 }
 
 // GameVersionNumber (HMCL) reads /assets/game/versions.txt and version-alias.csv through
-// Class.getResourceAsStream, which works inside the APK. Put src/main on the unit-test
-// classpath (appended last, so compiled classes win) so the same lookup works in JVM tests.
-tasks.withType<Test>().configureEach {
-    classpath += files("src/main")
+// Class.getResourceAsStream, which works inside the APK but not in JVM unit tests (Android
+// assets are not on the test classpath). Expose just those two files as unit-test java
+// resources under /assets/game/ via the variant API, so AGP wires the task dependency.
+abstract class SyncTestGameAssets : DefaultTask() {
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
+    abstract val sources: ConfigurableFileCollection
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun sync() {
+        val root = outputDir.get().asFile
+        root.deleteRecursively()
+        val target = File(root, "assets/game").apply { mkdirs() }
+        sources.files.forEach { it.copyTo(File(target, it.name), overwrite = true) }
+    }
+}
+
+val syncTestGameAssets = tasks.register<SyncTestGameAssets>("syncTestGameAssets") {
+    sources.from("src/main/assets/game/versions.txt", "src/main/assets/game/version-alias.csv")
+}
+
+androidComponents {
+    onVariants { variant ->
+        (variant as? HasUnitTest)?.unitTest?.sources?.resources
+            ?.addGeneratedSourceDirectory(syncTestGameAssets, SyncTestGameAssets::outputDir)
+    }
 }
 
 // Tests CI cannot run meaningfully. CI passes -PciExcludedTests; local runs are unchanged.
@@ -232,7 +258,7 @@ if (providers.gradleProperty("ciExcludedTests").isPresent) {
             excludeTestsMatching("com.movtery.zalithlauncher.utils.file.FileTest")
             excludeTestsMatching("com.movtery.zalithlauncher.utils.file.MurmurHash2IncrementalTest")
             // TODO(upstream): assertions never passed (were masked by a static-init NPE until the
-            // assets classpath fix above): placeholder "someRelease", and contradictory
+            // test-assets fix above): placeholder "someRelease", and contradictory
             // snapshot-vs-release expectations. The other VersionCompareTest cases run in CI.
             excludeTestsMatching("com.movtery.zalithlauncher.game.version.installed.utils.VersionCompareTest.testCompareLegacySnapshots")
             excludeTestsMatching("com.movtery.zalithlauncher.game.version.installed.utils.VersionCompareTest.testCompareNewSnapshots")
