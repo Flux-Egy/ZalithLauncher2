@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.path
 
+import com.movtery.zalithlauncher.context.GlobalContext
 import com.movtery.zalithlauncher.coroutine.managedScope
 import android.content.Context
 import com.movtery.zalithlauncher.database.AppDatabase
@@ -71,12 +72,19 @@ object GamePathManager {
      */
     fun getUserPath(): String = File(_currentPath.value).parentFile!!.absolutePath
 
-    private lateinit var database: AppDatabase
-    private lateinit var gamePathDao: GamePathDao
+    @Volatile
+    private var database: AppDatabase? = null
+
+    /** Resolved lazily so a process that skips [initialize] does not crash (see ZLApplication) */
+    private val db: AppDatabase
+        get() = database ?: synchronized(this) {
+            database ?: AppDatabase.getInstance(GlobalContext).also { database = it }
+        }
+
+    private val gamePathDao: GamePathDao get() = db.gamePathDao()
 
     fun initialize(context: Context) {
         database = AppDatabase.getInstance(context)
-        gamePathDao = database.gamePathDao()
     }
 
     fun reloadPath() {

@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.utils.logging
 
+import com.movtery.zalithlauncher.context.ProcessRole
 import android.content.Context
 import android.util.Log
 import com.movtery.zalithlauncher.BuildKeys
@@ -97,9 +98,9 @@ object Logger : CoroutineScope {
      * 获取当前进程标识
      */
     private fun getProcessTag(context: Context): String {
-        val processName = context.applicationInfo.processName
-        val separatorIndex = processName.lastIndexOf(':')
-        return if (separatorIndex < 0) "main" else processName.substring(separatorIndex + 1)
+        //注意：applicationInfo.processName 是应用的默认进程名，而非当前进程名，
+        //此前导致 :game / :jvm / :filemanager 的日志文件都被标记为 "main"
+        return ProcessRole.current(context).tag
     }
 
     private suspend fun printLauncherInfo() {

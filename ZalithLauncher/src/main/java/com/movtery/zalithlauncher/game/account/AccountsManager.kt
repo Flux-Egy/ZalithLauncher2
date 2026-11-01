@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.account
 
+import com.movtery.zalithlauncher.context.GlobalContext
 import com.movtery.zalithlauncher.coroutine.managedScope
 import android.content.Context
 import com.movtery.zalithlauncher.R
@@ -68,14 +69,24 @@ object AccountsManager {
     //本次启动器会话内已通过服务端校验的账号
     private val sessionValidatedAccounts: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
-    private lateinit var database: AppDatabase
+    @Volatile
+    private var database: AppDatabase? = null
+
+    /**
+     * Resolved lazily so that a process that skips [initialize] (see ZLApplication's
+     * process-aware init) still works instead of crashing on an uninitialised lateinit.
+     */
+    private val db: AppDatabase
+        get() = database ?: synchronized(this) {
+            database ?: AppDatabase.getInstance(GlobalContext).also { database = it }
+        }
 
     /**
      * The ONLY reference to [AccountDao] in the app. Rows contain encrypted credentials;
      * always go through [readAllAccountsDecrypted] / [writeAccountEncrypted].
      */
-    private lateinit var accountDao: AccountDao
-    private lateinit var authServerDao: AuthServerDao
+    private val accountDao: AccountDao get() = db.accountDao()
+    private val authServerDao: AuthServerDao get() = db.authServerDao()
 
     //凭据加密（AndroidKeyStore AES-256-GCM，"zlc1:" 前缀）
     private val secretsCodec = AccountSecretsCodec(CredentialCodec { AndroidKeystoreCipher.getOrNull() })
@@ -93,8 +104,6 @@ object AccountsManager {
      */
     fun initialize(context: Context) {
         database = AppDatabase.getInstance(context)
-        accountDao = database.accountDao()
-        authServerDao = database.authServerDao()
     }
 
     /**
