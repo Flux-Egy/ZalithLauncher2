@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.launch
 
+import com.movtery.zalithlauncher.game.account.offline.LOOPBACK_HOST
 import androidx.collection.ArrayMap
 import com.movtery.zalithlauncher.BuildConfig
 import com.movtery.zalithlauncher.BuildKeys
@@ -192,7 +193,7 @@ class LaunchArgs(
                     val msg = "Using offline Yggdrasil server on port $port"
                     LoggerBridge.append(msg)
                     Logger.info(TAG, msg)
-                    argsList.add("-javaagent:${LibPath.AUTHLIB_INJECTOR.absolutePath}=http://localhost:$port")
+                    argsList.add("-javaagent:${LibPath.AUTHLIB_INJECTOR.absolutePath}=http://$LOOPBACK_HOST:$port")
                     argsList.add("-Dauthlibinjector.side=client")
                 } ?: run {
                     //无法获取端口号，说明服务器未成功启动
