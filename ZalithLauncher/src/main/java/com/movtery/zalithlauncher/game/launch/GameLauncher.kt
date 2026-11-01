@@ -105,6 +105,13 @@ class GameLauncher(
         offlineServer.stop()
     }
 
+    override fun logSecrets(): Collection<String?> = listOf(
+        usingAccount.accessToken,
+        usingAccount.refreshToken,
+        usingAccount.clientToken,
+        usingAccount.xUid
+    )
+
     override suspend fun launch(screenSize: IntSize): Int {
         if (!Renderers.isCurrentRendererValid()) {
             Renderers.setCurrentRenderer(version.getRenderer())

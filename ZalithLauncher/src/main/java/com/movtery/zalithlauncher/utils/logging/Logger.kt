@@ -196,7 +196,8 @@ object Logger : CoroutineScope {
             append("/")
             append(message.level.name)
             append("] ")
-            append(message.message)
+            //脱敏：日志常被用户上传到公开的粘贴站点
+            append(LogRedactor.redact(message.message))
         }
     }
 

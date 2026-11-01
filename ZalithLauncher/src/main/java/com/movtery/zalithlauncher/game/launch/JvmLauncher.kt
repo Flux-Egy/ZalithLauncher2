@@ -33,6 +33,7 @@ import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.activities.runJar
 import com.movtery.zalithlauncher.ui.theme.showThemed
+import com.movtery.zalithlauncher.utils.logging.LogRedactor
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.string.getMessageOrToString
 import com.movtery.zalithlauncher.utils.string.splitPreservingQuotes
@@ -108,7 +109,7 @@ open class JvmLauncher(
         }
 
         LoggerBridge.appendTitle("Launch JVM")
-        LoggerBridge.appendInfo("Java arguments: \r\n${argList.joinToString("\r\n")}")
+        LoggerBridge.appendInfo("Java arguments: \r\n${LogRedactor.redactArgs(argList).joinToString("\r\n")}")
 
         return Pair(runtime, argList)
     }

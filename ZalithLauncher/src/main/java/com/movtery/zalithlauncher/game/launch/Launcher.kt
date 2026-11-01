@@ -45,6 +45,7 @@ import com.movtery.zalithlauncher.setting.unit.getOrMin
 import com.movtery.zalithlauncher.utils.device.Architecture
 import com.movtery.zalithlauncher.utils.device.Architecture.ARCH_X86
 import com.movtery.zalithlauncher.utils.device.Architecture.is64BitsDevice
+import com.movtery.zalithlauncher.utils.logging.LogRedactor
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.getSystemDnsServerAddresses
 import com.movtery.zalithlauncher.utils.string.getMessageOrToString
@@ -135,6 +136,12 @@ abstract class Launcher(
      */
     protected open fun getMinecraftPath(): String = getGameHome()
 
+    /**
+     * Exact secret values (e.g. the account's tokens) that must be masked wherever they
+     * appear in logged launch arguments. See [LogRedactor.redactArgs].
+     */
+    protected open fun logSecrets(): Collection<String?> = emptyList()
+
     protected suspend fun launchJvm(
         context: Context,
         jvmArgs: List<String>,
@@ -186,15 +193,8 @@ abstract class Launcher(
         args.add(0, "$runtimeHome/bin/java")
 
         LoggerBridge.appendTitle("JVM Args")
-        val iterator = args.iterator()
-        while (iterator.hasNext()) {
-            val arg = iterator.next()
-            if (arg.startsWith("--accessToken") && iterator.hasNext()) {
-                iterator.next()
-                LoggerBridge.appendInfo(arg)
-                LoggerBridge.appendInfo("********************")
-                continue
-            }
+        //只脱敏日志输出，传给 JVM 的真实参数保持不变
+        LogRedactor.redactArgs(args, logSecrets()).forEach { arg ->
             LoggerBridge.appendInfo(arg)
         }
 
