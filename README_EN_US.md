@@ -30,7 +30,7 @@ Thank you to every language contributor for helping make Zalith Launcher 2 more 
 | JDK | **21** (CI uses Temurin 21; Java/Kotlin bytecode target is 17) |
 | Android Studio | A recent release that supports **AGP 9.3** / Gradle 9.5 (the Gradle wrapper downloads Gradle automatically) |
 | Android SDK | **compileSdk 37 (minor 2)**, minSdk 26, targetSdk 34 |
-| Android NDK | **25.2.9519653** for the ndk-build modules (`ndkVersion` in `ZalithLauncher/build.gradle.kts`), plus an NDK for cargo-ndk (CI pins **27.0.12077973** via `ANDROID_NDK_HOME`) |
+| Android NDK | **25.2.9519653** for the ndk-build modules (`ndkVersion` in `ZalithLauncher/build.gradle.kts`), plus an NDK for cargo-ndk (CI pins **30.0.16248370** via `ANDROID_NDK_HOME`) |
 | Rust | `rustup` with targets `aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android` |
 | cargo-ndk | `cargo install cargo-ndk` (CI uses v4.1.2) — required to build `PetLib` |
 | Memory | Gradle runs with `-Xmx4g` (`gradle.properties`); 8 GB+ RAM recommended |

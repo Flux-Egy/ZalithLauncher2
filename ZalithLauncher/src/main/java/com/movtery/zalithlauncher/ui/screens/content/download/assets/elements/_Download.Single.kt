@@ -532,7 +532,7 @@ private fun LazyListScope.dependencyLayout(
                     R.string.download_assets_dependency_project_unavailable
                 }
             )
-            return@items
+            return@uniqueItems
         }
 
         val key = dependency.cacheKey()

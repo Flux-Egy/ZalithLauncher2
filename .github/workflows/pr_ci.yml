@@ -22,8 +22,10 @@ env:
   # SHA-256 of cargo-ndk-x86_64-unknown-linux-gnu-v4.1.2.tgz
   # (matches the digest GitHub publishes for the release asset)
   CARGO_NDK_SHA256: "9451622c4567e8abb2c8005001855e32901c0b716ccdd3a173a4375fd03426e1"
-  # NDK used by cargo-ndk for PetLib. ndk-build uses ndkVersion from build.gradle.kts.
-  CARGO_NDK_ANDROID_NDK: "27.0.12077973"
+  # NDK used by cargo-ndk for PetLib (ndk-build uses ndkVersion from build.gradle.kts).
+  # Matches the NDK preinstalled on the current ubuntu runner image, which is what the
+  # release workflow (build.yml) actually uses today; installed if a future image lacks it.
+  CARGO_NDK_ANDROID_NDK: "30.0.16248370"
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
 jobs:
@@ -81,7 +83,10 @@ jobs:
           set -euo pipefail
           ndk="$ANDROID_HOME/ndk/${CARGO_NDK_ANDROID_NDK}"
           if [ ! -f "$ndk/source.properties" ]; then
-            yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;${CARGO_NDK_ANDROID_NDK}" > /dev/null
+            sdkmanager_bin="$(command -v sdkmanager || echo "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager")"
+            # `yes` gets SIGPIPE when sdkmanager exits; keep that out of pipefail
+            yes 2>/dev/null | "$sdkmanager_bin" --licenses > /dev/null || true
+            "$sdkmanager_bin" --install "ndk;${CARGO_NDK_ANDROID_NDK}"
           fi
           test -f "$ndk/source.properties"
           echo "Using NDK at $ndk"

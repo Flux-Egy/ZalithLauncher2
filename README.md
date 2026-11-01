@@ -34,7 +34,7 @@
 | JDK | **21**（CI 使用 Temurin 21；Java/Kotlin 字节码目标为 17） |
 | Android Studio | 支持 **AGP 9.3** / Gradle 9.5 的较新版本（Gradle Wrapper 会自动下载 Gradle） |
 | Android SDK | **compileSdk 37（minor 2）**，minSdk 26，targetSdk 34 |
-| Android NDK | ndk-build 模块使用 **25.2.9519653**（`ZalithLauncher/build.gradle.kts` 中的 `ndkVersion`）；cargo-ndk 另需一个 NDK（CI 通过 `ANDROID_NDK_HOME` 固定为 **27.0.12077973**） |
+| Android NDK | ndk-build 模块使用 **25.2.9519653**（`ZalithLauncher/build.gradle.kts` 中的 `ndkVersion`）；cargo-ndk 另需一个 NDK（CI 通过 `ANDROID_NDK_HOME` 固定为 **30.0.16248370**） |
 | Rust | 通过 `rustup` 安装目标 `aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android` |
 | cargo-ndk | `cargo install cargo-ndk`（CI 使用 v4.1.2），构建 `PetLib` 所必需 |
 | 内存 | Gradle 以 `-Xmx4g` 运行（`gradle.properties`），建议 8 GB 以上内存 |
