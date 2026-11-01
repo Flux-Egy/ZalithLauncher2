@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.home.server
 
+import com.movtery.zalithlauncher.coroutine.managedScope
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
@@ -31,7 +32,6 @@ import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.ServerAddress
 import com.movtery.zalithlauncher.utils.string.stripColorCodes
 import com.tencent.mmkv.MMKV
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -122,7 +122,7 @@ object ServerCardManager {
 
     private val mmkv: MMKV by lazy { MMKV.mmkvWithID("home_server_cards") }
     private val gson = Gson()
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = managedScope("ServerCardManager", Dispatchers.IO)
 
     private val _cards = MutableStateFlow<List<ServerCardState>>(emptyList())
 

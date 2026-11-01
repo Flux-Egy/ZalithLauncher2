@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.account
 
+import com.movtery.zalithlauncher.coroutine.managedScope
 import android.content.Context
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.coroutine.Task
@@ -29,7 +30,6 @@ import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.androidText
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.isNetworkAvailable
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,7 +42,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 private const val TAG = "AccountManager"
 
 object AccountsManager {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = managedScope("AccountsManager", Dispatchers.IO)
 
     //账号相关
     private val _accounts = CopyOnWriteArrayList<Account>()

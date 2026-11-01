@@ -25,9 +25,10 @@ import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.utils.file.zipDirectory
 import com.movtery.zalithlauncher.utils.printLauncherInfo
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -46,7 +47,13 @@ import kotlin.coroutines.CoroutineContext
  * [Modified from HMCL](https://github.com/HMCL-dev/HMCL/blob/57018bef47417108b75e2298ab61f89a7586b1b9/HMCLCore/src/main/java/org/jackhuang/hmcl/util/logging/Logger.java)
  */
 object Logger : CoroutineScope {
-    override val coroutineContext: CoroutineContext = Dispatchers.Default + Job()
+    /**
+     * SupervisorJob + handler: a failure while writing one log entry must not cancel
+     * the logger scope (which would silently stop all file logging) or crash the app.
+     * The handler uses android.util.Log directly to avoid recursing into this Logger.
+     */
+    override val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob() +
+            CoroutineExceptionHandler { _, t -> Log.e("Logger", "Uncaught exception in logger coroutine", t) }
 
     private lateinit var PACKAGE_PREFIX: String
 
