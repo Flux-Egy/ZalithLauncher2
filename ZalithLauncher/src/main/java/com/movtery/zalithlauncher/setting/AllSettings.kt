@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.setting
 
+import com.movtery.zalithlauncher.game.renderer.upscale.GameUpscaler
 import com.movtery.zalithlauncher.ui.theme.style.LauncherStyle
 import com.movtery.zalithlauncher.ui.theme.style.ThemeFont
 import android.os.Build
@@ -90,6 +91,16 @@ object AllSettings : SettingsRegistry() {
      * 分辨率规则
      */
     val resolutionRule = enumSetting("resolutionRule", ResolutionRule.PERCENTAGE)
+
+    /**
+     * 游戏画面放大方式（Android 13+，见 GameUpscalerEffect）
+     */
+    val gameUpscaler = enumSetting("gameUpscaler", GameUpscaler.OFF)
+
+    /**
+     * CAS 锐化强度（0~100）
+     */
+    val gameUpscalerSharpness = intSetting("gameUpscalerSharpness", 50, 0..100)
 
     /**
      * 自定义分辨率宽度，0 表示尚未初始化

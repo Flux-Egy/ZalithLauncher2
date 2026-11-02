@@ -1087,6 +1087,21 @@ ABI：%2$s
     <string name="settings_curseforge_api_key_none">未設定。在新增 Key 之前，無法瀏覽或下載 CurseForge 資源。</string>
     <string name="settings_curseforge_api_key_label">API Key（留空以移除你的 Key）</string>
     <string name="settings_curseforge_api_key_help">可在 console.curseforge.com 免費取得。Key 會加密儲存在本裝置，且僅傳送給 CurseForge。</string>
+    <string name="settings_upscaler_title">畫面放大</string>
+    <string name="settings_upscaler_summary">將遊戲畫面（依上方解析度比例渲染）放大到螢幕尺寸的方式。降低比例可提高影格率，放大演算法能讓畫面更清晰。</string>
+    <string name="settings_upscaler_unsupported">需要 Android 13 或更新版本</string>
+    <string name="settings_upscaler_off">關閉（直接拉伸）</string>
+    <string name="settings_upscaler_sgsr">Snapdragon GSR 1</string>
+    <string name="settings_upscaler_cas">銳化（AMD CAS）</string>
+    <string name="settings_upscaler_off_desc">與先前相同的雙線性拉伸</string>
+    <string name="settings_upscaler_sgsr_desc" formatted="false">以低解析度畫面進行邊緣感知放大，單次著色器處理。適合低於 100% 的比例。</string>
+    <string name="settings_upscaler_cas_desc">拉伸後進行對比度自適應銳化，適用於任意比例。</string>
+    <string name="settings_upscaler_recommended">推薦</string>
+    <string name="settings_upscaler_recommended_for">推薦用於 %1$s</string>
+    <string name="settings_upscaler_sharpness">銳化強度</string>
+    <string name="settings_performance_preset_title">效能預設</string>
+    <string name="settings_performance_preset_summary" formatted="false">以 50% 解析度渲染，使用推薦的放大演算法，並保持 GC 最佳化參數開啟。之後可個別調整每一項。</string>
+    <string name="settings_performance_preset_applied">已套用效能預設</string>
     <string name="settings_launcher_style_title">啟動器樣式</string>
     <string name="settings_launcher_style_summary">變更啟動器的版面與外觀。所有功能在每種樣式下皆可使用。</string>
     <string name="settings_launcher_style_default">Zalith（預設）</string>

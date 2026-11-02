@@ -2224,6 +2224,21 @@ This package contains native code that runs inside the game. Only install packag
     <string name="settings_curseforge_api_key_none">Not set. CurseForge browsing and downloads won’t work until you add a key.</string>
     <string name="settings_curseforge_api_key_label">API key (leave empty to remove yours)</string>
     <string name="settings_curseforge_api_key_help">Get a free key at console.curseforge.com. It is stored encrypted on this device and only sent to CurseForge.</string>
+    <string name="settings_upscaler_title">Upscaling</string>
+    <string name="settings_upscaler_summary">How the game image (rendered at the resolution scale above) is brought to screen size. Lower the scale for more FPS; an upscaler keeps it sharper.</string>
+    <string name="settings_upscaler_unsupported">Requires Android 13 or newer</string>
+    <string name="settings_upscaler_off">Off (plain stretch)</string>
+    <string name="settings_upscaler_sgsr">Snapdragon GSR 1</string>
+    <string name="settings_upscaler_cas">Sharpen (AMD CAS)</string>
+    <string name="settings_upscaler_off_desc">Plain bilinear stretch, as before</string>
+    <string name="settings_upscaler_sgsr_desc" formatted="false">Edge-aware upscaling from the lower resolution, one shader pass. Best below 100 % scale.</string>
+    <string name="settings_upscaler_cas_desc">Contrast-adaptive sharpening after the stretch. Works at any scale.</string>
+    <string name="settings_upscaler_recommended">recommended</string>
+    <string name="settings_upscaler_recommended_for">recommended for %1$s</string>
+    <string name="settings_upscaler_sharpness">Sharpness</string>
+    <string name="settings_performance_preset_title">Performance preset</string>
+    <string name="settings_performance_preset_summary" formatted="false">Render at 50 % resolution, upscale with the recommended upscaler and keep the tuned GC flags on. Every value can be changed afterwards.</string>
+    <string name="settings_performance_preset_applied">Performance preset applied</string>
     <string name="settings_launcher_style_title">Launcher style</string>
     <string name="settings_launcher_style_summary">Change the layout and look of the launcher. All features are available in every style.</string>
     <string name="settings_launcher_style_default">Zalith (default)</string>

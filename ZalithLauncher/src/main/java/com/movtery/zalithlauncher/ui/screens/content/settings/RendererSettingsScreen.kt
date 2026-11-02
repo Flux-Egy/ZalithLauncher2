@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings
 
+import com.movtery.zalithlauncher.ui.screens.content.settings.elements.UpscalerSettings
 import com.movtery.zalithlauncher.ui.screens.content.settings.elements.LocalPluginPackagesSettings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -324,6 +325,9 @@ fun RendererSettingsScreen(
                             )
                         }
                     }
+
+                    //画面放大与性能预设
+                    UpscalerSettings(modifier = Modifier.fillMaxWidth())
 
                     SwitchSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
