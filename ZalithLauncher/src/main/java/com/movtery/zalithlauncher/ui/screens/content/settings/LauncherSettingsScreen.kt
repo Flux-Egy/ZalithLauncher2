@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings
 
+import com.movtery.zalithlauncher.ui.screens.content.settings.elements.displayName
+import com.movtery.zalithlauncher.ui.screens.content.settings.elements.CustomThemeSettings
 import com.movtery.zalithlauncher.game.download.assets.platform.curseforge.CurseForgeApiKey
 import com.movtery.zalithlauncher.ui.theme.style.LauncherStyle
 import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
@@ -200,18 +202,13 @@ fun LauncherSettingsScreen(
                         items = LauncherStyle.entries,
                         title = stringResource(R.string.settings_launcher_style_title),
                         summary = stringResource(R.string.settings_launcher_style_summary),
-                        getItemText = {
-                            when (it) {
-                                LauncherStyle.ZALITH_DEFAULT -> stringResource(R.string.settings_launcher_style_default)
-                                LauncherStyle.PC_LAUNCHER -> stringResource(R.string.settings_launcher_style_pc)
-                                LauncherStyle.MODRINTH_STYLE -> stringResource(R.string.settings_launcher_style_modrinth)
-                                LauncherStyle.CONSOLE -> stringResource(R.string.settings_launcher_style_console)
-                                LauncherStyle.MATERIAL_YOU -> stringResource(R.string.settings_launcher_style_material_you)
-                                LauncherStyle.GLASS -> stringResource(R.string.settings_launcher_style_glass)
-                                LauncherStyle.RETRO_PIXEL -> stringResource(R.string.settings_launcher_style_retro)
-                            }
-                        }
+                        getItemText = { it.displayName() }
                     )
+
+                    //自定义主题的详细选项仅在选用“自定义”样式时显示
+                    if (AllSettings.launcherStyle.state == LauncherStyle.CUSTOM) {
+                        CustomThemeSettings(modifier = Modifier.fillMaxWidth())
+                    }
 
                     ListSettingsCard(
                         modifier = Modifier.fillMaxWidth(),

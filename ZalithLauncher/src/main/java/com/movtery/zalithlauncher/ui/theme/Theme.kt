@@ -577,24 +577,28 @@ private val verdantDawnDark = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDark.verdantDawn,
 )
 
-private fun customLight(
+internal fun customLight(
     color: Color,
     style: PaletteStyle,
+    secondary: Color? = null,
 ): ColorScheme {
     return dynamicColorScheme(
         primary = color,
         isDark = false,
+        secondary = secondary,
         style = style,
     )
 }
 
-private fun customDark(
+internal fun customDark(
     color: Color,
     style: PaletteStyle,
+    secondary: Color? = null,
 ): ColorScheme {
     return dynamicColorScheme(
         primary = color,
         isDark = true,
+        secondary = secondary,
         style = style,
     )
 }

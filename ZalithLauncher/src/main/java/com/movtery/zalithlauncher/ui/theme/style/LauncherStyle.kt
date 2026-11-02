@@ -18,6 +18,10 @@
 
 package com.movtery.zalithlauncher.ui.theme.style
 
+import com.movtery.zalithlauncher.ui.theme.customLight
+import com.movtery.zalithlauncher.ui.theme.customDark
+import com.movtery.zalithlauncher.setting.AllSettings
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -57,6 +61,8 @@ import com.movtery.zalithlauncher.ui.theme.AppTypography
  *   (the image is blurred behind panels when background blur is enabled).
  * - [RETRO_PIXEL]: classic block-game menu vibe: pixel font, square beveled buttons,
  *   procedurally drawn earthy backdrop. No game assets are used.
+ * - [CUSTOM]: user-defined: any of the layouts above with the user's primary/secondary
+ *   colors, corner radius and font; exportable as JSON (see CustomThemeCodec).
  *
  * All styles host the same screens, so every feature works in every style.
  */
@@ -67,7 +73,54 @@ enum class LauncherStyle {
     CONSOLE,
     MATERIAL_YOU,
     GLASS,
-    RETRO_PIXEL
+    RETRO_PIXEL,
+    CUSTOM
+}
+
+/** The layout actually shown: for [LauncherStyle.CUSTOM], the layout chosen in the custom theme */
+@Composable
+fun effectiveLauncherLayout(style: LauncherStyle): LauncherStyle =
+    if (style == LauncherStyle.CUSTOM) {
+        AllSettings.customThemeLayout.state.takeIf { it != LauncherStyle.CUSTOM } ?: LauncherStyle.ZALITH_DEFAULT
+    } else style
+
+fun ThemeFont.toFontFamily(): FontFamily = when (this) {
+    ThemeFont.DEFAULT -> FontFamily.Default
+    ThemeFont.SANS_SERIF -> FontFamily.SansSerif
+    ThemeFont.SERIF -> FontFamily.Serif
+    ThemeFont.MONOSPACE -> FontFamily.Monospace
+    ThemeFont.CURSIVE -> FontFamily.Cursive
+    ThemeFont.PIXEL -> PixelHeadingFontFamily
+}
+
+private fun Typography.withFontFamily(family: FontFamily): Typography = Typography(
+    displayLarge = displayLarge.copy(fontFamily = family),
+    displayMedium = displayMedium.copy(fontFamily = family),
+    displaySmall = displaySmall.copy(fontFamily = family),
+    headlineLarge = headlineLarge.copy(fontFamily = family),
+    headlineMedium = headlineMedium.copy(fontFamily = family),
+    headlineSmall = headlineSmall.copy(fontFamily = family),
+    titleLarge = titleLarge.copy(fontFamily = family),
+    titleMedium = titleMedium.copy(fontFamily = family),
+    titleSmall = titleSmall.copy(fontFamily = family),
+    bodyLarge = bodyLarge.copy(fontFamily = family),
+    bodyMedium = bodyMedium.copy(fontFamily = family),
+    bodySmall = bodySmall.copy(fontFamily = family),
+    labelLarge = labelLarge.copy(fontFamily = family),
+    labelMedium = labelMedium.copy(fontFamily = family),
+    labelSmall = labelSmall.copy(fontFamily = family)
+)
+
+/** Material shapes scaled from one radius (extraLarge = 2x, extraSmall = 1/3) */
+private fun shapesFromRadius(radius: Int): Shapes {
+    val r = radius.coerceIn(0, 32)
+    return Shapes(
+        extraSmall = RoundedCornerShape((r / 3f).dp),
+        small = RoundedCornerShape((r * 2 / 3f).dp),
+        medium = RoundedCornerShape(r.dp),
+        large = RoundedCornerShape((r * 4 / 3f).dp),
+        extraLarge = RoundedCornerShape((r * 2).dp)
+    )
 }
 
 /** Current launcher style for the subtree (provided by MainScreen) */
@@ -442,6 +495,31 @@ fun LauncherStyleTheme(style: LauncherStyle, content: @Composable () -> Unit) {
                     colorScheme = glassColors(dark),
                     shapes = glassShapes,
                     typography = MaterialTheme.typography,
+                    content = content
+                )
+            }
+        }
+        LauncherStyle.CUSTOM -> {
+            val dark = isLauncherInDarkTheme()
+            val primary = Color(AllSettings.launcherCustomColor.state)
+            val secondaryInt = AllSettings.customThemeSecondary.state
+            val paletteStyle = AllSettings.launcherCustomPaletteStyle.state
+            val radius = AllSettings.customThemeCornerRadius.state
+            val font = AllSettings.customThemeFont.state
+            val scheme = remember(dark, primary, secondaryInt, paletteStyle) {
+                val secondary = secondaryInt.takeIf { it != 0 }?.let { Color(it) }
+                if (dark) customDark(primary, paletteStyle, secondary) else customLight(primary, paletteStyle, secondary)
+            }
+            val typography = MaterialTheme.typography
+            val customTypography = remember(font, typography) {
+                if (font == ThemeFont.DEFAULT) typography else typography.withFontFamily(font.toFontFamily())
+            }
+            //布局相关的判断（如 Modrinth 网格）以自定义主题选用的布局为准
+            CompositionLocalProvider(LocalLauncherStyle provides effectiveLauncherLayout(style)) {
+                MaterialTheme(
+                    colorScheme = scheme,
+                    shapes = remember(radius) { shapesFromRadius(radius) },
+                    typography = customTypography,
                     content = content
                 )
             }

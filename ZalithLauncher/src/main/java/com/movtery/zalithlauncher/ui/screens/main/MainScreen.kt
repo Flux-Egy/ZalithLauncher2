@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.main
 
+import com.movtery.zalithlauncher.ui.theme.style.effectiveLauncherLayout
 import com.movtery.zalithlauncher.ui.screens.main.shells.RetroPixelShell
 import com.movtery.zalithlauncher.ui.screens.main.shells.GlassShell
 import com.movtery.zalithlauncher.ui.screens.main.shells.MaterialYouShell
@@ -270,8 +271,9 @@ fun MainScreen(
                 }
             }
 
-            when (launcherStyle) {
-                LauncherStyle.ZALITH_DEFAULT -> {
+            when (effectiveLauncherLayout(launcherStyle)) {
+                //CUSTOM 已被解析为其选用的布局，这里不会出现
+                LauncherStyle.ZALITH_DEFAULT, LauncherStyle.CUSTOM -> {
                     //原有界面，保持不变
                     Column(
                         modifier = Modifier
