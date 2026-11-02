@@ -175,6 +175,14 @@ fun RendererSettingsScreen(
                     SwitchSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
                         position = CardPosition.Middle,
+                        unit = AllSettings.rendererAutoSelect,
+                        title = stringResource(R.string.settings_renderer_auto_select_title),
+                        summary = stringResource(R.string.settings_renderer_auto_select_summary)
+                    )
+
+                    SwitchSettingsCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle,
                         unit = AllSettings.sfpewPluginLayer,
                         enabled = currentRenderer is Plugin,
                         title = stringResource(R.string.settings_renderer_sfpew_plugin_layer_title),

@@ -18,6 +18,10 @@
 
 package com.movtery.zalithlauncher
 
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import com.movtery.zalithlauncher.game.renderer.auto.GpuDetector
+import com.movtery.zalithlauncher.coroutine.managedScope
 import android.app.Application
 import android.content.res.Configuration
 import android.os.Process
@@ -164,6 +168,12 @@ class ZLApplication : Application(), SingletonImageLoader.Factory {
             ProcessRole.MAIN, ProcessRole.GAME, ProcessRole.OTHER -> {
                 AccountsManager.initialize(this)
                 GamePathManager.initialize(this)
+                if (role == ProcessRole.MAIN) {
+                    //后台检测 GPU 并缓存（多进程 MMKV），供渲染器自动选择使用；:game 进程只读取缓存
+                    managedScope("GpuDetector", Dispatchers.Default).launch {
+                        GpuDetector.detectAndCache(this@ZLApplication)
+                    }
+                }
             }
             ProcessRole.JVM -> GamePathManager.initialize(this)
             ProcessRole.FILE_MANAGER -> Unit

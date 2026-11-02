@@ -425,6 +425,9 @@
     <!--  渲染器  -->
     <string name="renderer_version_support">MC 版本支援：</string>
     <string name="renderer_version_unsupported_warning">目前渲染器 %s 不支援此遊戲版本，繼續使用可能導致渲染錯誤或遊戲崩潰！您確定要忽略風險並繼續嗎？</string>
+    <string name="settings_renderer_auto_select_title">自動選擇渲染器</string>
+    <string name="settings_renderer_auto_select_summary">未選擇渲染器時，依 GPU、遊戲版本和已安裝的光影模組自動選擇。手動選擇的渲染器一律優先。</string>
+    <string name="renderer_hardware_mismatch_warning">%1$s 不適用於此 GPU（%2$s），很可能無法啟動。</string>
     <string name="renderer_version_storage_permissions">目前的渲染器 %s 可透過設定檔修改設定，請先為啟動器開啟外部儲存空間權限，否則將無法讀取並載入該渲染器的設定！</string>
     <string name="renderer_version_storage_permissions_sdk30">目前的渲染器 %s 可透過設定檔修改設定，請先為啟動器開啟「管理所有檔案」的權限，否則將無法讀取並載入該渲染器的設定！</string>
     <!--  外掛  -->

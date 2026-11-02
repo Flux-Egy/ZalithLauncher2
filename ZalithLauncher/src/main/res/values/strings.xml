@@ -858,6 +858,9 @@
     <string name="renderer_version_support">MC Version Support:</string>
     <!-- Warning dialog on game launch; %s is the renderer name, which does not support this game version -->
     <string name="renderer_version_unsupported_warning">The current renderer %s does not support this game version. Continuing to use it may cause rendering errors or crashes! Are you sure you want to proceed?</string>
+    <string name="settings_renderer_auto_select_title">Automatic renderer selection</string>
+    <string name="settings_renderer_auto_select_summary">When no renderer is chosen, pick one based on your GPU, the game version and installed shader mods. A renderer you choose is always used.</string>
+    <string name="renderer_hardware_mismatch_warning">%1$s is not designed for this GPU (%2$s) and will probably fail to start.</string>
     <!-- Dialog on game launch asking for storage access so the renderer config can be read; %s is the renderer name -->
     <string name="renderer_version_storage_permissions">The current renderer %s can be configured via a config file. Please enable external storage permission for the launcher first, otherwise it will not be able to read and load the renderer\'s configuration!</string>
     <!-- Same dialog on Android 11 and newer, asking for the Manage All Files permission; %s is the renderer name -->

@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.elements
 
+import com.movtery.zalithlauncher.game.renderer.auto.GpuDetector
+import com.movtery.zalithlauncher.game.renderer.auto.RendererResolver
 import android.app.Activity
 import android.net.Uri
 import android.os.Build
@@ -148,6 +150,13 @@ sealed interface LaunchGameOperation {
         val quickPlay: QuickPlay?
     ): LaunchGameOperation
 
+    /** 手动选择的渲染器不适用于当前 GPU（如在 Mali 上使用 Freedreno） */
+    data class RendererHardwareMismatch(
+        val renderer: RendererInterface,
+        val version: Version,
+        val quickPlay: QuickPlay?
+    ): LaunchGameOperation
+
     /** 当前已加载的插件不支持选中的版本 */
     data class UnsupportedPlugins(
         val plugins: List<ApkPlugin>,
@@ -264,6 +273,24 @@ fun LaunchGameOperation(
                 }
             )
         }
+        is LaunchGameOperation.RendererHardwareMismatch -> {
+            val gpu = GpuDetector.cached()
+            SimpleAlertDialog(
+                title = stringResource(R.string.generic_warning),
+                text = stringResource(
+                    R.string.renderer_hardware_mismatch_warning,
+                    operation.renderer.getRendererName(),
+                    gpu?.glRenderer?.takeIf { it.isNotBlank() } ?: gpu?.vendor?.name.orEmpty()
+                ),
+                confirmText = stringResource(R.string.generic_anyway),
+                onConfirm = {
+                    launchGameViewModel.updateOperation(LaunchGameOperation.RealLaunch(operation.version, operation.quickPlay))
+                },
+                onDismiss = {
+                    launchGameViewModel.updateOperation(LaunchGameOperation.None)
+                }
+            )
+        }
         is LaunchGameOperation.UnsupportedPlugins -> {
             val plugins = operation.plugins
             val version = operation.version
@@ -301,7 +328,7 @@ fun LaunchGameOperation(
                     return@LaunchedEffect
                 }
 
-                Renderers.setCurrentRenderer(version.getRenderer())
+                Renderers.setCurrentRenderer(RendererResolver.resolveRendererId(version))
                 val currentRenderer = Renderers.getCurrentRenderer()
 
                 val mcVer = version.getVersionInfo()!!.minecraftVersion
@@ -335,9 +362,17 @@ fun LaunchGameOperation(
                 //前提：系统支持这个设置
                 if (
                     canHandlePermission &&  !hasStoragePermission &&
-                    RendererPluginManager.isConfigurablePlugin(version.getRenderer())
+                    RendererPluginManager.isConfigurablePlugin(currentRenderer.getUniqueIdentifier())
                 ) {
                     launchGameViewModel.updateOperation(LaunchGameOperation.RendererNoStoragePermission(currentRenderer, version, quickPlay))
+                    return@LaunchedEffect
+                }
+
+                //手动选择的渲染器与当前 GPU 不匹配时提示（不阻止启动）
+                if (RendererResolver.isHardwareMismatch(version, currentRenderer)) {
+                    launchGameViewModel.updateOperation(
+                        LaunchGameOperation.RendererHardwareMismatch(currentRenderer, version, quickPlay)
+                    )
                     return@LaunchedEffect
                 }
 

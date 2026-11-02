@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.launch
 
+import com.movtery.zalithlauncher.game.renderer.auto.RendererResolver
 import com.movtery.zalithlauncher.utils.device.Architecture.is64BitsDevice
 import com.movtery.zalithlauncher.bridge.LoggerBridge
 import android.content.Context
@@ -118,7 +119,7 @@ class GameLauncher(
 
     override suspend fun launch(screenSize: IntSize): Int {
         if (!Renderers.isCurrentRendererValid()) {
-            Renderers.setCurrentRenderer(version.getRenderer())
+            Renderers.setCurrentRenderer(RendererResolver.resolveRendererId(version))
         }
         configuredRendererEnv = withContext(Dispatchers.IO) {
             val renderer = Renderers.getCurrentRenderer()

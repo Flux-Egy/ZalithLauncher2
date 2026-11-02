@@ -55,6 +55,11 @@ object AllSettings : SettingsRegistry() {
     val renderer = stringSetting("renderer", "")
 
     /**
+     * 未手动选择渲染器时，根据 GPU、游戏版本与光影模组自动选择（规则见 assets/renderer_compat.json）
+     */
+    val rendererAutoSelect = boolSetting("rendererAutoSelect", true)
+
+    /**
      * 为渲染器插件叠加 SFPEW 兼容层
      */
     val sfpewPluginLayer = boolSetting("sfpewPluginLayer", false)

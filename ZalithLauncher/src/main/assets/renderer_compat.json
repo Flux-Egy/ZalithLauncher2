@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "_comment": "Renderer auto-selection rules. Only used when no renderer was chosen (global and per-version settings empty). First matching rule wins; within a rule the first available, hardware-compatible renderer wins. Renderer ids are RendererInterface.getRendererId(). Preferences marked 'hypothesis' need device testing; tune this file, not code.",
+  "renderers": {
+    "gallium_freedreno": {
+      "gpuVendors": ["ADRENO"],
+      "note": "Mesa Freedreno targets Qualcomm Adreno only (fact)"
+    },
+    "gallium_panfrost": {
+      "gpuVendors": ["MALI"],
+      "note": "Mesa Panfrost targets ARM Mali only (fact)"
+    },
+    "opengles3_desktopgl_zink_kopper": {
+      "requiresVulkan": true,
+      "note": "Zink translates OpenGL to Vulkan (fact)"
+    }
+  },
+  "rules": [
+    {
+      "id": "shaders-adreno-vulkan",
+      "when": { "shaderMod": true, "minMc": "1.17", "gpuVendors": ["ADRENO"], "minGpuModel": 600 },
+      "prefer": ["opengles3_desktopgl_zink_kopper", "opengles3_mobileglues"],
+      "note": "hypothesis: Zink with Turnip offers the most complete desktop GL for shader packs on Adreno 6xx+"
+    },
+    {
+      "id": "shaders-mali",
+      "when": { "shaderMod": true, "minMc": "1.17", "gpuVendors": ["MALI"] },
+      "prefer": ["opengles3_mobileglues", "opengles3_desktopgl_zink_kopper"],
+      "note": "hypothesis: MobileGlues (GLES 3.2) is the safer shader path on Mali drivers"
+    },
+    {
+      "id": "shaders-other",
+      "when": { "shaderMod": true, "minMc": "1.17" },
+      "prefer": ["opengles3_mobileglues", "opengles3_desktopgl_zink_kopper"],
+      "note": "upstream FCL docs: shaders need VirGL/Zink/MobileGlues; GL4ES-family lacks the required GL features"
+    },
+    {
+      "id": "legacy",
+      "when": { "belowMc": "1.17" },
+      "prefer": ["opengles3", "opengles2"],
+      "note": "pre-1.17 uses the legacy fixed-function pipeline that the GL4ES family emulates"
+    },
+    {
+      "id": "default",
+      "when": {},
+      "prefer": ["opengles3", "opengles3_mobileglues"],
+      "note": "keeps today's default (NG-GL4ES) until device data justifies a change"
+    }
+  ]
+}
