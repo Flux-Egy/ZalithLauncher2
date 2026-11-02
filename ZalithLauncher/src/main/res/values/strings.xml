@@ -457,6 +457,7 @@
     <string name="download_assets_dependency_projects">Dependencies</string>
     <!-- Section title for optional dependencies in the asset install dialog -->
     <string name="download_assets_optional_projects">Optional Projects</string>
+    <string name="download_assets_incompatible_installed">Incompatible with installed mods: %1$s. Installing may cause crashes.</string>
     <!-- Progress text shown while the project version list starts loading in pages -->
     <string name="download_assets_loading_page_data">Starting to load paged data</string>
     <!-- Progress text while the project version list loads; %1$d is the chunk number, %2$d the page -->

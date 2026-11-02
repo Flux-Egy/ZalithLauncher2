@@ -236,6 +236,16 @@ private fun DownloadDialog(
         }
         val hasDeps = dependencies.isNotEmpty() || optionals.isNotEmpty()
 
+        //资源声明为不兼容、且当前版本中已安装的模组项目（安装前提示，不阻止安装）
+        val incompatibleInstalled = remember(dependencyEntries, installedProjects) {
+            dependencyEntries.filter { entry ->
+                val dependency = entry.dependency
+                val projectId = entry.project?.platformId() ?: dependency.projectId
+                dependency.type == PlatformDependencyType.INCOMPATIBLE && projectId != null &&
+                        installedProjects[dependency.platform]?.contains(projectId) == true
+            }
+        }
+
         //用户是否手动修改过依赖的勾选状态
         var userChangedDependencies by remember(dependencyEntries) { mutableStateOf(false) }
 
@@ -372,6 +382,20 @@ private fun DownloadDialog(
                                     listState = listState
                                 )
                             }
+                        }
+
+                        if (incompatibleInstalled.isNotEmpty()) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(
+                                    R.string.download_assets_incompatible_installed,
+                                    incompatibleInstalled.joinToString { entry ->
+                                        entry.project?.platformTitle() ?: entry.dependency.projectId.orEmpty()
+                                    }
+                                ),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
 
                         Row(

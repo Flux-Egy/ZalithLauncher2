@@ -176,6 +176,7 @@
     <string name="download_assets_search_mc_versions">البحث في إصدارات MC</string>
     <string name="download_assets_dependency_projects">التبعيات</string>
     <string name="download_assets_optional_projects">مشاريع اختيارية</string>
+    <string name="download_assets_incompatible_installed">غير متوافق مع إضافات مثبتة: %1$s. قد يؤدي التثبيت إلى أعطال.</string>
     <string name="download_assets_loading_page_data">البدء في تحميل البيانات المقسمة إلى صفحات</string>
     <string name="download_assets_loaded_chunk_page">البيانات المقسمة المحملة، الجزء %1$d، الصفحة %2$d</string>
     <string name="download_assets_loading_dep_project">تحميل مشروع التبعية وتخزينه مؤقتًا، المعرف: %s</string>
