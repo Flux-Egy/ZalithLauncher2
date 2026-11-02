@@ -1,6 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
-<network-security-config xmlns:tools="http://schemas.android.com/tools">
-    <base-config
-        cleartextTrafficPermitted="true"
-        tools:ignore="InsecureBaseConfiguration" />
+<?xml version="1.0" encoding="utf-8"?><!--
+   Network security policy for the launcher process(es).
+
+   Cleartext HTTP is denied by default. Launcher-side HTTP clients
+   (HttpURLConnection, OkHttp, Ktor/OkHttp, Coil, WebView) all honour this policy.
+
+   Notes:
+   - Game-side traffic (Minecraft, mods, authlib-injector running inside the
+     bundled OpenJDK) does not use the Android network stack and is NOT affected,
+     so authlib-injector's http://localhost Yggdrasil endpoint keeps working.
+   - Legacy http:// library URLs from old version JSONs are already rewritten to
+     https:// (BaseMinecraftDownloader) or mapped to the HTTPS BMCLAPI mirror.
+   - Loopback is allowed for local helper services.
+   - Self-hosted authlib-injector servers must be reachable over https://.
+     If a specific trusted host genuinely needs cleartext, add a narrow
+     <domain-config> entry for it here instead of re-enabling base cleartext.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
 </network-security-config>

@@ -156,6 +156,17 @@ object AllSettings : SettingsRegistry() {
     val ramAllocation = intSetting("ramAllocation", null, min = 256)
 
     /**
+     * 内存安全上限：启动时将游戏堆内存限制在物理内存的一半以内，降低被系统低内存机制杀死的风险
+     * （见 JvmTuning）
+     */
+    val ramSafetyLimit = boolSetting("ramSafetyLimit", true)
+
+    /**
+     * 优化的 GC 参数：按 Java 版本自动添加 G1 相关参数（用户自定义的 GC 参数优先）
+     */
+    val jvmGcTuning = boolSetting("jvmGcTuning", true)
+
+    /**
      * 自定义Jvm启动参数
      */
     val jvmArgs = stringSetting("jvmArgs", "")

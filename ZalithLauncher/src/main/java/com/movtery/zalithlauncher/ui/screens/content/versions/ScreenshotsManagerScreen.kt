@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.versions
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.ContentValues
@@ -730,7 +731,7 @@ private fun ScreenshotGrid(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(items) { info ->
+                uniqueItems(items, id = { it.file.absolutePath }, contentType = { "screenshot" }) { info ->
                     ScreenshotItemLayout(
                         info = info,
                         selected = selected.contains(info),

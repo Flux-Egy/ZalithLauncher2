@@ -297,6 +297,13 @@ fun otherLogin(
 ): Task? {
     if (TaskSystem.containsTask(account.uniqueUUID)) return null
 
+    //已存储的密码不可用（例如 Keystore 密钥丢失导致无法解密），交由重新登录流程处理
+    if (account.otherPassword.isNullOrEmpty()) {
+        onFailed(CredentialsExpiredException())
+        onFinally()
+        return null
+    }
+
     return AuthServerHelper(
         baseUrl = account.otherBaseUrl!!,
         serverName = account.accountType!!,

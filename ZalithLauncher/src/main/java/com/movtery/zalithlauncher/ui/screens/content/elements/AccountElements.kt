@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.elements
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -52,7 +53,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -528,7 +528,7 @@ fun LoginMenuDialog(
                                 )
                             }
 
-                            items(authServers) { server ->
+                            uniqueItems(authServers, id = { it.baseUrl }, contentType = { "auth_server" }) { server ->
                                 LoginItem(
                                     title = server.serverName,
                                     icon = {

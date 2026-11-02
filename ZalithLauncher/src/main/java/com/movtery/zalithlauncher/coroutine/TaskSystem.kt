@@ -21,7 +21,6 @@ package com.movtery.zalithlauncher.coroutine
 import com.movtery.zalithlauncher.keepalive.TaskKeepAlive
 import com.movtery.zalithlauncher.utils.network.isInterruptedIOException
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -32,7 +31,7 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
 object TaskSystem {
-    private val scope = CoroutineScope(Dispatchers.Default)
+    private val scope = managedScope("TaskSystem", Dispatchers.Default)
     private val _tasksFlow: MutableStateFlow<List<Task>> = MutableStateFlow(emptyList())
     val tasksFlow = _tasksFlow.asStateFlow()
 

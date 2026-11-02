@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.download.assets.download
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -694,7 +695,7 @@ private fun ProjectInfo(
                         }
 
                         //屏幕截图
-                        items(screenshots) { screenshot ->
+                        uniqueItems(screenshots, id = { it.imageUrl }, contentType = { "screenshot" }) { screenshot ->
                             ScreenshotItemLayout(
                                 modifier = Modifier.fillMaxWidth(),
                                 screenshot = screenshot

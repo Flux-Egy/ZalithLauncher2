@@ -21,21 +21,58 @@ Thank you to every language contributor for helping make Zalith Launcher 2 more 
 ## 📦 Build Instructions (For Developers)
 
 > The following section is for developers who wish to contribute or build the project locally.
+> CI is the source of truth for toolchain versions: see `.github/workflows/build.yml` and `pr_ci.yml`.
 
 ### Requirements
 
-* Android Studio **Bumblebee** or newer
-* Android SDK:
-  * **Minimum API level**: 26
-  * **Target API level**: 35
-* JDK 11
+| Component | Version / notes |
+|---|---|
+| JDK | **21** (CI uses Temurin 21; Java/Kotlin bytecode target is 17) |
+| Android Studio | A recent release that supports **AGP 9.3** / Gradle 9.5 (the Gradle wrapper downloads Gradle automatically) |
+| Android SDK | **compileSdk 37 (minor 2)**, minSdk 26, targetSdk 34 |
+| Android NDK | **25.2.9519653** for the ndk-build modules (`ndkVersion` in `ZalithLauncher/build.gradle.kts`), plus an NDK for cargo-ndk (CI pins **30.0.16248370** via `ANDROID_NDK_HOME`) |
+| Rust | `rustup` with targets `aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android` |
+| cargo-ndk | `cargo install cargo-ndk` (CI uses v4.1.2) — required to build `PetLib` |
+| Memory | Gradle runs with `-Xmx4g` (`gradle.properties`); 8 GB+ RAM recommended |
+
+Building on ARM64 Linux hosts (for example Termux/proot) is not supported by the official Android toolchains; use an x86_64 Linux, macOS or Windows machine, or GitHub Actions.
 
 ### Build Steps
 
 ```bash
-git clone git@github.com:ZalithLauncher/ZalithLauncher2.git
-# Open the project in Android Studio and build
+git clone https://github.com/ZalithLauncher/ZalithLauncher2.git
+cd ZalithLauncher2
+rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+cargo install cargo-ndk
+
+# Debug APK for one ABI: all (universal, default) | arm | arm64 | x86 | x86_64
+./gradlew :ZalithLauncher:assembleDebug -Darch=arm64
+# Output: ZalithLauncher/build/outputs/apk/debug/
 ```
+
+### Optional keys
+
+Read from an environment variable, or from a file in the project root (all of these files are git-ignored). If a key is missing the build still succeeds and prints a warning, but the related feature will not work.
+
+| Purpose | Environment variable | File |
+|---|---|---|
+| Microsoft login (Azure OAuth client ID) | `OAUTH_CLIENT_ID` | `.oauth_client_id.txt` |
+| CurseForge API | `CURSEFORGE_API_KEY` | `.curseforge_api.txt` |
+| Release signing only | `STORE_PASSWORD`, `KEY_PASSWORD` | `.store_password.txt`, `.key_password.txt` |
+
+Never commit these values.
+
+### Tests and checks
+
+```bash
+# Unit tests (-PciExcludedTests skips tests that need external services or developer-local files, plus 2 known-broken upstream assertions)
+./gradlew :ZalithLauncher:testDebugUnitTest :CardGrid:testDebugUnitTest :Guide:testDebugUnitTest -Darch=arm64 -PciExcludedTests
+
+# 16 KB page-size alignment of 64-bit native libraries in the built APK
+scripts/check-16kb-alignment.sh --allowlist .github/16kb-alignment-allowlist.txt ZalithLauncher/build/outputs/apk/debug/*.apk
+```
+
+Pull requests are verified automatically by `.github/workflows/pr_ci.yml`.
 
 ## 📜 License
 

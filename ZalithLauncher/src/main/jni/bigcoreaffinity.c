@@ -29,8 +29,12 @@ void bigcore_set_affinity() {
         bigcore_format_cpu_path(path_buffer, corecnt);
         int corefreqfd = open(path_buffer, O_RDONLY);
         if(corefreqfd != -1) {
-            ssize_t read_count = read(corefreqfd, freq_buffer, FREQ_MAX);
+            // Leave room for the terminator: reading FREQ_MAX bytes would make
+            // freq_buffer[read_count] write one byte past the end of the buffer.
+            ssize_t read_count = read(corefreqfd, freq_buffer, FREQ_MAX - 1);
             close(corefreqfd);
+            // read() returns -1 on error; never index freq_buffer[-1]
+            if(read_count < 0) read_count = 0;
             freq_buffer[read_count] = 0;
             core_freq = strtoul(freq_buffer, &discard, 10);
             if(core_freq >= max_freq) {

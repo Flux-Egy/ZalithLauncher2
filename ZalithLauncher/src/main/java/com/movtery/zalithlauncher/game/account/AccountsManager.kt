@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.game.account
 
+import com.movtery.zalithlauncher.context.GlobalContext
+import com.movtery.zalithlauncher.coroutine.managedScope
 import android.content.Context
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.coroutine.Task
@@ -25,11 +27,14 @@ import com.movtery.zalithlauncher.coroutine.TaskSystem
 import com.movtery.zalithlauncher.database.AppDatabase
 import com.movtery.zalithlauncher.game.account.auth_server.data.AuthServer
 import com.movtery.zalithlauncher.game.account.auth_server.data.AuthServerDao
+import com.movtery.zalithlauncher.security.AccountSecrets
+import com.movtery.zalithlauncher.security.AccountSecretsCodec
+import com.movtery.zalithlauncher.security.AndroidKeystoreCipher
+import com.movtery.zalithlauncher.security.CredentialCodec
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.androidText
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.isNetworkAvailable
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,7 +47,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 private const val TAG = "AccountManager"
 
 object AccountsManager {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = managedScope("AccountsManager", Dispatchers.IO)
 
     //账号相关
     private val _accounts = CopyOnWriteArrayList<Account>()
@@ -64,17 +69,41 @@ object AccountsManager {
     //本次启动器会话内已通过服务端校验的账号
     private val sessionValidatedAccounts: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
-    private lateinit var database: AppDatabase
-    private lateinit var accountDao: AccountDao
-    private lateinit var authServerDao: AuthServerDao
+    @Volatile
+    private var database: AppDatabase? = null
+
+    /**
+     * Resolved lazily so that a process that skips [initialize] (see ZLApplication's
+     * process-aware init) still works instead of crashing on an uninitialised lateinit.
+     */
+    private val db: AppDatabase
+        get() = database ?: synchronized(this) {
+            database ?: AppDatabase.getInstance(GlobalContext).also { database = it }
+        }
+
+    /**
+     * The ONLY reference to [AccountDao] in the app. Rows contain encrypted credentials;
+     * always go through [readAllAccountsDecrypted] / [writeAccountEncrypted].
+     */
+    private val accountDao: AccountDao get() = db.accountDao()
+    private val authServerDao: AuthServerDao get() = db.authServerDao()
+
+    //凭据加密（AndroidKeyStore AES-256-GCM，"zlc1:" 前缀）
+    private val secretsCodec = AccountSecretsCodec(CredentialCodec { AndroidKeystoreCipher.getOrNull() })
+
+    private val _credentialStorageInsecure = MutableStateFlow(false)
+
+    /**
+     * True when AndroidKeyStore is unavailable and account credentials are stored in
+     * plaintext. The UI shows a warning banner; login keeps working.
+     */
+    val credentialStorageInsecure = _credentialStorageInsecure.asStateFlow()
 
     /**
      * 初始化整个账号系统
      */
     fun initialize(context: Context) {
         database = AppDatabase.getInstance(context)
-        accountDao = database.accountDao()
-        authServerDao = database.authServerDao()
     }
 
     /**
@@ -93,8 +122,66 @@ object AccountsManager {
         _refreshWardrobe.update { !it }
     }
 
+    private fun Account.secrets() = AccountSecrets(
+        accessToken = accessToken,
+        refreshToken = refreshToken,
+        clientToken = clientToken,
+        otherPassword = otherPassword
+    )
+
+    private fun Account.withSecrets(secrets: AccountSecrets) = copy(
+        accessToken = secrets.accessToken,
+        refreshToken = secrets.refreshToken,
+        clientToken = secrets.clientToken,
+        otherPassword = secrets.otherPassword
+    )
+
+    private fun reportInsecureStorage() {
+        if (_credentialStorageInsecure.value) return
+        _credentialStorageInsecure.value = true
+        Logger.error(
+            TAG,
+            "SECURITY WARNING: AndroidKeyStore is unavailable on this device. " +
+                    "Account credentials are being stored in PLAINTEXT."
+        )
+    }
+
+    /**
+     * Encrypts the credential fields and writes the row. The in-memory [account] is not modified.
+     */
+    private suspend fun writeAccountEncrypted(account: Account) {
+        val sealed = secretsCodec.seal(account.secrets())
+        if (sealed.isInsecure) reportInsecureStorage()
+        accountDao.saveAccount(account.withSecrets(sealed.secrets))
+    }
+
+    /**
+     * Reads all rows and decrypts their credentials. Rows that still hold legacy plaintext
+     * are re-saved encrypted (one-time, seamless migration: nobody is logged out).
+     */
+    private suspend fun readAllAccountsDecrypted(): List<Account> {
+        return accountDao.getAllAccounts().map { stored ->
+            val opened = secretsCodec.open(stored.secrets())
+            val account = stored.withSecrets(opened.secrets)
+
+            if (opened.failedFields.isNotEmpty()) {
+                Logger.warning(
+                    TAG,
+                    "Could not decrypt ${opened.failedFields.joinToString()} for account ${account.username}; " +
+                            "the user will be asked to sign in again"
+                )
+            }
+            if (opened.needsReencrypt) {
+                runCatching { writeAccountEncrypted(account) }
+                    .onSuccess { Logger.info(TAG, "Migrated stored credentials for account ${account.username}") }
+                    .onFailure { e -> Logger.error(TAG, "Failed to migrate credentials for ${account.username}", e) }
+            }
+            account
+        }
+    }
+
     private suspend fun suspendReloadAccounts() {
-        val loadedAccounts = accountDao.getAllAccounts()
+        val loadedAccounts = readAllAccountsDecrypted()
         _accounts.clear()
         _accounts.addAll(loadedAccounts)
 
@@ -248,7 +335,7 @@ object AccountsManager {
      */
     suspend fun suspendSaveAccount(account: Account) {
         runCatching {
-            accountDao.saveAccount(account)
+            writeAccountEncrypted(account)
             Logger.info(TAG, "Saved account: ${account.username}")
             //同时设置当前账号
             setCurrentAccountInternal(account)

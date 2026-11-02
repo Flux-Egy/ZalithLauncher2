@@ -21,6 +21,7 @@ package com.movtery.zalithlauncher
 import android.app.Application
 import android.content.res.Configuration
 import android.os.Process
+import android.os.StrictMode
 import android.util.Log
 import coil3.ImageLoader
 import coil3.PlatformContext
@@ -34,6 +35,7 @@ import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import com.kyant.fishnet.Fishnet
 import com.movtery.zalithlauncher.context.GlobalContext
+import com.movtery.zalithlauncher.context.ProcessRole
 import com.movtery.zalithlauncher.context.refreshContext
 import com.movtery.zalithlauncher.coroutine.TaskSystem
 import com.movtery.zalithlauncher.game.account.AccountsManager
@@ -62,6 +64,8 @@ class ZLApplication : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         GlobalContext = this
+        //调试构建：尽早启用 StrictMode（仅记录日志），以便也能捕获本方法中的主线程 I/O
+        if (BuildConfig.DEBUG) enableStrictMode()
         TLSSecurity.install()
         refreshContext(this)
         //初始化任务保活控制器，需在任何任务开始前完成初始化
@@ -145,8 +149,54 @@ class ZLApplication : Application(), SingletonImageLoader.Factory {
             .build()
     }
 
+    /**
+     * Process-aware initialisation. Each android:process runs this Application again,
+     * so only set up what that process uses:
+     * - MAIN / GAME / OTHER: accounts + game paths (GAME is kept conservative)
+     * - JVM: game paths only (JvmLauncher resolves the game/user home)
+     * - FILE_MANAGER: neither (the file manager references no account or path manager)
+     * Both managers also resolve their database lazily, so a skipped initialise can
+     * never crash a process that unexpectedly uses them.
+     */
     private fun initializeData() {
-        AccountsManager.initialize(this)
-        GamePathManager.initialize(this)
+        val role = ProcessRole.current(this)
+        when (role) {
+            ProcessRole.MAIN, ProcessRole.GAME, ProcessRole.OTHER -> {
+                AccountsManager.initialize(this)
+                GamePathManager.initialize(this)
+            }
+            ProcessRole.JVM -> GamePathManager.initialize(this)
+            ProcessRole.FILE_MANAGER -> Unit
+        }
+        Log.i("ZLApplication", "Initialised process role: ${role.tag}")
+    }
+
+    /**
+     * Debug builds only. Violations are logged (tag "StrictMode"), never fatal, so existing
+     * main-thread I/O shows up in logcat without breaking development builds.
+     */
+    private fun enableStrictMode() {
+        StrictMode.setThreadPolicy(
+            StrictMode.ThreadPolicy.Builder()
+                .detectDiskReads()
+                .detectDiskWrites()
+                .detectNetwork()
+                .detectCustomSlowCalls()
+                .detectUnbufferedIo()
+                .penaltyLog()
+                .build()
+        )
+        StrictMode.setVmPolicy(
+            StrictMode.VmPolicy.Builder()
+                .detectLeakedClosableObjects()
+                .detectLeakedSqlLiteObjects()
+                .detectLeakedRegistrationObjects()
+                .detectActivityLeaks()
+                .detectFileUriExposure()
+                .detectContentUriWithoutPermission()
+                .detectCleartextNetwork()
+                .penaltyLog()
+                .build()
+        )
     }
 }

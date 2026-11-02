@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.splash
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +31,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -166,7 +166,7 @@ private fun UnpackTaskList(
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
             state = scrollState,
         ) {
-            items(items) { item ->
+            uniqueItems(items, id = { it.name }, contentType = { "installable" }) { item ->
                 TaskItem(
                     item = item,
                     modifier = Modifier.padding(vertical = 6.dp)

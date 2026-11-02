@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.game.launch
 
+import com.movtery.zalithlauncher.utils.device.Architecture.is64BitsDevice
+import com.movtery.zalithlauncher.utils.platform.getTotalMemory
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
@@ -33,6 +35,7 @@ import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.activities.runJar
 import com.movtery.zalithlauncher.ui.theme.showThemed
+import com.movtery.zalithlauncher.utils.logging.LogRedactor
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.string.getMessageOrToString
 import com.movtery.zalithlauncher.utils.string.splitPreservingQuotes
@@ -42,8 +45,11 @@ import java.io.IOException
 
 private const val TAG = "JvmLauncher"
 
-/** 安装器等轻量任务的内存上限 */
-private const val INSTALL_RAM_ALLOCATION = 512
+/**
+ * 安装器等任务的内存上限。新版 Forge/NeoForge 安装处理器（binarypatcher 等）在 512 MB 下可能内存不足；
+ * 实际值不超过 [JvmTuning.heapCeilingMb]，以免在低内存/32 位设备上给安装进程过大的堆
+ */
+private const val INSTALL_RAM_ALLOCATION = 1024
 
 open class JvmLauncher(
     private val context: Context,
@@ -57,8 +63,14 @@ open class JvmLauncher(
         if (jvmLaunchInfo.useUserJvm) {
             super.progressFinalUserArgs(args, ramAllocation)
         } else {
-            super.progressFinalUserArgs(args, INSTALL_RAM_ALLOCATION)
+            super.progressFinalUserArgs(args, installHeapMb())
         }
+    }
+
+    private fun installHeapMb(): Int {
+        val totalMb = runCatching { getTotalMemory(context) / (1024 * 1024) }.getOrNull()
+            ?: return JvmTuning.MIN_HEAP_MB
+        return minOf(INSTALL_RAM_ALLOCATION, JvmTuning.heapCeilingMb(totalMb, is64BitsDevice))
     }
 
     override suspend fun launch(screenSize: IntSize): Int {
@@ -108,7 +120,7 @@ open class JvmLauncher(
         }
 
         LoggerBridge.appendTitle("Launch JVM")
-        LoggerBridge.appendInfo("Java arguments: \r\n${argList.joinToString("\r\n")}")
+        LoggerBridge.appendInfo("Java arguments: \r\n${LogRedactor.redactArgs(argList).joinToString("\r\n")}")
 
         return Pair(runtime, argList)
     }

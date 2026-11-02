@@ -1,5 +1,6 @@
 package com.movtery.zalithlauncher.ui.screens.main.control_editor.edit_widget
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -55,7 +56,7 @@ fun EditJoystickStyle(
                     modifier = Modifier.fillMaxSize(),
                     columns = GridCells.Adaptive(minSize = 120.dp)
                 ) {
-                    items(joystickStyles) { style ->
+                    uniqueItems(joystickStyles, id = { it.uuid }, contentType = { "joystick_style" }) { style ->
                         ChoseStyleItem(
                             modifier = Modifier.padding(all = 8.dp),
                             style = style,

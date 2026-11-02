@@ -457,6 +457,7 @@
     <string name="download_assets_dependency_projects">Dependencies</string>
     <!-- Section title for optional dependencies in the asset install dialog -->
     <string name="download_assets_optional_projects">Optional Projects</string>
+    <string name="download_assets_incompatible_installed">Incompatible with installed mods: %1$s. Installing may cause crashes.</string>
     <!-- Progress text shown while the project version list starts loading in pages -->
     <string name="download_assets_loading_page_data">Starting to load paged data</string>
     <!-- Progress text while the project version list loads; %1$d is the chunk number, %2$d the page -->
@@ -869,6 +870,7 @@
     <string name="plugin_download_summary">Download the plugin and install it as an app. Just reopen the launcher and it will load automatically!</string>
     <!-- Placeholder shown in the account list when no account has been added -->
     <string name="account_no_account">No accounts available</string>
+    <string name="account_credentials_insecure">Secure credential storage is unavailable on this device. Your account tokens and passwords are stored unencrypted.</string>
     <!-- Confirm button of the Microsoft login tip dialog, starting the login -->
     <string name="account_login">Login</string>
     <!-- Progress text while signing in; %s is the player name; shown when launching or adding an account -->
@@ -1514,6 +1516,13 @@
     <string name="mods_manage_no_mods">No mods for this version</string>
     <!-- Warning banner on the mods page when the version has no mod loader -->
     <string name="mods_manage_no_loader">No mod loader for the current version, mods cannot be used</string>
+    <string name="mods_issues_title">Mod problems found (%1$d)</string>
+    <string name="mods_issue_missing">%1$s requires %2$s, which is not installed</string>
+    <string name="mods_issue_breaks">%1$s is incompatible with %2$s</string>
+    <string name="mods_issue_conflicts">%1$s may not work well with %2$s</string>
+    <string name="mods_issue_duplicate">%1$s is installed more than once: %2$s</string>
+    <string name="mods_issue_wrong_loader">%1$s is not made for %2$s</string>
+    <string name="mods_issues_more">…and %1$d more</string>
     <!-- Button and dialog title for updating the selected mods to newer versions -->
     <string name="mods_update">Update Mods</string>
     <!-- First warning line in the dialog before checking for mod updates -->
@@ -1894,6 +1903,10 @@
     <string name="settings_game_java_memory_title">Memory Allocation</string>
     <!-- Summary of the memory allocation slider in the Game settings tab -->
     <string name="settings_game_java_memory_summary">Adjust Minecraft\'s memory usage</string>
+    <string name="settings_game_ram_safety_limit_title">RAM safety limit</string>
+    <string name="settings_game_ram_safety_limit_summary">Limit game memory to half of the device RAM so the system is less likely to close the game. Higher saved values are lowered at launch.</string>
+    <string name="settings_game_jvm_gc_tuning_title">Optimized GC settings</string>
+    <string name="settings_game_jvm_gc_tuning_summary">Use G1 garbage collector settings suited to the Java version. Ignored if you set your own GC options in the JVM arguments.</string>
     <!-- Preview under the memory allocation slider; %1$d is used memory, %2$d is total memory, in MB -->
     <string name="settings_game_java_memory_used_text">Used: %1$dMB / %2$dMB</string>
     <!-- Preview under the memory allocation slider; %d is the memory allocated to the game in MB -->

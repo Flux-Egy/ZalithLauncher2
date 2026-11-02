@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.ui.screens.main.control_editor.edit_translatable
 
+import com.movtery.zalithlauncher.ui.components.lazy.identityKey
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,7 +33,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -182,7 +183,7 @@ fun EditTranslatableTextDialog(
                         )
                     }
 
-                    items(text.matchQueue) { string ->
+                    uniqueItems(text.matchQueue, id = { identityKey(it) }, contentType = { "localized_string" }) { string ->
                         LocalizedStringItem(
                             modifier = Modifier.fillMaxWidth(),
                             string = string,

@@ -433,6 +433,7 @@
     <string name="plugin_download_summary">下載外掛，以應用程式的方式進行安裝，重新打開啟動器即可自動載入！</string>
     <!--  帳號  -->
     <string name="account_no_account">找不到可用帳號</string>
+    <string name="account_credentials_insecure">此裝置無法使用安全憑證儲存，您的帳號權杖與密碼將以未加密形式儲存。</string>
     <string name="account_login">登入</string>
     <string name="account_logging_in">%s 登入中</string>
     <string name="account_logging_in_failed">登入失敗</string>
@@ -750,6 +751,13 @@
     <string name="mods_manage_delete_warning">您確定要刪除模組 %s 嗎？該操作不可撤銷！</string>
     <string name="mods_manage_no_mods">目前版本尚無模組</string>
     <string name="mods_manage_no_loader">當前版本無模組載入器，無法使用模組</string>
+    <string name="mods_issues_title">發現模組問題（%1$d）</string>
+    <string name="mods_issue_missing">%1$s 需要 %2$s，但尚未安裝</string>
+    <string name="mods_issue_breaks">%1$s 與 %2$s 不相容</string>
+    <string name="mods_issue_conflicts">%1$s 與 %2$s 可能無法正常配合</string>
+    <string name="mods_issue_duplicate">%1$s 被安裝了多次：%2$s</string>
+    <string name="mods_issue_wrong_loader">%1$s 不適用於 %2$s</string>
+    <string name="mods_issues_more">……以及另外 %1$d 項</string>
     <string name="mods_update">更新模組</string>
     <string name="mods_update_warning_1">在開始檢查模組更新之前，您需要了解，一次性更新大量模組可能會帶來相容性問題，導致原本可以正常運行的遊戲突然無法使用。</string>
     <string name="mods_update_warning_2">啟動器暫不提供模組更新日誌功能，您需要自行了解模組更新了哪些內容，以確保更新後能夠正常使用。</string>
@@ -901,6 +909,10 @@
     <string name="settings_game_java_runtime_summary">指定預設使用的 Java 環境</string>
     <string name="settings_game_java_memory_title">記憶體分配</string>
     <string name="settings_game_java_memory_summary">控制分配給 Minecraft 的記憶體大小</string>
+    <string name="settings_game_ram_safety_limit_title">記憶體安全上限</string>
+    <string name="settings_game_ram_safety_limit_summary">將遊戲記憶體限制在裝置記憶體的一半以內，降低遊戲被系統關閉的可能。超出的已儲存值會在啟動時下調。</string>
+    <string name="settings_game_jvm_gc_tuning_title">最佳化的 GC 設定</string>
+    <string name="settings_game_jvm_gc_tuning_summary">依 Java 版本使用合適的 G1 垃圾回收器設定。若在 JVM 參數中自行設定了 GC 選項，則不生效。</string>
     <string name="settings_game_java_memory_used_text">已使用：%1$dMB / %2$dMB</string>
     <string name="settings_game_java_memory_allocation_text">已分配：%dMB</string>
     <string name="settings_game_native_lib_plugin_title">原生函式庫外掛</string>
@@ -1184,6 +1196,7 @@
     <string name="download_assets_search_mc_versions">搜尋 MC 版本</string>
     <string name="download_assets_dependency_projects">前置依賴</string>
     <string name="download_assets_optional_projects">可選項目</string>
+    <string name="download_assets_incompatible_installed">與已安裝的模組不相容：%1$s。安裝後可能導致崩潰。</string>
     <string name="download_assets_loading_page_data">開始加載分頁資料</string>
     <string name="download_assets_loaded_chunk_page">已加載分頁資料，第 %1$d 區間，第 %2$d 頁</string>
     <string name="download_assets_loading_dep_project">載入並快取相依專案，ID：%s</string>

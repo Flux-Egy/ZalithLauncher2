@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.home.version
 
+import com.movtery.zalithlauncher.coroutine.managedScope
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.movtery.zalithlauncher.game.version.installed.Version
@@ -25,7 +26,6 @@ import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.utils.hasStoragePermission
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.tencent.mmkv.MMKV
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -81,7 +81,7 @@ object VersionCardManager {
 
     private val mmkv: MMKV by lazy { MMKV.mmkvWithID("home_version_cards") }
     private val gson = Gson()
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = managedScope("VersionCardManager", Dispatchers.IO)
 
     private val _cards = MutableStateFlow<List<VersionCardState>>(emptyList())
 

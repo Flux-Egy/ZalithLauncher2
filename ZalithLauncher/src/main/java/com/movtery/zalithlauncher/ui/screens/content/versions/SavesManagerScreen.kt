@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.versions
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.content.Context
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.basicMarquee
@@ -38,7 +39,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -596,7 +596,7 @@ private fun SavesList(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 state = scrollState,
             ) {
-                items(list) { saveData ->
+                uniqueItems(list, id = { it.saveFile.absolutePath }, contentType = { "save" }) { saveData ->
                     SaveItemLayout(
                         modifier = Modifier.fillMaxWidth(),
                         saveData = saveData,

@@ -42,7 +42,7 @@ import io.ktor.server.routing.RoutingContext
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
@@ -59,6 +59,9 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "OfflineYggdrasil"
+
+/** authlib-injector in the game JVM connects to this address; it is also listed in skinDomains */
+internal const val LOOPBACK_HOST = "127.0.0.1"
 
 /**
  * 离线账号 Yggdrasil 服务器，用于本地加载玩家皮肤、披风
@@ -77,12 +80,19 @@ class OfflineYggdrasilServer(
     }.genKeyPair()
 
     private val serverStartedLatch = CountDownLatch(1)
+
+    @Volatile
     private var isServerRunning = false
+
+    /** Port resolved once when the server starts; read without blocking by [getPort] */
+    @Volatile
+    private var resolvedPort: Int? = null
 
     private var server: EmbeddedServer<CIOApplicationEngine, CIOApplicationEngine.Configuration>? = null
 
     fun start() {
-        server = embeddedServer(CIO, port = port) {
+        //仅监听本机回环地址：该服务会为离线角色签发档案，不应暴露给局域网中的其他设备
+        server = embeddedServer(CIO, port = port, host = LOOPBACK_HOST) {
             install(ContentNegotiation) {
                 json(Json {
                     prettyPrint = true
@@ -125,9 +135,17 @@ class OfflineYggdrasilServer(
                 }
             }
         }.apply {
-            monitor.subscribe(ApplicationStarted) {
-                //服务器成功启动
-                serverStartedLatch.countDown()
+            val embedded = this
+            monitor.subscribe(ApplicationStarted) { application ->
+                //服务器成功启动：在应用自身的协程作用域内解析一次实际端口并缓存
+                application.launch {
+                    resolvedPort = runCatching {
+                        embedded.engine.resolvedConnectors().firstOrNull()?.port
+                    }.onFailure { e ->
+                        Logger.error(TAG, "Failed to resolve the server port", e)
+                    }.getOrNull()
+                    serverStartedLatch.countDown()
+                }
             }
         }
 
@@ -136,30 +154,23 @@ class OfflineYggdrasilServer(
         //等待服务器启动完成
         val startTimeout = 10L //10秒超时
         if (serverStartedLatch.await(startTimeout, TimeUnit.SECONDS)) {
-            isServerRunning = true
+            isServerRunning = resolvedPort != null
         }
     }
 
     fun stop() {
         isServerRunning = false
+        resolvedPort = null
         server?.stop(1000, 5000)
         serverStartedLatch.countDown()
     }
 
-    fun getPort(): Int? {
-        if (!isServerRunning) {
-            return null
-        }
-
-        val engine = server?.engine ?: return null
-        return runBlocking {
-            try {
-                engine.resolvedConnectors().firstOrNull()?.port
-            } catch (_: Exception) {
-                null
-            }
-        }
-    }
+    /**
+     * The port the server is listening on, or null if it is not running.
+     * Non-blocking: the port is resolved once at startup (previously this used runBlocking
+     * on every call, including from inside request handlers).
+     */
+    fun getPort(): Int? = if (isServerRunning) resolvedPort else null
 
     /**
      * 添加玩家角色
@@ -238,7 +249,7 @@ class OfflineYggdrasilServer(
             Logger.debug(TAG, "Profile with username $username not found")
         }
 
-        return character.toCompleteResponse("http://localhost:${getPort()}", this::sign).also {
+        return character.toCompleteResponse("http://$LOOPBACK_HOST:${getPort()}", this::sign).also {
             Logger.debug(TAG, "Found profile with username $username")
         }
     }
@@ -253,7 +264,7 @@ class OfflineYggdrasilServer(
             Logger.debug(TAG, "Profile with uuid $uuid not found")
         }
 
-        return character.toCompleteResponse("http://localhost:${getPort()}", this::sign).also {
+        return character.toCompleteResponse("http://$LOOPBACK_HOST:${getPort()}", this::sign).also {
             Logger.debug(TAG, "Found profile with uuid $uuid")
         }
     }

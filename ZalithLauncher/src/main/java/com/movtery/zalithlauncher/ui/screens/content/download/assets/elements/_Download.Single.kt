@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.download.assets.elements
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import androidx.annotation.StringRes
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.Orientation
@@ -38,7 +39,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -236,6 +236,16 @@ private fun DownloadDialog(
         }
         val hasDeps = dependencies.isNotEmpty() || optionals.isNotEmpty()
 
+        //资源声明为不兼容、且当前版本中已安装的模组项目（安装前提示，不阻止安装）
+        val incompatibleInstalled = remember(dependencyEntries, installedProjects) {
+            dependencyEntries.filter { entry ->
+                val dependency = entry.dependency
+                val projectId = entry.project?.platformId() ?: dependency.projectId
+                dependency.type == PlatformDependencyType.INCOMPATIBLE && projectId != null &&
+                        installedProjects[dependency.platform]?.contains(projectId) == true
+            }
+        }
+
         //用户是否手动修改过依赖的勾选状态
         var userChangedDependencies by remember(dependencyEntries) { mutableStateOf(false) }
 
@@ -374,6 +384,20 @@ private fun DownloadDialog(
                             }
                         }
 
+                        if (incompatibleInstalled.isNotEmpty()) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(
+                                    R.string.download_assets_incompatible_installed,
+                                    incompatibleInstalled.joinToString { entry ->
+                                        entry.project?.platformTitle() ?: entry.dependency.projectId.orEmpty()
+                                    }
+                                ),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -437,7 +461,7 @@ private fun ChoseGameVersionLayout(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             state = listState
         ) {
-            items(versions) { version ->
+            uniqueItems(versions, id = { it.getVersionName() }, contentType = { "game_version" }) { version ->
                 SelectVersionListItem(
                     modifier = Modifier.fillMaxWidth(),
                     version = version,
@@ -518,7 +542,7 @@ private fun LazyListScope.dependencyLayout(
         )
     }
     //前置项目列表
-    items(list) { entry ->
+    uniqueItems(list, id = { with(it.dependency) { "$platform:$projectId:$versionId:$type" } }, contentType = { "dependency" }) { entry ->
         val dependency = entry.dependency
         val project = entry.project
         if (project == null) {
@@ -532,7 +556,7 @@ private fun LazyListScope.dependencyLayout(
                     R.string.download_assets_dependency_project_unavailable
                 }
             )
-            return@items
+            return@uniqueItems
         }
 
         val key = dependency.cacheKey()
