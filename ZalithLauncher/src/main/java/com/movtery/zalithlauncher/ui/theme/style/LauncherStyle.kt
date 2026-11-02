@@ -1,0 +1,230 @@
+/*
+ * Zalith Launcher 2
+ * Copyright (C) 2025-2026 MovTery <movtery228@qq.com> and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
+ */
+
+package com.movtery.zalithlauncher.ui.theme.style
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.movtery.zalithlauncher.R
+import com.movtery.zalithlauncher.setting.enums.isLauncherInDarkTheme
+import com.movtery.zalithlauncher.ui.theme.AppTypography
+
+/**
+ * Overall launcher look. Selected in Settings > Launcher > Appearance.
+ *
+ * - [ZALITH_DEFAULT]: the original Zalith UI, unchanged.
+ * - [PC_LAUNCHER]: desktop-launcher layout (left sidebar + account bar), always dark,
+ *   pixel-style headings.
+ * - [MODRINTH_STYLE]: top tab bar with a search entry, clean surfaces, green accent,
+ *   large rounded corners; follows the light/dark setting.
+ *
+ * All styles host the same screens, so every feature works in every style.
+ */
+enum class LauncherStyle {
+    ZALITH_DEFAULT,
+    PC_LAUNCHER,
+    MODRINTH_STYLE
+}
+
+/** Current launcher style for the subtree (provided by MainScreen) */
+val LocalLauncherStyle = staticCompositionLocalOf { LauncherStyle.ZALITH_DEFAULT }
+
+/**
+ * When non-null, forces [isLauncherInDarkTheme] for the subtree. Used by styles with a
+ * fixed light/dark appearance, so helpers such as itemColor() stay consistent with the
+ * style's color scheme.
+ */
+val LocalForcedDarkTheme = staticCompositionLocalOf<Boolean?> { null }
+
+/** Pixel-style heading font (Pixelify Sans, SIL Open Font License 1.1) */
+val PixelHeadingFontFamily = FontFamily(Font(R.font.pixelify_sans, FontWeight.Normal))
+
+// ---------------------------------------------------------------- PC launcher
+
+/** Dark, game-like palette with the classic green "play" accent */
+private val pcLauncherColors: ColorScheme = darkColorScheme(
+    primary = Color(0xFF3C8527),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFF2A5E1B),
+    onPrimaryContainer = Color(0xFFD6F5C8),
+    secondary = Color(0xFF9E9E9E),
+    onSecondary = Color(0xFF111111),
+    secondaryContainer = Color(0xFF3A3A3A),
+    onSecondaryContainer = Color(0xFFE6E6E6),
+    tertiary = Color(0xFFE8C547),
+    onTertiary = Color(0xFF241A00),
+    background = Color(0xFF1A1A1A),
+    onBackground = Color(0xFFEDEDED),
+    surface = Color(0xFF222222),
+    onSurface = Color(0xFFEDEDED),
+    surfaceVariant = Color(0xFF313131),
+    onSurfaceVariant = Color(0xFFC8C8C8),
+    surfaceDim = Color(0xFF181818),
+    surfaceBright = Color(0xFF2E2E2E),
+    surfaceContainerLowest = Color(0xFF141414),
+    surfaceContainerLow = Color(0xFF1C1C1C),
+    surfaceContainer = Color(0xFF212121),
+    surfaceContainerHigh = Color(0xFF2A2A2A),
+    surfaceContainerHighest = Color(0xFF333333),
+    outline = Color(0xFF5A5A5A),
+    outlineVariant = Color(0xFF3A3A3A),
+    error = Color(0xFFE5484D),
+    onError = Color(0xFFFFFFFF)
+)
+
+/** Blocky, low-radius shapes */
+private val pcLauncherShapes = Shapes(
+    extraSmall = RoundedCornerShape(2.dp),
+    small = RoundedCornerShape(4.dp),
+    medium = RoundedCornerShape(4.dp),
+    large = RoundedCornerShape(6.dp),
+    extraLarge = RoundedCornerShape(8.dp)
+)
+
+/** Pixel font for headings and titles; body text keeps the readable default font */
+private val pcLauncherTypography: Typography = AppTypography.copy(
+    displayLarge = AppTypography.displayLarge.copy(fontFamily = PixelHeadingFontFamily),
+    displayMedium = AppTypography.displayMedium.copy(fontFamily = PixelHeadingFontFamily),
+    displaySmall = AppTypography.displaySmall.copy(fontFamily = PixelHeadingFontFamily),
+    headlineLarge = AppTypography.headlineLarge.copy(fontFamily = PixelHeadingFontFamily),
+    headlineMedium = AppTypography.headlineMedium.copy(fontFamily = PixelHeadingFontFamily),
+    headlineSmall = AppTypography.headlineSmall.copy(fontFamily = PixelHeadingFontFamily),
+    titleLarge = AppTypography.titleLarge.copy(fontFamily = PixelHeadingFontFamily),
+    titleMedium = AppTypography.titleMedium.copy(fontFamily = PixelHeadingFontFamily)
+)
+
+// ----------------------------------------------------------- Modrinth style
+
+/** Brand-like green on clean light surfaces */
+private val modrinthLightColors: ColorScheme = lightColorScheme(
+    primary = Color(0xFF00AF5C),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFD3F8E2),
+    onPrimaryContainer = Color(0xFF00391D),
+    secondary = Color(0xFF5B6270),
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = Color(0xFFE6E9EF),
+    onSecondaryContainer = Color(0xFF1A1D23),
+    background = Color(0xFFF6F7F9),
+    onBackground = Color(0xFF1A1D23),
+    surface = Color(0xFFFFFFFF),
+    onSurface = Color(0xFF1A1D23),
+    surfaceVariant = Color(0xFFECEEF2),
+    onSurfaceVariant = Color(0xFF5B6270),
+    surfaceDim = Color(0xFFE6E8EC),
+    surfaceBright = Color(0xFFFFFFFF),
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFF9FAFB),
+    surfaceContainer = Color(0xFFF6F7F9),
+    surfaceContainerHigh = Color(0xFFEEF0F3),
+    surfaceContainerHighest = Color(0xFFE6E9EE),
+    outline = Color(0xFFC8CDD5),
+    outlineVariant = Color(0xFFE1E4E9)
+)
+
+/** Same identity on dark surfaces */
+private val modrinthDarkColors: ColorScheme = darkColorScheme(
+    primary = Color(0xFF1BD96A),
+    onPrimary = Color(0xFF00210E),
+    primaryContainer = Color(0xFF0E5A30),
+    onPrimaryContainer = Color(0xFFB6F5CF),
+    secondary = Color(0xFFB0BAC5),
+    onSecondary = Color(0xFF16181C),
+    secondaryContainer = Color(0xFF33363D),
+    onSecondaryContainer = Color(0xFFE6E8EB),
+    background = Color(0xFF16181C),
+    onBackground = Color(0xFFE6E8EB),
+    surface = Color(0xFF1E2025),
+    onSurface = Color(0xFFE6E8EB),
+    surfaceVariant = Color(0xFF33363D),
+    onSurfaceVariant = Color(0xFFB0BAC5),
+    surfaceDim = Color(0xFF121418),
+    surfaceBright = Color(0xFF26292F),
+    surfaceContainerLowest = Color(0xFF101215),
+    surfaceContainerLow = Color(0xFF1A1C21),
+    surfaceContainer = Color(0xFF16181C),
+    surfaceContainerHigh = Color(0xFF2A2D33),
+    surfaceContainerHighest = Color(0xFF33363D),
+    outline = Color(0xFF4A4F59),
+    outlineVariant = Color(0xFF33363D)
+)
+
+/** Generous rounding */
+private val modrinthShapes = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(20.dp),
+    extraLarge = RoundedCornerShape(28.dp)
+)
+
+/** Default font with bolder titles */
+private val modrinthTypography: Typography = AppTypography.copy(
+    titleLarge = AppTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+    titleMedium = AppTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+    headlineSmall = AppTypography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+)
+
+/**
+ * Applies the colors, shapes and typography of [style] to [content].
+ * [LauncherStyle.ZALITH_DEFAULT] leaves the existing theme untouched.
+ */
+@Composable
+fun LauncherStyleTheme(style: LauncherStyle, content: @Composable () -> Unit) {
+    when (style) {
+        LauncherStyle.ZALITH_DEFAULT -> CompositionLocalProvider(
+            LocalLauncherStyle provides style,
+            content = content
+        )
+        LauncherStyle.PC_LAUNCHER -> CompositionLocalProvider(
+            LocalLauncherStyle provides style,
+            LocalForcedDarkTheme provides true
+        ) {
+            MaterialTheme(
+                colorScheme = pcLauncherColors,
+                shapes = pcLauncherShapes,
+                typography = pcLauncherTypography,
+                content = content
+            )
+        }
+        LauncherStyle.MODRINTH_STYLE -> {
+            val dark = isLauncherInDarkTheme()
+            CompositionLocalProvider(LocalLauncherStyle provides style) {
+                MaterialTheme(
+                    colorScheme = if (dark) modrinthDarkColors else modrinthLightColors,
+                    shapes = modrinthShapes,
+                    typography = modrinthTypography,
+                    content = content
+                )
+            }
+        }
+    }
+}

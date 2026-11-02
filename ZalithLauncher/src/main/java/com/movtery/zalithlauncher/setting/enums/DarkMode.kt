@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.setting.AllSettings
+import com.movtery.zalithlauncher.ui.theme.style.LocalForcedDarkTheme
 
 /**
  * 启动器UI深色主题
@@ -43,6 +44,8 @@ enum class DarkMode(val textRes: Int) {
  */
 @Composable
 fun isLauncherInDarkTheme(): Boolean {
+    //部分启动器外观样式固定为深色（见 LauncherStyleTheme），保持各处颜色计算一致
+    LocalForcedDarkTheme.current?.let { return it }
     val value = AllSettings.launcherDarkMode.state
     return key(value) {
         when (value) {

@@ -2214,6 +2214,21 @@ This package contains native code that runs inside the game. Only install packag
     <string name="settings_launcher_color_theme_style">Palette Style</string>
     <!-- Title of the dark mode picker in Launcher settings -->
     <string name="settings_launcher_dark_mode_title">Dark Mode</string>
+    <string name="settings_launcher_style_title">Launcher style</string>
+    <string name="settings_launcher_style_summary">Change the layout and look of the launcher. All features are available in every style.</string>
+    <string name="settings_launcher_style_default">Zalith (default)</string>
+    <string name="settings_launcher_style_pc">PC launcher</string>
+    <string name="settings_launcher_style_modrinth">Modrinth style</string>
+    <string name="style_nav_play">Play</string>
+    <string name="style_nav_home">Home</string>
+    <string name="style_nav_installations">Installations</string>
+    <string name="style_nav_accounts">Accounts &amp; skins</string>
+    <string name="style_nav_files">Files</string>
+    <string name="style_nav_mods">Mods</string>
+    <string name="style_nav_modpacks">Modpacks</string>
+    <string name="style_nav_resource_packs">Resource packs</string>
+    <string name="style_search_hint">Search mods…</string>
+    <string name="style_sign_in">Sign in</string>
     <!-- Title of the launcher language picker in Launcher settings -->
     <string name="settings_launcher_language">Language</string>
     <!-- Title of the fullscreen switch in Launcher settings -->

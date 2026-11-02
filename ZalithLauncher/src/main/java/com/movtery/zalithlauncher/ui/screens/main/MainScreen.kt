@@ -18,6 +18,13 @@
 
 package com.movtery.zalithlauncher.ui.screens.main
 
+import com.movtery.zalithlauncher.ui.theme.style.LauncherStyleTheme
+import com.movtery.zalithlauncher.ui.theme.style.LauncherStyle
+import com.movtery.zalithlauncher.ui.screens.main.shells.ShellNavigation
+import com.movtery.zalithlauncher.ui.screens.main.shells.ShellDestination
+import com.movtery.zalithlauncher.ui.screens.main.shells.PcLauncherShell
+import com.movtery.zalithlauncher.ui.screens.main.shells.ModrinthShell
+import com.movtery.zalithlauncher.ui.screens.content.FirstLoginMenu
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -162,86 +169,171 @@ fun MainScreen(
     val isBackgroundValid = LocalBackgroundViewModel.current?.isValid == true
     val launcherBackgroundOpacity = AllSettings.launcherBackgroundOpacity.state.toFloat() / 100f
 
-    val backgroundColor = if (isBackgroundValid) {
-        backgroundColor().copy(alpha = launcherBackgroundOpacity)
-    } else backgroundColor()
+    //启动器外观样式：默认样式保持原有界面不变，其它样式更换外壳布局与配色，承载同一套页面
+    val launcherStyle = AllSettings.launcherStyle.state
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = backgroundColor,
-        contentColor = onBackgroundColor()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            TopBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp),
-                mainScreenKey = mainScreenKey,
-                inLauncherScreen = inLauncherScreen,
-                taskRunning = taskRunning,
-                isTasksExpanded = isTaskMenuExpanded,
-                contentColor = onBackgroundColor(),
-                onScreenBack = {
-                    screenBackStackModel.mainScreen.backStack.removeFirstOrNull()
-                },
-                toMainScreen = toMainScreen,
-                toSettingsScreen = {
-                    screenBackStackModel.mainScreen.removeAndNavigateTo(
-                        removes = screenBackStackModel.clearBeforeNavKeys,
-                        screenKey = screenBackStackModel.settingsScreen
-                    )
-                },
-                toDownloadScreen = {
-                    screenBackStackModel.navigateToDownload()
-                },
-                toMultiplayerScreen = {
-                    screenBackStackModel.mainScreen.removeAndNavigateTo(
-                        removes = screenBackStackModel.clearBeforeNavKeys,
-                        screenKey = NormalNavKey.Multiplayer
-                    )
-                },
-                openFileManager = {
-                    eventViewModel.sendEvent(
-                        EventViewModel.Event.OpenFileManager(
-                            rootPath = PathManager.DIR_FILES_EXTERNAL.absolutePath
-                        )
-                    )
-                },
-                changeExpandedState = {
-                    changeTasksExpandedState()
-                },
+    val shellNavigation = ShellNavigation(
+        toHome = toMainScreen,
+        toInstallations = {
+            screenBackStackModel.mainScreen.removeAndNavigateTo(
+                removes = screenBackStackModel.clearBeforeNavKeys,
+                screenKey = NormalNavKey.VersionsManager
             )
+        },
+        toAccounts = {
+            screenBackStackModel.mainScreen.navigateTo(
+                screenKey = NormalNavKey.AccountManager(FirstLoginMenu.NONE)
+            )
+        },
+        toDownload = { screenBackStackModel.navigateToDownload() },
+        toMods = { screenBackStackModel.navigateToDownload(screenBackStackModel.downloadModScreen) },
+        toModpacks = { screenBackStackModel.navigateToDownload(screenBackStackModel.downloadModPackScreen) },
+        toResourcePacks = { screenBackStackModel.navigateToDownload(screenBackStackModel.downloadResourcePackScreen) },
+        toMultiplayer = {
+            screenBackStackModel.mainScreen.removeAndNavigateTo(
+                removes = screenBackStackModel.clearBeforeNavKeys,
+                screenKey = NormalNavKey.Multiplayer
+            )
+        },
+        toSettings = {
+            screenBackStackModel.mainScreen.removeAndNavigateTo(
+                removes = screenBackStackModel.clearBeforeNavKeys,
+                screenKey = screenBackStackModel.settingsScreen
+            )
+        },
+        openFileManager = {
+            eventViewModel.sendEvent(
+                EventViewModel.Event.OpenFileManager(
+                    rootPath = PathManager.DIR_FILES_EXTERNAL.absolutePath
+                )
+            )
+        },
+        toggleTasks = { changeTasksExpandedState() },
+        onScreenBack = { screenBackStackModel.mainScreen.backStack.removeFirstOrNull() }
+    )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                NavStateHost(rootKey = screenBackStackModel.mainScreen) {
-                    NavigationUI(
-                        modifier = Modifier.fillMaxSize(),
-                        screenBackStackModel = screenBackStackModel,
-                        toMainScreen = toMainScreen,
-                        eventViewModel = eventViewModel,
-                        modpackImportViewModel = modpackImportViewModel,
-                        modifyVersionViewModel = modifyVersionViewModel,
-                        submitError = submitError
-                    )
-                }
+    val shellDestination = when (mainScreenKey) {
+        null, is NormalNavKey.LauncherMain -> ShellDestination.HOME
+        is NormalNavKey.VersionsManager, is NestedNavKey.VersionSettings -> ShellDestination.INSTALLATIONS
+        is NormalNavKey.AccountManager -> ShellDestination.ACCOUNTS
+        is NormalNavKey.Multiplayer -> ShellDestination.MULTIPLAYER
+        is NestedNavKey.Settings -> ShellDestination.SETTINGS
+        is NestedNavKey.Download -> when (screenBackStackModel.downloadScreen.currentKey) {
+            is NestedNavKey.DownloadMod -> ShellDestination.MODS
+            is NestedNavKey.DownloadModPack -> ShellDestination.MODPACKS
+            is NestedNavKey.DownloadResourcePack -> ShellDestination.RESOURCE_PACKS
+            else -> ShellDestination.DOWNLOAD
+        }
+        else -> ShellDestination.OTHER
+    }
 
-                TaskMenu(
-                    isExpanded = isTaskMenuExpanded,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(0.3f)
-                        .align(Alignment.CenterStart)
-                        .padding(all = 6.dp)
-                ) {
-                    changeTasksExpandedState()
+    LauncherStyleTheme(launcherStyle) {
+        //在样式主题内取色，使背景随样式配色变化
+        val backgroundColor = if (isBackgroundValid) {
+            backgroundColor().copy(alpha = launcherBackgroundOpacity)
+        } else backgroundColor()
+
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = backgroundColor,
+            contentColor = onBackgroundColor()
+        ) {
+            //页面内容（导航页面 + 任务菜单），由各样式的外壳承载
+            val screenContent: @Composable (Modifier) -> Unit = { contentModifier ->
+                Box(modifier = contentModifier) {
+                    NavStateHost(rootKey = screenBackStackModel.mainScreen) {
+                        NavigationUI(
+                            modifier = Modifier.fillMaxSize(),
+                            screenBackStackModel = screenBackStackModel,
+                            toMainScreen = toMainScreen,
+                            eventViewModel = eventViewModel,
+                            modpackImportViewModel = modpackImportViewModel,
+                            modifyVersionViewModel = modifyVersionViewModel,
+                            submitError = submitError
+                        )
+                    }
+
+                    TaskMenu(
+                        isExpanded = isTaskMenuExpanded,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.3f)
+                            .align(Alignment.CenterStart)
+                            .padding(all = 6.dp)
+                    ) {
+                        changeTasksExpandedState()
+                    }
                 }
+            }
+
+            when (launcherStyle) {
+                LauncherStyle.ZALITH_DEFAULT -> {
+                    //原有界面，保持不变
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        TopBar(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(40.dp),
+                            mainScreenKey = mainScreenKey,
+                            inLauncherScreen = inLauncherScreen,
+                            taskRunning = taskRunning,
+                            isTasksExpanded = isTaskMenuExpanded,
+                            contentColor = onBackgroundColor(),
+                            onScreenBack = {
+                                screenBackStackModel.mainScreen.backStack.removeFirstOrNull()
+                            },
+                            toMainScreen = toMainScreen,
+                            toSettingsScreen = {
+                                screenBackStackModel.mainScreen.removeAndNavigateTo(
+                                    removes = screenBackStackModel.clearBeforeNavKeys,
+                                    screenKey = screenBackStackModel.settingsScreen
+                                )
+                            },
+                            toDownloadScreen = {
+                                screenBackStackModel.navigateToDownload()
+                            },
+                            toMultiplayerScreen = {
+                                screenBackStackModel.mainScreen.removeAndNavigateTo(
+                                    removes = screenBackStackModel.clearBeforeNavKeys,
+                                    screenKey = NormalNavKey.Multiplayer
+                                )
+                            },
+                            openFileManager = {
+                                eventViewModel.sendEvent(
+                                    EventViewModel.Event.OpenFileManager(
+                                        rootPath = PathManager.DIR_FILES_EXTERNAL.absolutePath
+                                    )
+                                )
+                            },
+                            changeExpandedState = {
+                                changeTasksExpandedState()
+                            },
+                        )
+
+                        screenContent(
+                            Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        )
+                    }
+                }
+                LauncherStyle.PC_LAUNCHER -> PcLauncherShell(
+                    nav = shellNavigation,
+                    destination = shellDestination,
+                    inLauncherScreen = inLauncherScreen,
+                    taskRunning = taskRunning,
+                    content = screenContent
+                )
+                LauncherStyle.MODRINTH_STYLE -> ModrinthShell(
+                    nav = shellNavigation,
+                    destination = shellDestination,
+                    inLauncherScreen = inLauncherScreen,
+                    taskRunning = taskRunning,
+                    content = screenContent
+                )
             }
         }
     }

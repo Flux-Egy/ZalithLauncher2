@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.setting
 
+import com.movtery.zalithlauncher.ui.theme.style.LauncherStyle
 import android.os.Build
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -417,6 +418,11 @@ object AllSettings : SettingsRegistry() {
      * 启动器UI深色主题
      */
     val launcherDarkMode = enumSetting("launcherDarkMode", DarkMode.FollowSystem)
+
+    /**
+     * 启动器整体外观样式（默认 / PC 启动器 / Modrinth 风格），见 LauncherStyle
+     */
+    val launcherStyle = enumSetting("launcherStyle", LauncherStyle.ZALITH_DEFAULT)
 
     /**
      * 启动器语言

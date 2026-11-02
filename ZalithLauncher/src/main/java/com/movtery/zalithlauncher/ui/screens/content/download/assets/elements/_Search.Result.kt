@@ -18,6 +18,12 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.download.assets.elements
 
+import com.movtery.zalithlauncher.ui.theme.style.LocalLauncherStyle
+import com.movtery.zalithlauncher.ui.theme.style.LauncherStyle
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.GridCells
 import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -153,13 +159,16 @@ fun ResultListLayout(
                 val page = searchState.page
 
                 val listState = rememberLazyListState()
+                //Modrinth 样式下以卡片网格展示结果
+                val useGrid = LocalLauncherStyle.current == LauncherStyle.MODRINTH_STYLE
+                val gridState = rememberLazyGridState()
                 val maxCollapsePx = with(LocalDensity.current) { controllerHeight.toPx() }
 
                 //计算缩放比例，滑动偏移限制在0 ~ maxCollapsePx之间
                 val fraction by remember {
                     derivedStateOf {
-                        val index = listState.firstVisibleItemIndex
-                        val offset = listState.firstVisibleItemScrollOffset.toFloat()
+                        val index = if (useGrid) gridState.firstVisibleItemIndex else listState.firstVisibleItemIndex
+                        val offset = (if (useGrid) gridState.firstVisibleItemScrollOffset else listState.firstVisibleItemScrollOffset).toFloat()
 
                         when {
                             index > 0 -> 1f
@@ -169,15 +178,27 @@ fun ResultListLayout(
                 }
 
                 Box(modifier = Modifier.fillMaxSize()) {
-                    ResultList(
-                        modifier = Modifier.fillMaxSize(),
-                        state = listState,
-                        contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 60.dp, bottom = 6.dp),
-                        classes = classes,
-                        data = page.data,
-                        swapToDownload = swapToDownload,
-                        installedInfo = installedInfo
-                    )
+                    if (useGrid) {
+                        ResultGrid(
+                            modifier = Modifier.fillMaxSize(),
+                            state = gridState,
+                            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 60.dp, bottom = 6.dp),
+                            classes = classes,
+                            data = page.data,
+                            swapToDownload = swapToDownload,
+                            installedInfo = installedInfo
+                        )
+                    } else {
+                        ResultList(
+                            modifier = Modifier.fillMaxSize(),
+                            state = listState,
+                            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 60.dp, bottom = 6.dp),
+                            classes = classes,
+                            data = page.data,
+                            swapToDownload = swapToDownload,
+                            installedInfo = installedInfo
+                        )
+                    }
 
                     val targetScale = 1f - (1f - controllerMinScale) * fraction
                     val animatedScale by animateFloatAsState(targetScale)
@@ -382,47 +403,101 @@ private fun ResultList(
     swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> },
     installedInfo: ((Platform, projectId: String) -> InstalledMod?)? = null
 ) {
-    val context = LocalContext.current
     LazyColumn(
         modifier = modifier,
         state = state,
         contentPadding = contentPadding
     ) {
         uniqueItems(data, id = { "${it.first.platform()}:${it.first.platformId()}" }, contentType = { "search_result" }) { (item, mcmod) ->
-            val platform = remember(item) { item.platform() }
-            val title = remember(item) { item.platformTitle() }
-            val description = remember(item) { item.platformDescription() }
-            val iconUrl = remember(item) { item.platformIconUrl() }
-            val author = remember(item) { item.platformAuthor() }
-            val downloads = remember(item) { item.platformDownloadCount() }
-            val modloaders = remember(item) { item.platformModLoaders() }
-            val categories = remember(item, classes) { item.platformCategories(classes) }
-            val isInstalled = installedInfo?.invoke(platform, item.platformId()) != null
-            val isFavorite = FavoriteProjectsRepository.isFavorite(platform, item.platformId())
-
-            ResultProjectLayout(
+            ResultItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
-                platform = platform,
-                title = mcmod.getMcmodTitle(title, context),
-                description = description,
-                iconUrl = iconUrl,
-                author = author,
-                downloads = downloads,
-                modloaders = modloaders,
-                categories = categories?.sortedWith { o1, o2 -> o1.index() - o2.index() },
-                isInstalled = isInstalled,
-                isFavorite = isFavorite,
-                onFavoriteClick = {
-                    FavoriteProjectsRepository.toggle(item, classes)
-                },
-                onClick = {
-                    swapToDownload(platform, item.platformId(), iconUrl)
-                }
+                item = item,
+                mcmod = mcmod,
+                classes = classes,
+                swapToDownload = swapToDownload,
+                installedInfo = installedInfo
             )
         }
     }
+}
+
+/**
+ * Card grid variant of [ResultList], used by the Modrinth launcher style.
+ */
+@Composable
+private fun ResultGrid(
+    modifier: Modifier = Modifier,
+    state: LazyGridState = rememberLazyGridState(),
+    contentPadding: PaddingValues = PaddingValues(),
+    classes: PlatformClasses,
+    data: List<Pair<PlatformSearchData, AddonProjectInfo?>>,
+    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit = { _, _, _ -> },
+    installedInfo: ((Platform, projectId: String) -> InstalledMod?)? = null
+) {
+    LazyVerticalGrid(
+        modifier = modifier,
+        state = state,
+        columns = GridCells.Adaptive(minSize = 320.dp),
+        contentPadding = contentPadding,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        uniqueItems(data, id = { "${it.first.platform()}:${it.first.platformId()}" }, contentType = { "search_result" }) { (item, mcmod) ->
+            ResultItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                item = item,
+                mcmod = mcmod,
+                classes = classes,
+                swapToDownload = swapToDownload,
+                installedInfo = installedInfo
+            )
+        }
+    }
+}
+
+@Composable
+private fun ResultItem(
+    modifier: Modifier,
+    item: PlatformSearchData,
+    mcmod: AddonProjectInfo?,
+    classes: PlatformClasses,
+    swapToDownload: (Platform, projectId: String, iconUrl: String?) -> Unit,
+    installedInfo: ((Platform, projectId: String) -> InstalledMod?)?
+) {
+    val context = LocalContext.current
+        val platform = remember(item) { item.platform() }
+        val title = remember(item) { item.platformTitle() }
+        val description = remember(item) { item.platformDescription() }
+        val iconUrl = remember(item) { item.platformIconUrl() }
+        val author = remember(item) { item.platformAuthor() }
+        val downloads = remember(item) { item.platformDownloadCount() }
+        val modloaders = remember(item) { item.platformModLoaders() }
+        val categories = remember(item, classes) { item.platformCategories(classes) }
+        val isInstalled = installedInfo?.invoke(platform, item.platformId()) != null
+        val isFavorite = FavoriteProjectsRepository.isFavorite(platform, item.platformId())
+
+        ResultProjectLayout(
+            modifier = modifier,
+            platform = platform,
+            title = mcmod.getMcmodTitle(title, context),
+            description = description,
+            iconUrl = iconUrl,
+            author = author,
+            downloads = downloads,
+            modloaders = modloaders,
+            categories = categories?.sortedWith { o1, o2 -> o1.index() - o2.index() },
+            isInstalled = isInstalled,
+            isFavorite = isFavorite,
+            onFavoriteClick = {
+                FavoriteProjectsRepository.toggle(item, classes)
+            },
+            onClick = {
+                swapToDownload(platform, item.platformId(), iconUrl)
+            }
+        )
 }
 
 @Composable

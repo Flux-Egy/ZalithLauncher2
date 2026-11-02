@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings
 
+import com.movtery.zalithlauncher.ui.theme.style.LauncherStyle
 import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -188,6 +189,22 @@ fun LauncherSettingsScreen(
                         maxItemsInEachRow = 5,
                         onRadioClick = { enum ->
                             if (enum == ColorThemeType.CUSTOM) customColorOperation = CustomColorOperation.Dialog
+                        }
+                    )
+
+                    ListSettingsCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle,
+                        unit = AllSettings.launcherStyle,
+                        items = LauncherStyle.entries,
+                        title = stringResource(R.string.settings_launcher_style_title),
+                        summary = stringResource(R.string.settings_launcher_style_summary),
+                        getItemText = {
+                            when (it) {
+                                LauncherStyle.ZALITH_DEFAULT -> stringResource(R.string.settings_launcher_style_default)
+                                LauncherStyle.PC_LAUNCHER -> stringResource(R.string.settings_launcher_style_pc)
+                                LauncherStyle.MODRINTH_STYLE -> stringResource(R.string.settings_launcher_style_modrinth)
+                            }
                         }
                     )
 
