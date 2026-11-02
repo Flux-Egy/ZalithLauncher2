@@ -984,6 +984,8 @@ ABI：%2$s
     <string name="renderer_config_mg_ext_dsa_desc">暴露 GL_EXT_direct_state_access 扩展</string>
     <string name="renderer_config_mg_fsr1_title">FSR1 预设</string>
     <string name="renderer_config_mg_fsr1_desc">选择 FSR1 预设，以画质换取性能</string>
+    <string name="renderer_config_mg_sgsr1_title">Snapdragon GSR 1（实验性）</string>
+    <string name="renderer_config_mg_sgsr1_desc">骁龙 Game Super Resolution 超分辨率。需要支持 GSR 的 MobileGlues 版本，当前版本会忽略此设置。请勿与 FSR 1 同时启用。</string>
     <string name="renderer_config_mg_fsr1_ultra_quality">极高质量</string>
     <string name="renderer_config_mg_fsr1_quality">质量优先</string>
     <string name="renderer_config_mg_fsr1_balanced">均衡</string>

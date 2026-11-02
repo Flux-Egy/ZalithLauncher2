@@ -359,6 +359,8 @@
     <string name="date_format">yyyy/MM/dd, h:mm:ss a</string>
     <string name="renderer_version_support">دعم إصدارات MC:</string>
     <string name="renderer_version_unsupported_warning">العارض الحالي %s لا يدعم إصدار هذه اللعبة. الاستمرار في استخدامه قد يؤدي إلى أخطاء في العرض أو توقف مفاجئ! هل أنت متأكد من رغبتك في المتابعة؟</string>
+    <string name="renderer_config_mg_sgsr1_title">Snapdragon GSR 1 (تجريبي)</string>
+    <string name="renderer_config_mg_sgsr1_desc">رفع الدقة باستخدام Snapdragon Game Super Resolution. يتطلب إصدارًا من MobileGlues يدعم GSR، وتتجاهل الإصدارات الحالية هذا الإعداد. لا تفعّله مع FSR 1.</string>
     <string name="local_plugin_import_title">استيراد حزمة مُصيّر أو تعريف</string>
     <string name="local_plugin_import_summary">تثبيت مُصيّر (renderer.json) أو تعريف Vulkan من نوع Turnip (AdrenoTools meta.json) من ملف ‎.zip</string>
     <string name="local_plugin_imported_summary">حزمة مستوردة</string>

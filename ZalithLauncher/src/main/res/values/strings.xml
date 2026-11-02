@@ -1840,6 +1840,8 @@ This package contains native code that runs inside the game. Only install packag
     <string name="renderer_config_mg_fsr1_title">FSR1 Preset</string>
     <!-- Description of the FSR1 preset selector in MobileGlues renderer settings -->
     <string name="renderer_config_mg_fsr1_desc">Choose an FSR1 preset to trade image quality for performance</string>
+    <string name="renderer_config_mg_sgsr1_title">Snapdragon GSR 1 (experimental)</string>
+    <string name="renderer_config_mg_sgsr1_desc">Snapdragon Game Super Resolution upscaling. Needs a MobileGlues build with GSR support; current builds ignore this setting. Do not enable together with FSR 1.</string>
     <!-- FSR1 option for the highest image quality -->
     <string name="renderer_config_mg_fsr1_ultra_quality">Ultra Quality</string>
     <!-- FSR1 option prioritizing image quality -->
