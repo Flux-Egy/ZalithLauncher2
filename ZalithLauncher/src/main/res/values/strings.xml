@@ -1541,6 +1541,8 @@ This package contains native code that runs inside the game. Only install packag
     <string name="mods_manage_no_loader">No mod loader for the current version, mods cannot be used</string>
     <string name="mods_issues_title">Mod problems found (%1$d)</string>
     <string name="mods_issue_missing">%1$s requires %2$s, which is not installed</string>
+    <string name="mods_issue_version_mismatch">%1$s requires %2$s %3$s, but %4$s is installed. Install a matching %2$s version, or a version of %1$s that supports it.</string>
+    <string name="mods_issue_range_detail">(affects %1$s; installed: %2$s)</string>
     <string name="mods_issue_breaks">%1$s is incompatible with %2$s</string>
     <string name="mods_issue_conflicts">%1$s may not work well with %2$s</string>
     <string name="mods_issue_duplicate">%1$s is installed more than once: %2$s</string>

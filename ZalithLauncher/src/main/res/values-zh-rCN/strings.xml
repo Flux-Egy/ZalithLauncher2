@@ -829,6 +829,8 @@ ABI：%2$s
     <string name="mods_manage_no_loader">当前版本无模组加载器，无法使用模组</string>
     <string name="mods_issues_title">发现模组问题（%1$d）</string>
     <string name="mods_issue_missing">%1$s 需要 %2$s，但未安装</string>
+    <string name="mods_issue_version_mismatch">%1$s 需要 %2$s %3$s，但已安装的是 %4$s。请安装匹配的 %2$s 版本，或换用支持它的 %1$s 版本。</string>
+    <string name="mods_issue_range_detail">（影响版本 %1$s；已安装：%2$s）</string>
     <string name="mods_issue_breaks">%1$s 与 %2$s 不兼容</string>
     <string name="mods_issue_conflicts">%1$s 与 %2$s 可能无法正常配合</string>
     <string name="mods_issue_duplicate">%1$s 被安装了多次：%2$s</string>

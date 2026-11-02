@@ -776,6 +776,8 @@ ABI：%2$s
     <string name="mods_manage_no_loader">當前版本無模組載入器，無法使用模組</string>
     <string name="mods_issues_title">發現模組問題（%1$d）</string>
     <string name="mods_issue_missing">%1$s 需要 %2$s，但尚未安裝</string>
+    <string name="mods_issue_version_mismatch">%1$s 需要 %2$s %3$s，但已安裝的是 %4$s。請安裝相符的 %2$s 版本，或改用支援它的 %1$s 版本。</string>
+    <string name="mods_issue_range_detail">（影響版本 %1$s；已安裝：%2$s）</string>
     <string name="mods_issue_breaks">%1$s 與 %2$s 不相容</string>
     <string name="mods_issue_conflicts">%1$s 與 %2$s 可能無法正常配合</string>
     <string name="mods_issue_duplicate">%1$s 被安裝了多次：%2$s</string>

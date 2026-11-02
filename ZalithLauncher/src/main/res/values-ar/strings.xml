@@ -417,6 +417,8 @@ ABI: %2$s
     <string name="style_sign_in">تسجيل الدخول</string>
     <string name="mods_issues_title">تم العثور على مشكلات في الإضافات (%1$d)</string>
     <string name="mods_issue_missing">%1$s يتطلب %2$s، وهو غير مثبت</string>
+    <string name="mods_issue_version_mismatch">يتطلب %1$s الإضافة %2$s بالإصدار %3$s، لكن المثبّت هو %4$s. ثبّت إصدارًا مطابقًا من %2$s، أو إصدارًا من %1$s يدعمه.</string>
+    <string name="mods_issue_range_detail">(يشمل الإصدارات %1$s؛ المثبّت: %2$s)</string>
     <string name="mods_issue_breaks">%1$s غير متوافق مع %2$s</string>
     <string name="mods_issue_conflicts">قد لا يعمل %1$s بشكل جيد مع %2$s</string>
     <string name="mods_issue_duplicate">%1$s مثبت أكثر من مرة: %2$s</string>

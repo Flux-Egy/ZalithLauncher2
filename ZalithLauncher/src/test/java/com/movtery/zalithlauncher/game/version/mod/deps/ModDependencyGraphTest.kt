@@ -240,4 +240,104 @@ class ModDependencyGraphTest {
         assertNull(ModMetadataParsers.parseModsToml("[[[broken", DepLoader.FORGE))
         assertNotNull(ModMetadataParsers.parseJarJarMetadata("garbage"))
     }
+
+    // ---------------------------------------------------------- version ranges
+
+    /** Trimmed from the real fabric.mod.json of Iris 1.8.8+mc1.21.1 */
+    private val iris188 = """{"id":"iris","version":"1.8.8+mc1.21.1","name":"Iris",
+        "depends":{"fabricloader":">=0.12.3","minecraft":["1.21.x"],"sodium":["0.6.x"]},
+        "breaks":{"embeddium":"*","optifabric":"*","distanthorizons":"<=2.1.99"}}"""
+
+    /** Trimmed from the real fabric.mod.json of Sodium 0.8.13+mc1.21.1 */
+    private val sodium0813 = """{"id":"sodium","version":"0.8.13+mc1.21.1","name":"Sodium",
+        "depends":{"minecraft":["1.21","1.21.1"],"fabricloader":">=0.16.0"},
+        "breaks":{"embeddium":"*","iris":"<1.8.13","bobby":"<5.2.4"},"provides":["indium"]}"""
+
+    private fun parse(json: String) = ModMetadataParsers.parseFabric(json)!!.infos.single()
+
+    @Test
+    fun irisWithTooNewSodiumIsAVersionMismatch() {
+        val issues = ModDependencyGraph.analyze(listOf(parse(iris188), parse(sodium0813)), DepLoader.FABRIC)
+        val mismatch = issues.filterIsInstance<ModIssue.VersionMismatch>().single()
+        assertEquals("iris", mismatch.mod.id)
+        assertEquals("sodium", mismatch.dependencyId)
+        assertEquals("0.6.x", mismatch.requiredRange)
+        assertEquals(listOf("0.8.13+mc1.21.1"), mismatch.found)
+        // Sodium 0.8.13 really does break Iris < 1.8.13
+        val breaks = issues.filterIsInstance<ModIssue.Incompatible>().single()
+        assertEquals("sodium", breaks.mod.id)
+        assertEquals("iris", breaks.other.id)
+        assertEquals("<1.8.13", breaks.range)
+        assertTrue(breaks.hard)
+    }
+
+    @Test
+    fun breaksOutsideTheRangeIsNotReported() {
+        val iris1814 = iris188.replace("1.8.8+mc1.21.1", "1.8.14+mc1.21.1").replace("\"0.6.x\"", "\"0.8.x\"")
+        val issues = ModDependencyGraph.analyze(listOf(parse(iris1814), parse(sodium0813)), DepLoader.FABRIC)
+        assertEquals(emptyList<ModIssue>(), issues)
+    }
+
+    @Test
+    fun matchingVersionsHaveNoIssues() {
+        // Sodium 0.6.x does not declare a break on this Iris version
+        val sodium0613 = sodium0813.replace("0.8.13+mc1.21.1", "0.6.13+mc1.21.1").replace(",\"iris\":\"<1.8.13\"", "")
+        val issues = ModDependencyGraph.analyze(listOf(parse(iris188), parse(sodium0613)), DepLoader.FABRIC)
+        assertEquals(emptyList<ModIssue>(), issues)
+    }
+
+    @Test
+    fun unknownVersionGetsBenefitOfDoubt() {
+        val forge = ModMetadataParsers.parseModsToml(
+            """
+            modLoader="javafml"
+            [[mods]]
+            modId="a"
+            version="${'$'}{file.jarVersion}"
+            [[mods]]
+            modId="b"
+            version="1.0"
+            [[dependencies.b]]
+            modId="a"
+            type="required"
+            versionRange="[2.0,)"
+            """.trimIndent(),
+            DepLoader.NEOFORGE
+        )!!.infos
+        assertEquals(emptyList<ModIssue>(), ModDependencyGraph.analyze(forge, DepLoader.NEOFORGE))
+    }
+
+    @Test
+    fun forgeVersionRangeMismatch() {
+        val forge = ModMetadataParsers.parseModsToml(
+            """
+            modLoader="javafml"
+            [[mods]]
+            modId="lib"
+            version="1.4.0"
+            [[mods]]
+            modId="addon"
+            version="2.0"
+            [[dependencies.addon]]
+            modId="lib"
+            type="required"
+            versionRange="[1.5,2)"
+            [[dependencies.addon]]
+            modId="minecraft"
+            type="required"
+            versionRange="[1.21.1]"
+            """.trimIndent(),
+            DepLoader.NEOFORGE
+        )!!.infos
+        val mismatch = ModDependencyGraph.analyze(forge, DepLoader.NEOFORGE).single() as ModIssue.VersionMismatch
+        assertEquals("lib", mismatch.dependencyId)
+        assertEquals("[1.5,2)", mismatch.requiredRange)
+    }
+
+    @Test
+    fun wildcardBreaksAlwaysApplies() {
+        val emb = ModMetadataParsers.parseFabric("""{"id":"embeddium"}""")!!.infos.single()
+        val issues = ModDependencyGraph.analyze(listOf(parse(iris188), emb), DepLoader.FABRIC)
+        assertTrue(issues.any { it is ModIssue.Incompatible && it.mod.id == "iris" && it.other.id == "embeddium" && it.range == null })
+    }
 }

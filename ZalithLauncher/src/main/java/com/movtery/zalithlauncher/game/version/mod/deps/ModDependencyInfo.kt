@@ -40,7 +40,16 @@ enum class RelationKind {
     CONFLICTS
 }
 
-data class ModRelation(val targetId: String, val kind: RelationKind)
+/**
+ * @param range acceptable versions of the target; null means any version
+ * @param rangeText the range as written in the metadata, for display
+ */
+data class ModRelation(
+    val targetId: String,
+    val kind: RelationKind,
+    val range: ModVersionRange? = null,
+    val rangeText: String? = null
+)
 
 /**
  * Dependency-relevant metadata of one mod (or one nested jar-in-jar mod).
@@ -50,6 +59,8 @@ data class ModDependencyInfo(
     val id: String,
     val name: String = id,
     val loaders: Set<DepLoader>,
+    /** Declared version; null or unparseable means unknown (ranges are then not checked) */
+    val version: String? = null,
     /** Extra ids this mod satisfies (Fabric/Quilt "provides") */
     val provides: Set<String> = emptySet(),
     val relations: List<ModRelation> = emptyList(),
@@ -81,9 +92,9 @@ object ModMetadataParsers {
         val root = parseJsonObject(json) ?: return null
         val id = root.string("id") ?: return null
         val relations = mutableListOf<ModRelation>()
-        root.objectKeys("depends").forEach { relations += ModRelation(it, RelationKind.REQUIRED) }
-        root.objectKeys("breaks").forEach { relations += ModRelation(it, RelationKind.BREAKS) }
-        root.objectKeys("conflicts").forEach { relations += ModRelation(it, RelationKind.CONFLICTS) }
+        root.fabricRelations("depends", RelationKind.REQUIRED, relations)
+        root.fabricRelations("breaks", RelationKind.BREAKS, relations)
+        root.fabricRelations("conflicts", RelationKind.CONFLICTS, relations)
         val jars = root.array("jars").mapNotNull { (it as? JsonObject)?.string("file") }
         return Parsed(
             infos = listOf(
@@ -91,6 +102,7 @@ object ModMetadataParsers {
                     id = id,
                     name = root.string("name") ?: id,
                     loaders = setOf(DepLoader.FABRIC),
+                    version = root.string("version"),
                     provides = root.array("provides").mapNotNull { it.asStringOrNull() }.toSet(),
                     relations = relations
                 )
@@ -110,11 +122,12 @@ object ModMetadataParsers {
             val obj = dep as? JsonObject
             val depId = dep.asStringOrNull() ?: obj?.string("id") ?: return@forEach
             if (obj?.bool("optional") == true) return@forEach
-            relations += ModRelation(depId, RelationKind.REQUIRED)
+            relations += quiltRelation(depId, RelationKind.REQUIRED, obj)
         }
         loader.array("breaks").forEach { dep ->
-            val depId = dep.asStringOrNull() ?: (dep as? JsonObject)?.string("id") ?: return@forEach
-            relations += ModRelation(depId, RelationKind.BREAKS)
+            val obj = dep as? JsonObject
+            val depId = dep.asStringOrNull() ?: obj?.string("id") ?: return@forEach
+            relations += quiltRelation(depId, RelationKind.BREAKS, obj)
         }
         val provides = loader.array("provides").mapNotNull { it.asStringOrNull() ?: (it as? JsonObject)?.string("id") }
         val name = loader.obj("metadata")?.string("name") ?: id
@@ -124,6 +137,7 @@ object ModMetadataParsers {
                     id = id,
                     name = name,
                     loaders = setOf(DepLoader.QUILT),
+                    version = loader.string("version"),
                     provides = provides.toSet(),
                     relations = relations
                 )
@@ -160,12 +174,19 @@ object ModMetadataParsers {
                     null -> if (dep.getBoolean("mandatory") == true) RelationKind.REQUIRED else null
                     else -> null
                 } ?: return@forEach
-                relations += ModRelation(depId, kind)
+                val rangeText = dep.getString("versionRange")
+                relations += ModRelation(
+                    targetId = depId,
+                    kind = kind,
+                    range = rangeText?.let { MavenVersionRange.parse(it) },
+                    rangeText = rangeText
+                )
             }
             ModDependencyInfo(
                 id = id,
                 name = mod.getString("displayName") ?: id,
                 loaders = setOf(loader),
+                version = mod.getString("version"),
                 relations = relations
             )
         }
@@ -177,6 +198,30 @@ object ModMetadataParsers {
         parseJsonObject(json)?.array("jars")?.mapNotNull { (it as? JsonObject)?.string("path") }.orEmpty()
 
     // ---------------------------------------------------------------- helpers
+
+    /** Fabric: {"id": "range"} or {"id": ["range", "range"]} (array = any of) */
+    private fun JsonObject.fabricRelations(key: String, kind: RelationKind, out: MutableList<ModRelation>) {
+        val map = obj(key) ?: return
+        map.entrySet().forEach { (id, value) ->
+            val texts = when {
+                value.isJsonArray -> value.asJsonArray.mapNotNull { it.asStringOrNull() }
+                else -> listOfNotNull(value.asStringOrNull())
+            }
+            val range = if (texts.isEmpty()) null else FabricVersionPredicate.parseAny(texts)
+            out += ModRelation(id, kind, range, texts.joinToString(" || ").takeIf { it.isNotEmpty() })
+        }
+    }
+
+    /** Quilt: "versions" is a string, an array (any of), or an object (any/all; not evaluated) */
+    private fun quiltRelation(id: String, kind: RelationKind, obj: JsonObject?): ModRelation {
+        val versions = obj?.get("versions") ?: return ModRelation(id, kind)
+        val texts = when {
+            versions.isJsonArray -> versions.asJsonArray.mapNotNull { it.asStringOrNull() }
+            else -> listOfNotNull(versions.asStringOrNull())
+        }
+        if (texts.isEmpty()) return ModRelation(id, kind)
+        return ModRelation(id, kind, FabricVersionPredicate.parseAny(texts), texts.joinToString(" || "))
+    }
 
     private fun parseJsonObject(text: String): JsonObject? =
         runCatching { JsonParser.parseString(text) }.getOrNull()?.takeIf { it.isJsonObject }?.asJsonObject
