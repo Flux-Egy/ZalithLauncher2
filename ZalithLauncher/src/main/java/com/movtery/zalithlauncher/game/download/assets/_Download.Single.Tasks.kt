@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.game.download.assets
 
+import com.movtery.zalithlauncher.path.HOST_CURSEFORGE_API
+import com.movtery.zalithlauncher.game.download.assets.platform.curseforge.CurseForgeApiKey
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.coroutine.Task
 import com.movtery.zalithlauncher.coroutine.TaskSystem
@@ -182,7 +184,17 @@ fun mapExceptionToMessage(e: Throwable): AndroidStringText {
         is HttpRequestTimeoutException -> androidText(R.string.error_timeout)
         is UnknownHostException, is UnresolvedAddressException -> androidText(R.string.error_network_unreachable)
         is ConnectException -> androidText(R.string.error_connection_failed)
-        is ResponseException -> e.toLocal()
+        is ResponseException -> {
+            //CurseForge 在缺少或无效 API Key 时返回 403
+            val host = runCatching { e.response.call.request.url.host }.getOrNull()
+            if (e.response.status.value == 403 && host == HOST_CURSEFORGE_API) {
+                if (CurseForgeApiKey.source() == CurseForgeApiKey.Source.NONE) {
+                    androidText(R.string.curseforge_api_key_missing)
+                } else {
+                    androidText(R.string.curseforge_api_key_rejected)
+                }
+            } else e.toLocal()
+        }
         else -> {
             androidText(e.localizedMessage ?: e::class.simpleName ?: "Unknown error")
         }

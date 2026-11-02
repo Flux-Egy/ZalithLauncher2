@@ -1174,6 +1174,14 @@ ABI：%2$s
     <string name="settings_launcher_color_theme_summary">更改启动器的整体颜色主题</string>
     <string name="settings_launcher_color_theme_style">配色风格</string>
     <string name="settings_launcher_dark_mode_title">深色模式</string>
+    <string name="curseforge_api_key_missing">CurseForge 需要 API Key，而此版本未内置。请在 设置 → 启动器 → CurseForge API Key 中填写你自己的 Key，或改用 Modrinth。</string>
+    <string name="curseforge_api_key_rejected">CurseForge 拒绝了 API Key（403）。请在 设置 → 启动器 → CurseForge API Key 中检查。</string>
+    <string name="settings_curseforge_api_key_title">CurseForge API Key</string>
+    <string name="settings_curseforge_api_key_user">正在使用你自己的 Key（已加密存储）</string>
+    <string name="settings_curseforge_api_key_builtin">正在使用此版本内置的 Key，你也可以设置自己的 Key。</string>
+    <string name="settings_curseforge_api_key_none">未设置。在添加 Key 之前，无法浏览或下载 CurseForge 资源。</string>
+    <string name="settings_curseforge_api_key_label">API Key（留空以移除你的 Key）</string>
+    <string name="settings_curseforge_api_key_help">可在 console.curseforge.com 免费获取。Key 会加密保存在本设备，且仅发送给 CurseForge。</string>
     <string name="settings_launcher_style_title">启动器样式</string>
     <string name="settings_launcher_style_summary">更改启动器的布局与外观。所有功能在每种样式下均可使用。</string>
     <string name="settings_launcher_style_default">Zalith（默认）</string>

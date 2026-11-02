@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings
 
+import com.movtery.zalithlauncher.game.download.assets.platform.curseforge.CurseForgeApiKey
 import com.movtery.zalithlauncher.ui.theme.style.LauncherStyle
 import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.os.Build
@@ -398,13 +399,44 @@ fun LauncherSettingsScreen(
                         )
                     }
 
+                    //CurseForge API Key：未内置密钥的构建（如分支构建）必须由用户提供，否则 CurseForge 返回 403
+                    var keySource by remember { mutableStateOf(CurseForgeApiKey.source()) }
+                    var showKeyDialog by remember { mutableStateOf(false) }
+                    SettingsCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = if (isChinaMainland) CardPosition.Middle else CardPosition.Top,
+                        title = stringResource(R.string.settings_curseforge_api_key_title),
+                        summary = stringResource(
+                            when (keySource) {
+                                CurseForgeApiKey.Source.USER -> R.string.settings_curseforge_api_key_user
+                                CurseForgeApiKey.Source.BUILT_IN -> R.string.settings_curseforge_api_key_builtin
+                                CurseForgeApiKey.Source.NONE -> R.string.settings_curseforge_api_key_none
+                            }
+                        ),
+                        onClick = { showKeyDialog = true }
+                    )
+                    if (showKeyDialog) {
+                        //不回显已保存的密钥，留空并确认即清除
+                        var input by remember { mutableStateOf("") }
+                        SimpleEditDialog(
+                            title = stringResource(R.string.settings_curseforge_api_key_title),
+                            value = input,
+                            onValueChange = { input = it.trim() },
+                            label = { Text(text = stringResource(R.string.settings_curseforge_api_key_label)) },
+                            supportingText = { Text(text = stringResource(R.string.settings_curseforge_api_key_help)) },
+                            singleLine = true,
+                            onDismissRequest = { showKeyDialog = false },
+                            onConfirm = {
+                                CurseForgeApiKey.saveUserKey(input)
+                                keySource = CurseForgeApiKey.source()
+                                showKeyDialog = false
+                            }
+                        )
+                    }
+
                     IntSliderSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
-                        position = if (isChinaMainland) {
-                            CardPosition.Middle
-                        } else {
-                            CardPosition.Top
-                        },
+                        position = CardPosition.Middle,
                         unit = AllSettings.launcherLogRetentionDays,
                         title = stringResource(R.string.settings_launcher_log_retention_days_title),
                         summary = stringResource(R.string.settings_launcher_log_retention_days_summary),

@@ -502,6 +502,11 @@ object AllSettings : SettingsRegistry() {
         MirrorSourceType.LEGACY_NAMES
     )
 
+    /**
+     * 用户自行提供的 CurseForge API Key（经 Android Keystore 加密存储，见 CurseForgeApiKey）
+     */
+    val curseForgeUserApiKey = stringSetting("curseForgeUserApiKey", "")
+
     //Control
     /**
      * 全局默认控制布局文件名
