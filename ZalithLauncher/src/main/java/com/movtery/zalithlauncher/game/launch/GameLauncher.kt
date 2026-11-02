@@ -18,6 +18,10 @@
 
 package com.movtery.zalithlauncher.game.launch
 
+import com.movtery.zalithlauncher.utils.device.Architecture.is64BitsDevice
+import com.movtery.zalithlauncher.bridge.LoggerBridge
+import android.content.Context
+import android.app.ActivityManager
 import android.app.Activity
 import android.os.Build
 import android.os.Parcelable
@@ -246,7 +250,41 @@ class GameLauncher(
     }
 
     override fun progressFinalUserArgs(args: MutableList<String>, ramAllocation: Int) {
-        super.progressFinalUserArgs(args, version.getRamAllocation(activity))
+        val requested = version.getRamAllocation(activity)
+        val memoryInfo = runCatching {
+            val am = activity.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            ActivityManager.MemoryInfo().also { am.getMemoryInfo(it) }
+        }.getOrNull()
+        val decision = JvmTuning.resolveHeap(
+            requestedMb = requested,
+            totalRamMb = memoryInfo?.totalMem?.div(1024 * 1024) ?: 0L,
+            availRamMb = memoryInfo?.availMem?.div(1024 * 1024) ?: -1L,
+            is64Bit = is64BitsDevice,
+            safetyLimit = AllSettings.ramSafetyLimit.getValue() && memoryInfo != null
+        )
+        decision.clampedFromMb?.let { from ->
+            val msg = "Java heap lowered from $from MB to ${decision.heapMb} MB by the RAM safety limit " +
+                    "(ceiling ${decision.ceilingMb} MB = ${(JvmTuning.MAX_HEAP_FRACTION_OF_RAM * 100).toInt()}% of device RAM)"
+            Logger.warning(TAG, msg)
+            LoggerBridge.appendInfo(msg)
+        }
+        if (decision.lowMemoryWarning) {
+            val msg = "Low available memory: ${memoryInfo?.availMem?.div(1024 * 1024)} MB free for a ${decision.heapMb} MB heap " +
+                    "plus ~${JvmTuning.NATIVE_OVERHEAD_MB} MB native overhead; the system may close the game"
+            Logger.warning(TAG, msg)
+            LoggerBridge.appendInfo(msg)
+        }
+
+        super.progressFinalUserArgs(args, decision.heapMb)
+
+        if (AllSettings.jvmGcTuning.getValue()) {
+            val gcArgs = JvmTuning.gcArgs(runtime.javaVersion, decision.heapMb, args)
+            if (gcArgs.isNotEmpty()) {
+                Logger.info(TAG, "GC tuning (Java ${runtime.javaVersion}): ${gcArgs.joinToString(" ")}")
+                args.addAll(gcArgs)
+            }
+        }
+
         if (Renderers.isCurrentRendererValid()) {
             args.add("-Dorg.lwjgl.opengl.libname=${getGameRendererLibrary(version)}")
         }

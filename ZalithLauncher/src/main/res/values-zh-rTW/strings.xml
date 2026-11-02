@@ -902,6 +902,10 @@
     <string name="settings_game_java_runtime_summary">指定預設使用的 Java 環境</string>
     <string name="settings_game_java_memory_title">記憶體分配</string>
     <string name="settings_game_java_memory_summary">控制分配給 Minecraft 的記憶體大小</string>
+    <string name="settings_game_ram_safety_limit_title">記憶體安全上限</string>
+    <string name="settings_game_ram_safety_limit_summary">將遊戲記憶體限制在裝置記憶體的一半以內，降低遊戲被系統關閉的可能。超出的已儲存值會在啟動時下調。</string>
+    <string name="settings_game_jvm_gc_tuning_title">最佳化的 GC 設定</string>
+    <string name="settings_game_jvm_gc_tuning_summary">依 Java 版本使用合適的 G1 垃圾回收器設定。若在 JVM 參數中自行設定了 GC 選項，則不生效。</string>
     <string name="settings_game_java_memory_used_text">已使用：%1$dMB / %2$dMB</string>
     <string name="settings_game_java_memory_allocation_text">已分配：%dMB</string>
     <string name="settings_game_native_lib_plugin_title">原生函式庫外掛</string>

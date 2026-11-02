@@ -1895,6 +1895,10 @@
     <string name="settings_game_java_memory_title">Memory Allocation</string>
     <!-- Summary of the memory allocation slider in the Game settings tab -->
     <string name="settings_game_java_memory_summary">Adjust Minecraft\'s memory usage</string>
+    <string name="settings_game_ram_safety_limit_title">RAM safety limit</string>
+    <string name="settings_game_ram_safety_limit_summary">Limit game memory to half of the device RAM so the system is less likely to close the game. Higher saved values are lowered at launch.</string>
+    <string name="settings_game_jvm_gc_tuning_title">Optimized GC settings</string>
+    <string name="settings_game_jvm_gc_tuning_summary">Use G1 garbage collector settings suited to the Java version. Ignored if you set your own GC options in the JVM arguments.</string>
     <!-- Preview under the memory allocation slider; %1$d is used memory, %2$d is total memory, in MB -->
     <string name="settings_game_java_memory_used_text">Used: %1$dMB / %2$dMB</string>
     <!-- Preview under the memory allocation slider; %d is the memory allocated to the game in MB -->
