@@ -80,13 +80,13 @@ class ShellNavigation(
 enum class ShellDestination { HOME, INSTALLATIONS, ACCOUNTS, DOWNLOAD, MODS, MODPACKS, RESOURCE_PACKS, MULTIPLAYER, SETTINGS, OTHER }
 
 @Composable
-private fun goBack(onScreenBack: () -> Unit): () -> Unit {
+internal fun goBack(onScreenBack: () -> Unit): () -> Unit {
     val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     return { dispatcher?.onBackPressed() ?: onScreenBack() }
 }
 
 @Composable
-private fun AccountChip(onClick: () -> Unit, showName: Boolean = true) {
+internal fun AccountChip(onClick: () -> Unit, showName: Boolean = true) {
     val account by AccountsManager.currentAccountFlow.collectAsStateWithLifecycle()
     Row(
         modifier = Modifier

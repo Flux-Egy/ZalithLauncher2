@@ -205,6 +205,10 @@ fun LauncherSettingsScreen(
                                 LauncherStyle.ZALITH_DEFAULT -> stringResource(R.string.settings_launcher_style_default)
                                 LauncherStyle.PC_LAUNCHER -> stringResource(R.string.settings_launcher_style_pc)
                                 LauncherStyle.MODRINTH_STYLE -> stringResource(R.string.settings_launcher_style_modrinth)
+                                LauncherStyle.CONSOLE -> stringResource(R.string.settings_launcher_style_console)
+                                LauncherStyle.MATERIAL_YOU -> stringResource(R.string.settings_launcher_style_material_you)
+                                LauncherStyle.GLASS -> stringResource(R.string.settings_launcher_style_glass)
+                                LauncherStyle.RETRO_PIXEL -> stringResource(R.string.settings_launcher_style_retro)
                             }
                         }
                     )

@@ -18,6 +18,10 @@
 
 package com.movtery.zalithlauncher.ui.theme.style
 
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import android.os.Build
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -45,13 +49,25 @@ import com.movtery.zalithlauncher.ui.theme.AppTypography
  *   pixel-style headings.
  * - [MODRINTH_STYLE]: top tab bar with a search entry, clean surfaces, green accent,
  *   large rounded corners; follows the light/dark setting.
+ * - [CONSOLE]: game-console home screen: account and clock on top, large round
+ *   navigation buttons along the bottom, big touch targets; always dark.
+ * - [MATERIAL_YOU]: Material 3 navigation rail with colors taken from the wallpaper
+ *   (Android 12+; older versions keep the launcher's color theme).
+ * - [GLASS]: translucent panels over a soft gradient or the user's background image
+ *   (the image is blurred behind panels when background blur is enabled).
+ * - [RETRO_PIXEL]: classic block-game menu vibe: pixel font, square beveled buttons,
+ *   procedurally drawn earthy backdrop. No game assets are used.
  *
  * All styles host the same screens, so every feature works in every style.
  */
 enum class LauncherStyle {
     ZALITH_DEFAULT,
     PC_LAUNCHER,
-    MODRINTH_STYLE
+    MODRINTH_STYLE,
+    CONSOLE,
+    MATERIAL_YOU,
+    GLASS,
+    RETRO_PIXEL
 }
 
 /** Current launcher style for the subtree (provided by MainScreen) */
@@ -193,6 +209,177 @@ private val modrinthTypography: Typography = AppTypography.copy(
     headlineSmall = AppTypography.headlineSmall.copy(fontWeight = FontWeight.Bold)
 )
 
+// ------------------------------------------------------------------ Console
+
+/** Deep charcoal with a bright accent, high contrast for living-room readability */
+private val consoleColors: ColorScheme = darkColorScheme(
+    primary = Color(0xFF2FD566),
+    onPrimary = Color(0xFF00210C),
+    primaryContainer = Color(0xFF145C2E),
+    onPrimaryContainer = Color(0xFFC6F7D5),
+    secondary = Color(0xFF8AB4F8),
+    onSecondary = Color(0xFF062E6F),
+    secondaryContainer = Color(0xFF2B3A55),
+    onSecondaryContainer = Color(0xFFD8E2FF),
+    background = Color(0xFF101114),
+    onBackground = Color(0xFFF1F2F4),
+    surface = Color(0xFF17181C),
+    onSurface = Color(0xFFF1F2F4),
+    surfaceVariant = Color(0xFF2A2C31),
+    onSurfaceVariant = Color(0xFFC4C7CE),
+    surfaceDim = Color(0xFF0C0D10),
+    surfaceBright = Color(0xFF24262B),
+    surfaceContainerLowest = Color(0xFF0A0B0D),
+    surfaceContainerLow = Color(0xFF141519),
+    surfaceContainer = Color(0xFF101114),
+    surfaceContainerHigh = Color(0xFF22242A),
+    surfaceContainerHighest = Color(0xFF2C2E34),
+    outline = Color(0xFF5C6068),
+    outlineVariant = Color(0xFF34373D)
+)
+
+/** Pill-like, very round shapes */
+private val consoleShapes = Shapes(
+    extraSmall = RoundedCornerShape(10.dp),
+    small = RoundedCornerShape(14.dp),
+    medium = RoundedCornerShape(18.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(32.dp)
+)
+
+/** Larger labels for distance reading */
+private val consoleTypography: Typography = AppTypography.copy(
+    titleLarge = AppTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+    titleMedium = AppTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+    labelLarge = AppTypography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+)
+
+// -------------------------------------------------------------------- Glass
+
+/** Translucent surfaces; the shell draws a backdrop behind them */
+private fun glassColors(dark: Boolean): ColorScheme = if (dark) {
+    darkColorScheme(
+        primary = Color(0xFF9FD4FF),
+        onPrimary = Color(0xFF00324F),
+        primaryContainer = Color(0x664A8CC8),
+        onPrimaryContainer = Color(0xFFE2F2FF),
+        secondary = Color(0xFFE0B8FF),
+        onSecondary = Color(0xFF3B0A5A),
+        secondaryContainer = Color(0x667A4FA0),
+        onSecondaryContainer = Color(0xFFF5E6FF),
+        background = Color(0x99101622),
+        onBackground = Color(0xFFF4F6FA),
+        surface = Color(0x59101622),
+        onSurface = Color(0xFFF4F6FA),
+        surfaceVariant = Color(0x4DFFFFFF),
+        onSurfaceVariant = Color(0xFFDCE2EC),
+        surfaceDim = Color(0x40000000),
+        surfaceBright = Color(0xCC1C2433),
+        surfaceContainerLowest = Color(0x1AFFFFFF),
+        surfaceContainerLow = Color(0x26FFFFFF),
+        surfaceContainer = Color(0x66101622),
+        surfaceContainerHigh = Color(0x33FFFFFF),
+        surfaceContainerHighest = Color(0x40FFFFFF),
+        outline = Color(0x66FFFFFF),
+        outlineVariant = Color(0x33FFFFFF)
+    )
+} else {
+    lightColorScheme(
+        primary = Color(0xFF1F5FA8),
+        onPrimary = Color(0xFFFFFFFF),
+        primaryContainer = Color(0x80BFDBFF),
+        onPrimaryContainer = Color(0xFF00213F),
+        secondary = Color(0xFF6B3FA0),
+        onSecondary = Color(0xFFFFFFFF),
+        secondaryContainer = Color(0x80E4CCFF),
+        onSecondaryContainer = Color(0xFF250046),
+        background = Color(0x99FFFFFF),
+        onBackground = Color(0xFF111827),
+        surface = Color(0x99FFFFFF),
+        onSurface = Color(0xFF111827),
+        surfaceVariant = Color(0x80FFFFFF),
+        onSurfaceVariant = Color(0xFF374151),
+        surfaceDim = Color(0x66FFFFFF),
+        surfaceBright = Color(0xD9FFFFFF),
+        surfaceContainerLowest = Color(0x4DFFFFFF),
+        surfaceContainerLow = Color(0x66FFFFFF),
+        surfaceContainer = Color(0x80FFFFFF),
+        surfaceContainerHigh = Color(0x8CFFFFFF),
+        surfaceContainerHighest = Color(0x99FFFFFF),
+        outline = Color(0x99FFFFFF),
+        outlineVariant = Color(0x66FFFFFF)
+    )
+}
+
+private val glassShapes = Shapes(
+    extraSmall = RoundedCornerShape(10.dp),
+    small = RoundedCornerShape(14.dp),
+    medium = RoundedCornerShape(18.dp),
+    large = RoundedCornerShape(22.dp),
+    extraLarge = RoundedCornerShape(28.dp)
+)
+
+// --------------------------------------------------------------- Retro pixel
+
+/** Stone-gray UI over earthy tones, yellow highlight text */
+private val retroColors: ColorScheme = darkColorScheme(
+    primary = Color(0xFFFFFF55),
+    onPrimary = Color(0xFF1E1E1E),
+    primaryContainer = Color(0xFF6E6E6E),
+    onPrimaryContainer = Color(0xFFFFFF55),
+    secondary = Color(0xFF7FB238),
+    onSecondary = Color(0xFF102000),
+    secondaryContainer = Color(0xFF4A6B22),
+    onSecondaryContainer = Color(0xFFE6FFC8),
+    background = Color(0xFF3B2A1E),
+    onBackground = Color(0xFFFFFFFF),
+    surface = Color(0xFF2B2B2B),
+    onSurface = Color(0xFFFFFFFF),
+    surfaceVariant = Color(0xFF555555),
+    onSurfaceVariant = Color(0xFFE0E0E0),
+    surfaceDim = Color(0xFF1E1E1E),
+    surfaceBright = Color(0xE6373737),
+    surfaceContainerLowest = Color(0xFF1A1A1A),
+    surfaceContainerLow = Color(0xE6262626),
+    surfaceContainer = Color(0xF02B2B2B),
+    surfaceContainerHigh = Color(0xE6404040),
+    surfaceContainerHighest = Color(0xE64C4C4C),
+    outline = Color(0xFF000000),
+    outlineVariant = Color(0xFF1E1E1E),
+    error = Color(0xFFFF5555),
+    onError = Color(0xFF000000)
+)
+
+/** Square corners everywhere */
+private val retroShapes = Shapes(
+    extraSmall = RoundedCornerShape(0.dp),
+    small = RoundedCornerShape(0.dp),
+    medium = RoundedCornerShape(0.dp),
+    large = RoundedCornerShape(0.dp),
+    extraLarge = RoundedCornerShape(0.dp)
+)
+
+/** Pixel font throughout (headings and body) */
+private val retroTypography: Typography = with(AppTypography) {
+    Typography(
+        displayLarge = displayLarge.copy(fontFamily = PixelHeadingFontFamily),
+        displayMedium = displayMedium.copy(fontFamily = PixelHeadingFontFamily),
+        displaySmall = displaySmall.copy(fontFamily = PixelHeadingFontFamily),
+        headlineLarge = headlineLarge.copy(fontFamily = PixelHeadingFontFamily),
+        headlineMedium = headlineMedium.copy(fontFamily = PixelHeadingFontFamily),
+        headlineSmall = headlineSmall.copy(fontFamily = PixelHeadingFontFamily),
+        titleLarge = titleLarge.copy(fontFamily = PixelHeadingFontFamily),
+        titleMedium = titleMedium.copy(fontFamily = PixelHeadingFontFamily),
+        titleSmall = titleSmall.copy(fontFamily = PixelHeadingFontFamily),
+        bodyLarge = bodyLarge.copy(fontFamily = PixelHeadingFontFamily),
+        bodyMedium = bodyMedium.copy(fontFamily = PixelHeadingFontFamily),
+        bodySmall = bodySmall.copy(fontFamily = PixelHeadingFontFamily),
+        labelLarge = labelLarge.copy(fontFamily = PixelHeadingFontFamily),
+        labelMedium = labelMedium.copy(fontFamily = PixelHeadingFontFamily),
+        labelSmall = labelSmall.copy(fontFamily = PixelHeadingFontFamily)
+    )
+}
+
 /**
  * Applies the colors, shapes and typography of [style] to [content].
  * [LauncherStyle.ZALITH_DEFAULT] leaves the existing theme untouched.
@@ -225,6 +412,50 @@ fun LauncherStyleTheme(style: LauncherStyle, content: @Composable () -> Unit) {
                     content = content
                 )
             }
+        }
+        LauncherStyle.CONSOLE -> CompositionLocalProvider(
+            LocalLauncherStyle provides style,
+            LocalForcedDarkTheme provides true
+        ) {
+            MaterialTheme(
+                colorScheme = consoleColors,
+                shapes = consoleShapes,
+                typography = consoleTypography,
+                content = content
+            )
+        }
+        LauncherStyle.MATERIAL_YOU -> {
+            val dark = isLauncherInDarkTheme()
+            val context = LocalContext.current
+            //Android 12 以下没有壁纸取色，沿用启动器当前配色
+            val scheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            } else MaterialTheme.colorScheme
+            CompositionLocalProvider(LocalLauncherStyle provides style) {
+                MaterialTheme(colorScheme = scheme, content = content)
+            }
+        }
+        LauncherStyle.GLASS -> {
+            val dark = isLauncherInDarkTheme()
+            CompositionLocalProvider(LocalLauncherStyle provides style) {
+                MaterialTheme(
+                    colorScheme = glassColors(dark),
+                    shapes = glassShapes,
+                    typography = MaterialTheme.typography,
+                    content = content
+                )
+            }
+        }
+        LauncherStyle.RETRO_PIXEL -> CompositionLocalProvider(
+            LocalLauncherStyle provides style,
+            LocalForcedDarkTheme provides true
+        ) {
+            MaterialTheme(
+                colorScheme = retroColors,
+                shapes = retroShapes,
+                typography = retroTypography,
+                content = content
+            )
         }
     }
 }

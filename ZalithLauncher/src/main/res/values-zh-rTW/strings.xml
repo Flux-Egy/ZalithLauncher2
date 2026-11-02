@@ -1090,6 +1090,10 @@ ABI：%2$s
     <string name="settings_launcher_style_default">Zalith（預設）</string>
     <string name="settings_launcher_style_pc">PC 啟動器</string>
     <string name="settings_launcher_style_modrinth">Modrinth 風格</string>
+    <string name="settings_launcher_style_console">主機風格</string>
+    <string name="settings_launcher_style_material_you">Material You（桌布取色）</string>
+    <string name="settings_launcher_style_glass">玻璃擬態</string>
+    <string name="settings_launcher_style_retro">復古像素</string>
     <string name="style_nav_play">開始遊戲</string>
     <string name="style_nav_home">首頁</string>
     <string name="style_nav_installations">遊戲版本</string>

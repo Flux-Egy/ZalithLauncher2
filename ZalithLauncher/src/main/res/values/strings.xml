@@ -2227,6 +2227,10 @@ This package contains native code that runs inside the game. Only install packag
     <string name="settings_launcher_style_default">Zalith (default)</string>
     <string name="settings_launcher_style_pc">PC launcher</string>
     <string name="settings_launcher_style_modrinth">Modrinth style</string>
+    <string name="settings_launcher_style_console">Console</string>
+    <string name="settings_launcher_style_material_you">Material You (wallpaper colors)</string>
+    <string name="settings_launcher_style_glass">Glass</string>
+    <string name="settings_launcher_style_retro">Retro pixel</string>
     <string name="style_nav_play">Play</string>
     <string name="style_nav_home">Home</string>
     <string name="style_nav_installations">Installations</string>

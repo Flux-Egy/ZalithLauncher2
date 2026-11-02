@@ -401,6 +401,10 @@ ABI: %2$s
     <string name="settings_launcher_style_default">Zalith (الافتراضي)</string>
     <string name="settings_launcher_style_pc">مشغّل الحاسوب</string>
     <string name="settings_launcher_style_modrinth">نمط Modrinth</string>
+    <string name="settings_launcher_style_console">نمط منصّة الألعاب</string>
+    <string name="settings_launcher_style_material_you">Material You (ألوان الخلفية)</string>
+    <string name="settings_launcher_style_glass">زجاجي</string>
+    <string name="settings_launcher_style_retro">بكسل كلاسيكي</string>
     <string name="style_nav_play">اللعب</string>
     <string name="style_nav_home">الرئيسية</string>
     <string name="style_nav_installations">الإصدارات المثبّتة</string>

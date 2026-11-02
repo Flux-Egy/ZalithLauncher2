@@ -18,6 +18,10 @@
 
 package com.movtery.zalithlauncher.ui.screens.main
 
+import com.movtery.zalithlauncher.ui.screens.main.shells.RetroPixelShell
+import com.movtery.zalithlauncher.ui.screens.main.shells.GlassShell
+import com.movtery.zalithlauncher.ui.screens.main.shells.MaterialYouShell
+import com.movtery.zalithlauncher.ui.screens.main.shells.ConsoleShell
 import com.movtery.zalithlauncher.ui.theme.style.LauncherStyleTheme
 import com.movtery.zalithlauncher.ui.theme.style.LauncherStyle
 import com.movtery.zalithlauncher.ui.screens.main.shells.ShellNavigation
@@ -328,6 +332,34 @@ fun MainScreen(
                     content = screenContent
                 )
                 LauncherStyle.MODRINTH_STYLE -> ModrinthShell(
+                    nav = shellNavigation,
+                    destination = shellDestination,
+                    inLauncherScreen = inLauncherScreen,
+                    taskRunning = taskRunning,
+                    content = screenContent
+                )
+                LauncherStyle.CONSOLE -> ConsoleShell(
+                    nav = shellNavigation,
+                    destination = shellDestination,
+                    inLauncherScreen = inLauncherScreen,
+                    taskRunning = taskRunning,
+                    content = screenContent
+                )
+                LauncherStyle.MATERIAL_YOU -> MaterialYouShell(
+                    nav = shellNavigation,
+                    destination = shellDestination,
+                    inLauncherScreen = inLauncherScreen,
+                    taskRunning = taskRunning,
+                    content = screenContent
+                )
+                LauncherStyle.GLASS -> GlassShell(
+                    nav = shellNavigation,
+                    destination = shellDestination,
+                    inLauncherScreen = inLauncherScreen,
+                    taskRunning = taskRunning,
+                    content = screenContent
+                )
+                LauncherStyle.RETRO_PIXEL -> RetroPixelShell(
                     nav = shellNavigation,
                     destination = shellDestination,
                     inLauncherScreen = inLauncherScreen,
