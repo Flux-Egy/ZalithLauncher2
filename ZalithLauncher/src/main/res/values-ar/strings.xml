@@ -363,6 +363,13 @@
     <string name="renderer_version_storage_permissions_sdk30">يمكن ضبط العارض الحالي %s عبر ملف إعدادات. يرجى تفعيل إذن \'إدارة جميع الملفات\' للمشغل أولاً، وإلا فلن يتمكن من قراءة وتحميل إعدادات العارض!</string>
     <string name="account_no_account">لا توجد حسابات متاحة</string>
     <string name="account_credentials_insecure">التخزين الآمن لبيانات الاعتماد غير متاح على هذا الجهاز. يتم حفظ رموز حساباتك وكلمات المرور دون تشفير.</string>
+    <string name="mods_issues_title">تم العثور على مشكلات في الإضافات (%1$d)</string>
+    <string name="mods_issue_missing">%1$s يتطلب %2$s، وهو غير مثبت</string>
+    <string name="mods_issue_breaks">%1$s غير متوافق مع %2$s</string>
+    <string name="mods_issue_conflicts">قد لا يعمل %1$s بشكل جيد مع %2$s</string>
+    <string name="mods_issue_duplicate">%1$s مثبت أكثر من مرة: %2$s</string>
+    <string name="mods_issue_wrong_loader">%1$s غير مخصص لـ %2$s</string>
+    <string name="mods_issues_more">…و%1$d أخرى</string>
     <string name="settings_game_ram_safety_limit_title">حد أمان الذاكرة</string>
     <string name="settings_game_ram_safety_limit_summary">يحدّ ذاكرة اللعبة بنصف ذاكرة الجهاز حتى يقلّ احتمال أن يغلق النظام اللعبة. تُخفَّض القيم المحفوظة الأعلى عند التشغيل.</string>
     <string name="settings_game_jvm_gc_tuning_title">إعدادات GC محسّنة</string>

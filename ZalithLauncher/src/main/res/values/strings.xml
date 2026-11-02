@@ -1516,6 +1516,13 @@
     <string name="mods_manage_no_mods">No mods for this version</string>
     <!-- Warning banner on the mods page when the version has no mod loader -->
     <string name="mods_manage_no_loader">No mod loader for the current version, mods cannot be used</string>
+    <string name="mods_issues_title">Mod problems found (%1$d)</string>
+    <string name="mods_issue_missing">%1$s requires %2$s, which is not installed</string>
+    <string name="mods_issue_breaks">%1$s is incompatible with %2$s</string>
+    <string name="mods_issue_conflicts">%1$s may not work well with %2$s</string>
+    <string name="mods_issue_duplicate">%1$s is installed more than once: %2$s</string>
+    <string name="mods_issue_wrong_loader">%1$s is not made for %2$s</string>
+    <string name="mods_issues_more">…and %1$d more</string>
     <!-- Button and dialog title for updating the selected mods to newer versions -->
     <string name="mods_update">Update Mods</string>
     <!-- First warning line in the dialog before checking for mod updates -->

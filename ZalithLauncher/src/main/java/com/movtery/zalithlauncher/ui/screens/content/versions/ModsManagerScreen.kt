@@ -18,6 +18,10 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.versions
 
+import com.movtery.zalithlauncher.game.version.mod.deps.ModIssue
+import com.movtery.zalithlauncher.game.version.mod.deps.ModDependencyScanner
+import com.movtery.zalithlauncher.game.version.mod.deps.ModDependencyGraph
+import com.movtery.zalithlauncher.game.version.mod.deps.DepLoader
 import com.movtery.zalithlauncher.ui.components.lazy.identityKey
 import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.content.Context
@@ -178,9 +182,32 @@ import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
 private class ModsManageViewModel(
-    modsDir: File
+    modsDir: File,
+    /** Loader of this instance, for the dependency / wrong-loader checks (null = unknown) */
+    private val instanceLoader: DepLoader?
 ) : ViewModel() {
     val modReader = AllModReader(modsDir)
+
+    /** Problems found among the enabled mods (missing deps, incompatibilities, duplicates, wrong loader) */
+    var dependencyIssues by mutableStateOf<List<ModIssue>>(emptyList())
+        private set
+    private var analysisJob: Job? = null
+
+    private fun analyzeDependencies(mods: List<RemoteMod>) {
+        analysisJob?.cancel()
+        analysisJob = viewModelScope.launch(Dispatchers.IO) {
+            val infos = mods.asSequence()
+                .map { it.localMod.file }
+                .filter { it.isEnabled() }
+                .mapNotNull { file ->
+                    ensureActive()
+                    ModDependencyScanner.scan(file, instanceLoader)
+                }
+                .toList()
+            val issues = ModDependencyGraph.analyze(infos, instanceLoader)
+            withContext(Dispatchers.Main) { dependencyIssues = issues }
+        }
+    }
 
     var nameFilter by mutableStateOf("")
         private set
@@ -253,6 +280,7 @@ private class ModsManageViewModel(
             if (checkCount) modsCount.checkDir()
             try {
                 allMods = modReader.readAllForRemote()
+                analyzeDependencies(allMods)
                 filterMods(context)
             } catch (_: CancellationException) {
                 //已取消
@@ -566,7 +594,10 @@ private fun rememberModsManageViewModel(
     return viewModel(
         key = version.toString() + "_" + VersionFolders.MOD.folderName
     ) {
-        ModsManageViewModel(modsDir)
+        ModsManageViewModel(
+            modsDir = modsDir,
+            instanceLoader = version.getVersionInfo()?.primaryLoader?.loader?.toDepLoader()
+        )
     }
 }
 
@@ -765,6 +796,7 @@ fun ModsManagerScreen(
                                     .fillMaxWidth()
                                     .weight(1f),
                                 hasModLoader = hasModLoader,
+                                dependencyIssues = viewModel.dependencyIssues,
                                 modsList = viewModel.filteredMods,
                                 selectedMods = viewModel.selectedMods,
                                 removeFromSelected = { mod ->
@@ -1063,6 +1095,7 @@ private fun ModsActionsHeader(
 private fun ModsList(
     modifier: Modifier = Modifier,
     hasModLoader: Boolean,
+    dependencyIssues: List<ModIssue>,
     modsList: List<RemoteMod>?,
     selectedMods: List<RemoteMod>,
     removeFromSelected: (RemoteMod) -> Unit,
@@ -1100,6 +1133,15 @@ private fun ModsList(
                             style = MaterialTheme.typography.titleSmall,
                         )
                     }
+                }
+            }
+
+            if (dependencyIssues.isNotEmpty()) {
+                item(key = "warning_dependency_issues") {
+                    ModIssuesCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        issues = dependencyIssues
+                    )
                 }
             }
 
@@ -1534,3 +1576,52 @@ private fun LocalModInfoTooltip(
     }
 }
 
+private const val MAX_SHOWN_MOD_ISSUES = 5
+
+/** Maps the instance's loader to the loaders the dependency check understands */
+private fun ModLoader.toDepLoader(): DepLoader? = when (this) {
+    ModLoader.FABRIC, ModLoader.LEGACY_FABRIC, ModLoader.BABRIC -> DepLoader.FABRIC
+    ModLoader.QUILT -> DepLoader.QUILT
+    ModLoader.FORGE -> DepLoader.FORGE
+    ModLoader.NEOFORGE -> DepLoader.NEOFORGE
+    else -> null
+}
+
+@Composable
+private fun ModIssue.describe(): String = when (this) {
+    is ModIssue.MissingDependency -> stringResource(R.string.mods_issue_missing, mod.name, dependencyId)
+    is ModIssue.Incompatible -> stringResource(
+        if (hard) R.string.mods_issue_breaks else R.string.mods_issue_conflicts,
+        mod.name, other.name
+    )
+    is ModIssue.Duplicate -> stringResource(R.string.mods_issue_duplicate, id, mods.joinToString { it.fileName })
+    is ModIssue.WrongLoader -> stringResource(R.string.mods_issue_wrong_loader, mod.name, instanceLoader.displayName)
+}
+
+@Composable
+private fun ModIssuesCard(
+    modifier: Modifier = Modifier,
+    issues: List<ModIssue>
+) {
+    WarningItem(modifier = modifier) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = stringResource(R.string.mods_issues_title, issues.size),
+                style = MaterialTheme.typography.titleSmall
+            )
+            //错误优先显示
+            issues.sortedBy { it.severity }.take(MAX_SHOWN_MOD_ISSUES).forEach { issue ->
+                Text(
+                    text = "• " + issue.describe(),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            if (issues.size > MAX_SHOWN_MOD_ISSUES) {
+                Text(
+                    text = stringResource(R.string.mods_issues_more, issues.size - MAX_SHOWN_MOD_ISSUES),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+    }
+}
