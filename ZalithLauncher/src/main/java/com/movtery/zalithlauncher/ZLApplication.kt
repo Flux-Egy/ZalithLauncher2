@@ -70,7 +70,10 @@ class ZLApplication : Application(), SingletonImageLoader.Factory {
         GlobalContext = this
         //调试构建：尽早启用 StrictMode（仅记录日志），以便也能捕获本方法中的主线程 I/O
         if (BuildConfig.DEBUG) enableStrictMode()
-        TLSSecurity.install()
+        //构建加固的信任管理器需要读取磁盘（实测在主线程上约 200 ms），移至后台线程。
+        //所有 OkHttp/Ktor 客户端都通过 TLSSecurity.sslSocketFactory（同步 lazy）获取加固配置，
+        //因此始终是加固的；在其完成前创建的 HttpsURLConnection 使用平台默认的 TLS 校验。
+        Thread({ TLSSecurity.install() }, "TLSSecurity-init").start()
         refreshContext(this)
         //初始化任务保活控制器，需在任何任务开始前完成初始化
         TaskKeepAlive.initialize(this)
