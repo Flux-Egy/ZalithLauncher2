@@ -468,36 +468,36 @@ private fun ResultItem(
     installedInfo: ((Platform, projectId: String) -> InstalledMod?)?
 ) {
     val context = LocalContext.current
-        val platform = remember(item) { item.platform() }
-        val title = remember(item) { item.platformTitle() }
-        val description = remember(item) { item.platformDescription() }
-        val iconUrl = remember(item) { item.platformIconUrl() }
-        val author = remember(item) { item.platformAuthor() }
-        val downloads = remember(item) { item.platformDownloadCount() }
-        val modloaders = remember(item) { item.platformModLoaders() }
-        val categories = remember(item, classes) { item.platformCategories(classes) }
-        val isInstalled = installedInfo?.invoke(platform, item.platformId()) != null
-        val isFavorite = FavoriteProjectsRepository.isFavorite(platform, item.platformId())
+    val platform = remember(item) { item.platform() }
+    val title = remember(item) { item.platformTitle() }
+    val description = remember(item) { item.platformDescription() }
+    val iconUrl = remember(item) { item.platformIconUrl() }
+    val author = remember(item) { item.platformAuthor() }
+    val downloads = remember(item) { item.platformDownloadCount() }
+    val modloaders = remember(item) { item.platformModLoaders() }
+    val categories = remember(item, classes) { item.platformCategories(classes) }
+    val isInstalled = installedInfo?.invoke(platform, item.platformId()) != null
+    val isFavorite = FavoriteProjectsRepository.isFavorite(platform, item.platformId())
 
-        ResultProjectLayout(
-            modifier = modifier,
-            platform = platform,
-            title = mcmod.getMcmodTitle(title, context),
-            description = description,
-            iconUrl = iconUrl,
-            author = author,
-            downloads = downloads,
-            modloaders = modloaders,
-            categories = categories?.sortedWith { o1, o2 -> o1.index() - o2.index() },
-            isInstalled = isInstalled,
-            isFavorite = isFavorite,
-            onFavoriteClick = {
-                FavoriteProjectsRepository.toggle(item, classes)
-            },
-            onClick = {
-                swapToDownload(platform, item.platformId(), iconUrl)
-            }
-        )
+    ResultProjectLayout(
+        modifier = modifier,
+        platform = platform,
+        title = mcmod.getMcmodTitle(title, context),
+        description = description,
+        iconUrl = iconUrl,
+        author = author,
+        downloads = downloads,
+        modloaders = modloaders,
+        categories = categories?.sortedWith { o1, o2 -> o1.index() - o2.index() },
+        isInstalled = isInstalled,
+        isFavorite = isFavorite,
+        onFavoriteClick = {
+            FavoriteProjectsRepository.toggle(item, classes)
+        },
+        onClick = {
+            swapToDownload(platform, item.platformId(), iconUrl)
+        }
+    )
 }
 
 @Composable
