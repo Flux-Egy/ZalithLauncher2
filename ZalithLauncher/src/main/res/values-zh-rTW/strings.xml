@@ -425,6 +425,26 @@
     <!--  渲染器  -->
     <string name="renderer_version_support">MC 版本支援：</string>
     <string name="renderer_version_unsupported_warning">目前渲染器 %s 不支援此遊戲版本，繼續使用可能導致渲染錯誤或遊戲崩潰！您確定要忽略風險並繼續嗎？</string>
+    <string name="local_plugin_import_title">匯入渲染器或驅動包</string>
+    <string name="local_plugin_import_summary">從 .zip 檔案安裝渲染器（renderer.json）或 Turnip Vulkan 驅動（AdrenoTools meta.json）</string>
+    <string name="local_plugin_imported_summary">已匯入的包</string>
+    <string name="local_plugin_installed_title">已匯入的包（%1$d）</string>
+    <string name="local_plugin_installed_summary">從 .zip 檔案匯入的渲染器與驅動</string>
+    <string name="local_plugin_none">沒有已匯入的包</string>
+    <string name="local_plugin_delete_last">刪除最新的</string>
+    <string name="local_plugin_delete_confirm">要刪除已匯入的包「%1$s」嗎？</string>
+    <string name="local_plugin_confirm_title">安裝 %1$s？</string>
+    <string name="local_plugin_confirm_text">類型：%1$s
+ABI：%2$s
+
+%3$s
+
+此包含有將在遊戲內執行的原生程式碼。請只安裝來自可信來源的包。</string>
+    <string name="local_plugin_type_renderer">渲染器</string>
+    <string name="local_plugin_type_driver">Vulkan 驅動（Turnip）</string>
+    <string name="local_plugin_warning_16k">警告：%1$s 未按 16 KB 頁對齊，在使用 16 KB 頁的裝置上可能無法載入。</string>
+    <string name="local_plugin_invalid">無法匯入此包：%1$s</string>
+    <string name="local_plugin_installed_ok">已安裝 %1$s</string>
     <string name="settings_renderer_auto_select_title">自動選擇渲染器</string>
     <string name="settings_renderer_auto_select_summary">未選擇渲染器時，依 GPU、遊戲版本和已安裝的光影模組自動選擇。手動選擇的渲染器一律優先。</string>
     <string name="renderer_hardware_mismatch_warning">%1$s 不適用於此 GPU（%2$s），很可能無法啟動。</string>

@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.plugin
 
+import com.movtery.zalithlauncher.game.plugin.local.LocalPluginStore
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -74,6 +75,11 @@ object PluginLoader {
             }
         }
         FFmpegPluginManager.loadPlugin(context) { apkPluginList.add(it) }
+
+        // 导入的本地插件包（渲染器 / Turnip 驱动）
+        runCatching { LocalPluginStore.loadInto(context) }.onFailure { e ->
+            Logger.error("PluginLoader", "Failed to load imported plugin packages", e)
+        }
 
         // 加载旧架构渲染器插件
         RendererPluginManager.getRendererList().filter { plugin ->

@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings
 
+import com.movtery.zalithlauncher.ui.screens.content.settings.elements.LocalPluginPackagesSettings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -234,6 +235,9 @@ fun RendererSettingsScreen(
                             }
                         }
                     )
+
+                    //从 .zip 导入渲染器 / Turnip 驱动，并管理已导入的包
+                    LocalPluginPackagesSettings()
 
                     ListSettingsCard(
                         modifier = Modifier.fillMaxWidth(),

@@ -359,6 +359,26 @@
     <string name="date_format">yyyy/MM/dd, h:mm:ss a</string>
     <string name="renderer_version_support">دعم إصدارات MC:</string>
     <string name="renderer_version_unsupported_warning">العارض الحالي %s لا يدعم إصدار هذه اللعبة. الاستمرار في استخدامه قد يؤدي إلى أخطاء في العرض أو توقف مفاجئ! هل أنت متأكد من رغبتك في المتابعة؟</string>
+    <string name="local_plugin_import_title">استيراد حزمة مُصيّر أو تعريف</string>
+    <string name="local_plugin_import_summary">تثبيت مُصيّر (renderer.json) أو تعريف Vulkan من نوع Turnip (AdrenoTools meta.json) من ملف ‎.zip</string>
+    <string name="local_plugin_imported_summary">حزمة مستوردة</string>
+    <string name="local_plugin_installed_title">الحزم المستوردة (%1$d)</string>
+    <string name="local_plugin_installed_summary">المُصيّرات والتعريفات المستوردة من ملفات ‎.zip</string>
+    <string name="local_plugin_none">لا توجد حزم مستوردة</string>
+    <string name="local_plugin_delete_last">حذف الأحدث</string>
+    <string name="local_plugin_delete_confirm">هل تريد حذف الحزمة المستوردة “%1$s”؟</string>
+    <string name="local_plugin_confirm_title">تثبيت %1$s؟</string>
+    <string name="local_plugin_confirm_text">النوع: %1$s
+ABI: %2$s
+
+%3$s
+
+تحتوي هذه الحزمة على شيفرة أصلية تعمل داخل اللعبة. ثبّت الحزم من مصادر تثق بها فقط.</string>
+    <string name="local_plugin_type_renderer">مُصيّر</string>
+    <string name="local_plugin_type_driver">تعريف Vulkan ‏(Turnip)</string>
+    <string name="local_plugin_warning_16k">تحذير: %1$s غير محاذٍ لصفحات 16 كيلوبايت وقد يفشل تحميله على الأجهزة التي تستخدم صفحات 16 كيلوبايت.</string>
+    <string name="local_plugin_invalid">لا يمكن استيراد هذه الحزمة: %1$s</string>
+    <string name="local_plugin_installed_ok">تم تثبيت %1$s</string>
     <string name="settings_renderer_auto_select_title">اختيار المُصيّر تلقائيًا</string>
     <string name="settings_renderer_auto_select_summary">عند عدم اختيار مُصيّر، يُختار واحد بناءً على معالج الرسوميات وإصدار اللعبة وإضافات الظلال المثبتة. يُستخدم المُصيّر الذي تختاره دائمًا.</string>
     <string name="renderer_hardware_mismatch_warning">%1$s غير مصمم لمعالج الرسوميات هذا (%2$s) وعلى الأرجح لن يعمل.</string>

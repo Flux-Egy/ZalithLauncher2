@@ -858,6 +858,26 @@
     <string name="renderer_version_support">MC Version Support:</string>
     <!-- Warning dialog on game launch; %s is the renderer name, which does not support this game version -->
     <string name="renderer_version_unsupported_warning">The current renderer %s does not support this game version. Continuing to use it may cause rendering errors or crashes! Are you sure you want to proceed?</string>
+    <string name="local_plugin_import_title">Import renderer or driver package</string>
+    <string name="local_plugin_import_summary">Install a renderer (renderer.json) or a Turnip Vulkan driver (AdrenoTools meta.json) from a .zip file</string>
+    <string name="local_plugin_imported_summary">Imported package</string>
+    <string name="local_plugin_installed_title">Imported packages (%1$d)</string>
+    <string name="local_plugin_installed_summary">Renderers and drivers imported from .zip files</string>
+    <string name="local_plugin_none">No imported packages</string>
+    <string name="local_plugin_delete_last">Delete newest</string>
+    <string name="local_plugin_delete_confirm">Delete the imported package “%1$s”?</string>
+    <string name="local_plugin_confirm_title">Install %1$s?</string>
+    <string name="local_plugin_confirm_text">Type: %1$s
+ABI: %2$s
+
+%3$s
+
+This package contains native code that runs inside the game. Only install packages from sources you trust.</string>
+    <string name="local_plugin_type_renderer">Renderer</string>
+    <string name="local_plugin_type_driver">Vulkan driver (Turnip)</string>
+    <string name="local_plugin_warning_16k">Warning: %1$s is not aligned to 16 KB pages and may fail to load on devices that use 16 KB pages.</string>
+    <string name="local_plugin_invalid">This package cannot be imported: %1$s</string>
+    <string name="local_plugin_installed_ok">%1$s was installed</string>
     <string name="settings_renderer_auto_select_title">Automatic renderer selection</string>
     <string name="settings_renderer_auto_select_summary">When no renderer is chosen, pick one based on your GPU, the game version and installed shader mods. A renderer you choose is always used.</string>
     <string name="renderer_hardware_mismatch_warning">%1$s is not designed for this GPU (%2$s) and will probably fail to start.</string>
