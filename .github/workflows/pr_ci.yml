@@ -112,6 +112,25 @@ jobs:
             --allowlist .github/16kb-alignment-allowlist.txt \
             ZalithLauncher/build/outputs/apk/debug/*.apk
 
+      # The bundled JREs ship as .tar.xz assets, so the APK check above cannot see their
+      # libraries (libjvm.so etc.), which are extracted and dlopen()ed at runtime.
+      # Report-only until 16 KB-aligned JREs are rebuilt upstream (docs/16kb-jre.md);
+      # make it blocking once they land.
+      - name: Check 16 KB alignment of bundled JREs (report only)
+        continue-on-error: true
+        run: |
+          set -u
+          status=0
+          for jre in ZalithLauncher/src/main/assets/runtimes/jre-*; do
+            for pair in arm64:arm64-v8a x86_64:x86_64; do
+              archive="$jre/bin-${pair%%:*}.tar.xz"
+              [ -f "$archive" ] || continue
+              echo "### $(basename "$jre") ${pair##*:}" >> "$GITHUB_STEP_SUMMARY"
+              scripts/check-16kb-alignment.sh --abi "${pair##*:}" "$archive" || status=1
+            done
+          done
+          exit $status
+
       # Lint is report-only until a baseline is agreed; it does not fail the PR yet.
       - name: Lint (report only)
         continue-on-error: true

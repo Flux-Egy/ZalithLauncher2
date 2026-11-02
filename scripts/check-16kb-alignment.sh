@@ -8,11 +8,14 @@
 # aligned to at least 16 KB, as required on Android devices that use a 16 KB page size.
 #
 # Usage:
-#   scripts/check-16kb-alignment.sh [--allowlist FILE] [--readelf PATH] <input>...
+#   scripts/check-16kb-alignment.sh [--allowlist FILE] [--readelf PATH] [--abi ABI] <input>...
 #
-# <input> may be an .apk/.aab/.zip, a directory (scanned recursively for
-# */arm64-v8a/*.so and */x86_64/*.so), or a single .so file (its ABI is taken
-# from the parent directory name).
+# <input> may be an .apk/.aab/.zip/.aar, a .tar.xz/.txz/.tar.gz archive, a directory
+# (scanned recursively for */arm64-v8a/*.so and */x86_64/*.so), or a single .so file
+# (its ABI is taken from the parent directory name).
+#
+# --abi ABI: for inputs without ABI directories (e.g. a bundled JRE archive with
+# lib/server/libjvm.so), treat every .so found as belonging to ABI.
 #
 # Allowlist: one "<abi>/<libname.so>" per line; '#' starts a comment.
 # Allowlisted offenders are reported as warnings; any other offender fails the check.
@@ -29,11 +32,12 @@ readonly PAGE_SIZE=16384
 readonly ABIS=("arm64-v8a" "x86_64")
 
 allowlist_file=""
+forced_abi=""
 readelf_bin="${READELF:-}"
 inputs=()
 
 usage() {
-    sed -n '9,24p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '9,28p' "$0" | sed 's/^# \{0,1\}//'
     exit 2
 }
 
@@ -41,6 +45,7 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --allowlist) allowlist_file="${2:?--allowlist needs a file}"; shift 2 ;;
         --readelf)   readelf_bin="${2:?--readelf needs a path}"; shift 2 ;;
+        --abi)       forced_abi="${2:?--abi needs an ABI name}"; shift 2 ;;
         -h|--help)   usage ;;
         --)          shift; inputs+=("$@"); break ;;
         -*)          echo "Unknown option: $1" >&2; usage ;;
@@ -84,6 +89,12 @@ records="$workdir/records.tsv"
 
 add_from_dir() { # dir
     local abi so
+    if [[ -n "$forced_abi" ]]; then
+        while IFS= read -r -d '' so; do
+            printf '%s/%s\t%s\n' "$forced_abi" "$(basename "$so")" "$so" >> "$records"
+        done < <(find "$1" -type f -name '*.so' -print0)
+        return
+    fi
     for abi in "${ABIS[@]}"; do
         while IFS= read -r -d '' so; do
             printf '%s/%s\t%s\n' "$abi" "$(basename "$so")" "$so" >> "$records"
@@ -105,8 +116,15 @@ for input in "${inputs[@]}"; do
                 unzip -qq -o "$input" '*/arm64-v8a/*.so' '*/x86_64/*.so' -d "$dest" 2>/dev/null || true
                 add_from_dir "$dest"
                 ;;
+            *.tar.xz|*.txz|*.tar.gz|*.tgz)
+                idx=$((idx + 1))
+                dest="$workdir/x$idx"
+                mkdir -p "$dest"
+                tar -xf "$input" -C "$dest" --wildcards '*.so' 2>/dev/null || tar -xf "$input" -C "$dest"
+                add_from_dir "$dest"
+                ;;
             *.so)
-                abi="$(basename "$(dirname "$input")")"
+                abi="${forced_abi:-$(basename "$(dirname "$input")")}"
                 printf '%s/%s\t%s\n' "$abi" "$(basename "$input")" "$input" >> "$records"
                 ;;
             *) echo "error: unsupported input: $input" >&2; exit 2 ;;
