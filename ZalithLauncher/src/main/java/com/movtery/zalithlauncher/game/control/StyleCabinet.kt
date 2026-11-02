@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.control
 
+import com.movtery.zalithlauncher.coroutine.managedScope
 import com.movtery.layer_controller.data.ButtonStyle
 import com.movtery.layer_controller.data.JoystickStyle
 import com.movtery.layer_controller.observable.ObservableButtonStyle
@@ -27,7 +28,6 @@ import com.movtery.layer_controller.utils.loadJoystickStyle
 import com.movtery.layer_controller.utils.saveToStyleFile
 import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.utils.logging.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,7 +68,7 @@ sealed interface CabinetStyleItem {
  * 样式收藏柜状态
  */
 class StyleCabinetState {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = managedScope("StyleCabinet", Dispatchers.IO)
 
     /** 控件样式收藏本地目录 */
     private val dirControls = File(PathManager.DIR_CONTROL_LAYOUTS, "styles/controls")

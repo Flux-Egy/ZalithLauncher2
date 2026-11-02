@@ -9,6 +9,8 @@
 #include <android/dlext.h>
 #include "nsbypass.h"
 #include "GL/gl.h"
+#include <stdio.h>
+#include <vulkan/vulkan.h>
 
 //#define ADRENO_POSSIBLE
 #ifdef ADRENO_POSSIBLE
@@ -58,6 +60,35 @@ bool checkAdrenoGraphics() {
     return is_adreno;
 }
 
+/**
+ * Number of physical devices the Vulkan loader in [libvulkan] reports (0 on any failure).
+ * Creates and destroys a minimal Vulkan 1.0 instance.
+ */
+static uint32_t turnipDeviceCount(void* libvulkan) {
+    PFN_vkCreateInstance createInstance = (PFN_vkCreateInstance) dlsym(libvulkan, "vkCreateInstance");
+    PFN_vkEnumeratePhysicalDevices enumerateDevices =
+        (PFN_vkEnumeratePhysicalDevices) dlsym(libvulkan, "vkEnumeratePhysicalDevices");
+    PFN_vkDestroyInstance destroyInstance = (PFN_vkDestroyInstance) dlsym(libvulkan, "vkDestroyInstance");
+    if (!createInstance || !enumerateDevices || !destroyInstance) return 0;
+
+    VkApplicationInfo app_info = {
+        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        .pApplicationName = "ZalithTurnipProbe",
+        .apiVersion = VK_API_VERSION_1_0
+    };
+    VkInstanceCreateInfo create_info = {
+        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        .pApplicationInfo = &app_info
+    };
+    VkInstance instance = VK_NULL_HANDLE;
+    if (createInstance(&create_info, NULL, &instance) != VK_SUCCESS || instance == VK_NULL_HANDLE) return 0;
+
+    uint32_t count = 0;
+    VkResult result = enumerateDevices(instance, &count, NULL);
+    destroyInstance(instance, NULL);
+    return result == VK_SUCCESS ? count : 0;
+}
+
 void* loadTurnipVulkan(const char* driver_path, const char* native_dir, const char* cache_dir) {
     if (!checkAdrenoGraphics())
         return NULL;
@@ -101,6 +132,21 @@ void* loadTurnipVulkan(const char* driver_path, const char* native_dir, const ch
         dlclose(turnip_driver_handle);
         return NULL;
     }
+
+    // A Turnip build can load fine but not support this GPU (e.g. Mesa 24.3 on Adreno 8xx:
+    // vkEnumeratePhysicalDevices returns VK_ERROR_INITIALIZATION_FAILED with no devices).
+    // Returning it anyway leaves Zink / Vulkan mods with no device at all, so verify that it
+    // exposes a GPU and otherwise fall back to the system driver (callers dlopen libvulkan.so).
+    uint32_t device_count = turnipDeviceCount(libvulkan);
+    if (device_count == 0) {
+        printf("AdrenoSupp: Turnip loaded but exposes no Vulkan device on this GPU; using the system driver\n");
+        dlclose(libvulkan);
+        dlclose(dl_android);
+        dlclose(linkerhook);
+        dlclose(turnip_driver_handle);
+        return NULL;
+    }
+    printf("AdrenoSupp: Turnip exposes %u Vulkan device(s)\n", device_count);
 
     return libvulkan;
 }

@@ -1,0 +1,109 @@
+# Third-party prebuilt native libraries that are NOT yet 16 KB page-size aligned.
+# Used by scripts/check-16kb-alignment.sh. Format: <abi>/<libname.so>
+#
+# Policy:
+# - Libraries built in this repository (ndk-build modules in
+#   ZalithLauncher/src/main/jni, PetLib's Rust cdylib) must NEVER be listed here;
+#   they are built with -Wl,-z,max-page-size=16384.
+# - Each entry below is a third-party prebuilt. TODO(upstream): ask the owning
+#   project to rebuild with 16 KB alignment, then delete the entry. The check
+#   reports entries that have become compliant as "stale".
+# - Measured with `readelf -lW` (LOAD p_align = 0x1000) on 2026-11-01, commit cbf877a.
+
+# --- ZalithLauncher/src/main/jniLibs (prebuilt) -----------------------------
+# TODO(upstream): Mesa OSMesa builds (VirGL / Freedreno / Panfrost paths)
+arm64-v8a/libOSMesa_2121.so
+arm64-v8a/libOSMesa_2300d.so
+arm64-v8a/libOSMesa_8.so
+x86_64/libOSMesa_2121.so
+x86_64/libOSMesa_2300d.so
+x86_64/libOSMesa_8.so
+# TODO(upstream): gl4es 1.1.4
+arm64-v8a/libgl4es_114.so
+x86_64/libgl4es_114.so
+# TODO(upstream): shader converter used by the GL4ES path
+arm64-v8a/libshaderconv.so
+x86_64/libshaderconv.so
+# TODO(upstream): virglrenderer / virgl_test_server / libepoxy
+arm64-v8a/libvirgl_test_server.so
+x86_64/libvirgl_test_server.so
+x86_64/libvirglrenderer_1.so
+x86_64/libepoxy_0.so
+# TODO(upstream): Mesa Turnip (Freedreno Vulkan) driver
+arm64-v8a/libvulkan_freedreno.so
+# TODO(upstream): Khronos timeline-semaphore Vulkan layer
+arm64-v8a/libVkLayer_khronos_timeline_semaphore.so
+# TODO(upstream): JNA 5.x jnidispatch (x86_64 build only; arm64 is compliant)
+x86_64/libjnidispatch.so
+# TODO(upstream): unpack200 (x86_64 build only; arm64 is compliant)
+x86_64/libunpack200.so
+
+# --- ZalithLauncher/libs/*.aar (prebuilt) -----------------------------------
+# TODO(upstream): MobileGlues-release.aar
+arm64-v8a/libmobileglues.so
+x86_64/libmobileglues.so
+# TODO(upstream): NG-GL4ES-release.aar
+arm64-v8a/libng_gl4es.so
+x86_64/libng_gl4es.so
+# TODO(upstream): kopper-zink-release.aar (Mesa Zink + helpers)
+arm64-v8a/libEGL_mesa.so
+arm64-v8a/libcutils.so
+arm64-v8a/libglapi.so
+arm64-v8a/libglxshim.so
+arm64-v8a/libzink_dri.so
+x86_64/libEGL_mesa.so
+x86_64/libcutils.so
+x86_64/libglapi.so
+x86_64/libglxshim.so
+x86_64/libzink_dri.so
+# TODO(upstream): SDL-release.aar
+arm64-v8a/libSDL2.so
+arm64-v8a/libSDL3.so
+x86_64/libSDL2.so
+x86_64/libSDL3.so
+# TODO(upstream): SimpleFPEWrapper-release.aar
+arm64-v8a/libSimpleFPEWrapper.so
+x86_64/libSimpleFPEWrapper.so
+# TODO(upstream): spirv-cross-natives.aar
+arm64-v8a/libspirv-cross-c-shared.so
+x86_64/libspirv-cross-c-shared.so
+
+# TODO(upstream): lwjgl-3.3.3 / lwjgl-3.4.1 natives AARs. These ship as APK
+# assets (assets/app_runtime/lwjgl/<ver>/natives/<abi>/) and are dlopen()ed by
+# the game at runtime, so they need 16 KB alignment too.
+arm64-v8a/liblwjgl.so
+arm64-v8a/liblwjgl_nanovg.so
+arm64-v8a/liblwjgl_opengl.so
+arm64-v8a/liblwjgl_spng.so
+arm64-v8a/liblwjgl_stb.so
+arm64-v8a/liblwjgl_tinyfd.so
+arm64-v8a/liblwjgl_vma.so
+arm64-v8a/libfreetype.so
+arm64-v8a/libshaderc.so
+x86_64/liblwjgl.so
+x86_64/liblwjgl_nanovg.so
+x86_64/liblwjgl_opengl.so
+x86_64/liblwjgl_spng.so
+x86_64/liblwjgl_stb.so
+x86_64/liblwjgl_tinyfd.so
+x86_64/liblwjgl_vma.so
+x86_64/libfreetype.so
+x86_64/libshaderc.so
+# Note: JNA natives in assets/runtimes/jna/<ver>/natives/x86_64/libjnidispatch.so
+# share the key x86_64/libjnidispatch.so listed above.
+# Not covered by this check: libraries inside the bundled JRE archives
+# (assets/runtimes/jre-*/bin-*.tar.xz); see the Phase 2b plan.
+
+# --- Maven dependencies -----------------------------------------------------
+# TODO: com.bytedance:bytehook is pinned to 1.0.10 (see libs.versions.toml);
+# evaluate a newer release with 16 KB support before bumping.
+arm64-v8a/libbytehook.so
+x86_64/libbytehook.so
+
+# --- NDK toolchain (UNVERIFIED) ---------------------------------------------
+# libc++_shared.so is copied from NDK r25.2 by ndk-build (APP_STL := c++_shared).
+# Its alignment depends on the NDK release and could not be measured locally.
+# If the check reports this entry as stale, delete it. Otherwise it resolves when
+# ndkVersion is raised to a release that ships a 16 KB-aligned libc++_shared.so.
+arm64-v8a/libc++_shared.so
+x86_64/libc++_shared.so

@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.versions
 
+import com.movtery.zalithlauncher.coroutine.loggingExceptionHandler
 import android.os.Build
 import android.os.Vibrator
 import androidx.compose.animation.AnimatedVisibility
@@ -96,7 +97,9 @@ import kotlinx.coroutines.launch
 private const val TAG = "VersionConfigScreen"
 
 /** 页面退出后的配置保存作用域 */
-private val configSaveScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+private val configSaveScope = CoroutineScope(
+    SupervisorJob() + Dispatchers.IO + loggingExceptionHandler("VersionConfigSave")
+)
 
 @Composable
 fun VersionConfigScreen(

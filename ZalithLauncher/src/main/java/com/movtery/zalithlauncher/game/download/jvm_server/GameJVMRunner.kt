@@ -88,6 +88,22 @@ suspend fun runJvmRetryRuntimes(
         logOutput = logOutput
     )
 
+    //记录每次 JVM 任务（如 Forge/NeoForge 安装处理器）的退出码，便于排查安装失败
+    val label = postSummary ?: logId
+    val exitMessage = "[$label] JVM (${jre.name}) exited with code $exitCode"
+    if (exitCode == 0) {
+        Logger.info(TAG, exitMessage)
+    } else {
+        Logger.warning(TAG, exitMessage)
+        logOutput?.appendLines(listOf(exitMessage))
+        val outOfMemory = logOutput?.lines?.value?.any { it.contains("OutOfMemoryError") } == true
+        if (outOfMemory) {
+            val hint = "[$label] The JVM ran out of memory (java.lang.OutOfMemoryError in its output)"
+            Logger.warning(TAG, hint)
+            logOutput?.appendLines(listOf(hint))
+        }
+    }
+
     if (exitCode != 0) {
         val nextJava: Jre? = when (jre) {
             Jre.JRE_8 -> Jre.JRE_17

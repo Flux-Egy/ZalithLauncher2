@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
@@ -36,7 +37,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -234,7 +234,7 @@ fun JavaManageScreen(
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 state = scrollState,
             ) {
-                items(runtimes) { runtime ->
+                uniqueItems(runtimes, id = { it.name }, contentType = { "runtime" }) { runtime ->
                     JavaRuntimeItem(
                         runtime = runtime,
                         modifier = Modifier
@@ -499,7 +499,7 @@ private fun SelectJavaRuntimeDialog(
                         state = scrollState,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(runtimes) { runtime ->
+                        uniqueItems(runtimes, id = { it.name }, contentType = { "runtime" }) { runtime ->
                             JavaRuntimeItem(
                                 runtime = runtime,
                                 onClick = { onSelectRuntime(runtime) },

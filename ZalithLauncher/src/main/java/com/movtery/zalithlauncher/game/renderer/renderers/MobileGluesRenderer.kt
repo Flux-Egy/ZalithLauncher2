@@ -226,6 +226,22 @@ object MobileGluesRenderer : ConfigurableRenderer {
             option(3, R.string.renderer_config_mg_fsr1_balanced)
             option(4, R.string.renderer_config_mg_fsr1_performance)
         }
+        // Snapdragon Game Super Resolution v1 (BSD-3-Clause, SnapdragonGameStudios/snapdragon-gsr).
+        // Written to the MobileGlues JSON config next to fsr1Setting, with the same scale presets.
+        // Current MobileGlues builds do not read this key (proposal to coordinate upstream);
+        // unknown keys are expected to be ignored, so leaving it off is a no-op.
+        choice(
+            id = "sgsr1Setting",
+            title = R.string.renderer_config_mg_sgsr1_title,
+            description = R.string.renderer_config_mg_sgsr1_desc,
+            default = 0
+        ) {
+            option(0, R.string.generic_disable)
+            option(1, R.string.renderer_config_mg_fsr1_ultra_quality)
+            option(2, R.string.renderer_config_mg_fsr1_quality)
+            option(3, R.string.renderer_config_mg_fsr1_balanced)
+            option(4, R.string.renderer_config_mg_fsr1_performance)
+        }
     }
 
     override val legacyConfigKeys: List<String> = listOf("builtin:mobileglues")

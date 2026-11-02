@@ -66,17 +66,47 @@ class PathManager {
         lateinit var FILE_TERRACOTTA_LOG: File
         lateinit var FILE_SPONSORS_CACHE: File
 
-        fun refreshPaths(context: Context) {
+        @Volatile
+        private var pathsReady = false
+
+        /** True while DIR_FILES_EXTERNAL is the internal fallback; then a later refresh retries */
+        @Volatile
+        private var usingExternalFallback = false
+
+        /**
+         * Resolves all launcher paths and creates the directories.
+         *
+         * Called from Application.onCreate, onConfigurationChanged and every activity's onCreate.
+         * The storage locations cannot change within a process, so after the first successful
+         * run this is a no-op (measured on device: each run blocked the main thread for
+         * ~100-120 ms of disk checks, three times per cold start). The exception is the internal
+         * fallback for an inaccessible external dir, which is retried on the next call.
+         *
+         * @param force recompute even if already resolved
+         */
+        fun refreshPaths(context: Context, force: Boolean = false) {
+            if (pathsReady && !force && !usingExternalFallback) return
+            synchronized(this) {
+                if (pathsReady && !force && !usingExternalFallback) return
+                resolvePaths(context)
+                pathsReady = true
+            }
+        }
+
+        private fun resolvePaths(context: Context) {
             DIR_FILES_PRIVATE = context.filesDir
+            var fallback = false
             DIR_FILES_EXTERNAL = context.getExternalFilesDir(null) ?: run {
                 //from FCL (commit 744156a)
                 val externalDir = File(Environment.getExternalStorageDirectory(), "Android/data/${context.packageName}/files")
                 if (externalDir.ensureDirectorySilently()) externalDir
                 else {
                     Logger.warning(TAG, "External files dir is inaccessible, falling back to internal storage: ${externalDir.absolutePath}")
+                    fallback = true
                     File(DIR_FILES_PRIVATE, "data_files")
                 }
             }
+            usingExternalFallback = fallback
             DIR_CACHE = context.cacheDir
             DIR_NATIVE_LIB = context.applicationInfo.nativeLibraryDir
             DIR_RUNTIME_MOD = context.getDir("runtime_mod", 0)

@@ -18,11 +18,11 @@
 
 package com.movtery.zalithlauncher.game.version.installed
 
+import com.movtery.zalithlauncher.coroutine.managedScope
 import com.movtery.zalithlauncher.game.path.getGameHome
 import com.movtery.zalithlauncher.game.path.getVersionsHome
 import com.movtery.zalithlauncher.game.version.installed.utils.parseJsonToVersionInfo
 import com.movtery.zalithlauncher.utils.logging.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +38,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 private const val TAG = "VersionsManager"
 
 object VersionsManager {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = managedScope("VersionsManager", Dispatchers.IO)
     private val mutex = Mutex()
     private val listeners: MutableList<suspend () -> Unit> = CopyOnWriteArrayList()
 

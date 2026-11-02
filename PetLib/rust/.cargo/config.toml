@@ -1,0 +1,14 @@
+# Android 15+ devices may use a 16 KB memory page size. Shared libraries whose
+# ELF LOAD segments are aligned to less than 16 KB fail to load there, so link
+# the PetLib cdylib with 16 KB max page size for the 64-bit Android targets.
+# (32-bit ABIs are not affected by the 16 KB page size requirement.)
+# Verified in CI by scripts/check-16kb-alignment.sh.
+#
+# Note: these rustflags are ignored if RUSTFLAGS / CARGO_ENCODED_RUSTFLAGS is set
+# in the environment; the CI alignment check will catch that case.
+
+[target.aarch64-linux-android]
+rustflags = ["-C", "link-arg=-Wl,-z,max-page-size=16384"]
+
+[target.x86_64-linux-android]
+rustflags = ["-C", "link-arg=-Wl,-z,max-page-size=16384"]

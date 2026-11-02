@@ -27,6 +27,7 @@ import com.movtery.zalithlauncher.coroutine.addTask
 import com.movtery.zalithlauncher.coroutine.buildPhase
 import com.movtery.zalithlauncher.game.account.Account
 import com.movtery.zalithlauncher.game.account.AccountsManager
+import com.movtery.zalithlauncher.game.account.CredentialsExpiredException
 import com.movtery.zalithlauncher.game.account.auth_server.AuthServerHelper
 import com.movtery.zalithlauncher.game.account.isLocalAccount
 import com.movtery.zalithlauncher.game.account.isMicrosoftAccount
@@ -264,9 +265,11 @@ class GameLaunchFlow(scope: CoroutineScope) {
             baseUrl = account.otherBaseUrl!!,
             serverName = account.accountType!!,
             email = account.otherAccount!!,
-            password = account.otherPassword!!
+            password = account.otherPassword.orEmpty()
         )
         if (!helper.validateOrRefresh(context, account)) {
+            //已存储的密码不可用（例如 Keystore 密钥丢失导致无法解密）时，进入重新登录流程，而不是用空密码请求服务器
+            if (account.otherPassword.isNullOrEmpty()) throw CredentialsExpiredException()
             helper.passwordLogin(context, account)
         }
     }

@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.utils.logging
 
+import com.movtery.zalithlauncher.context.ProcessRole
 import android.content.Context
 import android.util.Log
 import com.movtery.zalithlauncher.BuildKeys
@@ -25,9 +26,10 @@ import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.utils.file.zipDirectory
 import com.movtery.zalithlauncher.utils.printLauncherInfo
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -46,7 +48,13 @@ import kotlin.coroutines.CoroutineContext
  * [Modified from HMCL](https://github.com/HMCL-dev/HMCL/blob/57018bef47417108b75e2298ab61f89a7586b1b9/HMCLCore/src/main/java/org/jackhuang/hmcl/util/logging/Logger.java)
  */
 object Logger : CoroutineScope {
-    override val coroutineContext: CoroutineContext = Dispatchers.Default + Job()
+    /**
+     * SupervisorJob + handler: a failure while writing one log entry must not cancel
+     * the logger scope (which would silently stop all file logging) or crash the app.
+     * The handler uses android.util.Log directly to avoid recursing into this Logger.
+     */
+    override val coroutineContext: CoroutineContext = Dispatchers.Default + SupervisorJob() +
+            CoroutineExceptionHandler { _, t -> Log.e("Logger", "Uncaught exception in logger coroutine", t) }
 
     private lateinit var PACKAGE_PREFIX: String
 
@@ -90,9 +98,9 @@ object Logger : CoroutineScope {
      * 获取当前进程标识
      */
     private fun getProcessTag(context: Context): String {
-        val processName = context.applicationInfo.processName
-        val separatorIndex = processName.lastIndexOf(':')
-        return if (separatorIndex < 0) "main" else processName.substring(separatorIndex + 1)
+        //注意：applicationInfo.processName 是应用的默认进程名，而非当前进程名，
+        //此前导致 :game / :jvm / :filemanager 的日志文件都被标记为 "main"
+        return ProcessRole.current(context).tag
     }
 
     private suspend fun printLauncherInfo() {
@@ -189,7 +197,8 @@ object Logger : CoroutineScope {
             append("/")
             append(message.level.name)
             append("] ")
-            append(message.message)
+            //脱敏：日志常被用户上传到公开的粘贴站点
+            append(LogRedactor.redact(message.message))
         }
     }
 

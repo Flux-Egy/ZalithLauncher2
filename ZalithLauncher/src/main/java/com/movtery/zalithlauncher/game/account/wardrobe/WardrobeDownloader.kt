@@ -23,6 +23,7 @@ import com.movtery.zalithlauncher.utils.GSON
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.network.downloadFile
 import com.movtery.zalithlauncher.utils.network.fetchStringFromUrl
+import com.movtery.zalithlauncher.utils.network.upgradeToHttps
 import com.movtery.zalithlauncher.utils.string.decodeBase64
 import kotlinx.coroutines.CancellationException
 import java.io.File
@@ -50,7 +51,8 @@ abstract class WardrobeDownloader {
         }
 
         try {
-            downloadFile(url = url, outputFile = file)
+            //Yggdrasil 材质地址常为 http://（如 textures.minecraft.net、ely.by），而明文流量已被禁止
+            downloadFile(url = upgradeToHttps(url), outputFile = file)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

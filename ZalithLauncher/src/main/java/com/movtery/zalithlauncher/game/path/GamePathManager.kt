@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.game.path
 
+import com.movtery.zalithlauncher.context.GlobalContext
+import com.movtery.zalithlauncher.coroutine.managedScope
 import android.content.Context
 import com.movtery.zalithlauncher.database.AppDatabase
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
@@ -26,7 +28,6 @@ import com.movtery.zalithlauncher.setting.AllSettings.currentGamePathId
 import com.movtery.zalithlauncher.utils.canHandlePermission
 import com.movtery.zalithlauncher.utils.hasStoragePermission
 import com.movtery.zalithlauncher.utils.logging.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,7 +47,7 @@ private const val TAG = "GamePathManager"
  * 游戏目录管理，为支持将游戏文件保存至不同的路径
  */
 object GamePathManager {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = managedScope("GamePathManager", Dispatchers.IO)
     private val mutex = Mutex()
     private val defaultGamePath = File(PathManager.DIR_FILES_EXTERNAL, ".minecraft").absolutePath
     /**
@@ -71,12 +72,19 @@ object GamePathManager {
      */
     fun getUserPath(): String = File(_currentPath.value).parentFile!!.absolutePath
 
-    private lateinit var database: AppDatabase
-    private lateinit var gamePathDao: GamePathDao
+    @Volatile
+    private var database: AppDatabase? = null
+
+    /** Resolved lazily so a process that skips [initialize] does not crash (see ZLApplication) */
+    private val db: AppDatabase
+        get() = database ?: synchronized(this) {
+            database ?: AppDatabase.getInstance(GlobalContext).also { database = it }
+        }
+
+    private val gamePathDao: GamePathDao get() = db.gamePathDao()
 
     fun initialize(context: Context) {
         database = AppDatabase.getInstance(context)
-        gamePathDao = database.gamePathDao()
     }
 
     fun reloadPath() {

@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.download.assets.search
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,7 +33,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
@@ -444,7 +444,7 @@ private fun ResultLayout(
             }
         }
 
-        items(screenshots) { screenshot ->
+        uniqueItems(screenshots, id = { it.imageUrl }, contentType = { "screenshot" }) { screenshot ->
             val scale = remember { Animatable(initialValue = 0.95f) }
             LaunchedEffect(Unit) {
                 scale.animateTo(targetValue = 1f, animationSpec = getAnimateTween())

@@ -39,6 +39,11 @@ object RendererPluginManager: ApkPluginManager() {
      */
     fun getRendererList(): List<RendererPlugin> = rendererPluginList
 
+    /** Registers a renderer imported from a drop-in package (LocalPluginStore) */
+    fun addLocalRenderer(plugin: RendererPlugin) {
+        if (rendererPluginList.none { it.packageName == plugin.packageName }) rendererPluginList.add(plugin)
+    }
+
     /**
      * 移除某些已加载的渲染器
      */

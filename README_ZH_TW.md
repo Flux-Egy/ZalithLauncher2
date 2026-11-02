@@ -27,24 +27,58 @@
 ## 📦 構建方式（開發者）
 
 > 以下內容適用於希望參與開發或自行構建應用的使用者。
+> 工具鏈版本以 CI 為準：請參閱 `.github/workflows/build.yml` 與 `pr_ci.yml`。
 
 ### 環境要求
 
-* Android Studio Bumblebee 以上
-* Android SDK：
-    * **最低 API**：26
-    * **目標 API**：35
-* JDK 11
+| 元件 | 版本 / 說明 |
+|---|---|
+| JDK | **21**（CI 使用 Temurin 21；Java/Kotlin 位元組碼目標為 17） |
+| Android Studio | 支援 **AGP 9.3** / Gradle 9.5 的較新版本（Gradle Wrapper 會自動下載 Gradle） |
+| Android SDK | **compileSdk 37（minor 2）**，minSdk 26，targetSdk 34 |
+| Android NDK | ndk-build 模組使用 **25.2.9519653**（`ZalithLauncher/build.gradle.kts` 中的 `ndkVersion`）；cargo-ndk 另需一個 NDK（CI 透過 `ANDROID_NDK_HOME` 固定為 **30.0.16248370**） |
+| Rust | 透過 `rustup` 安裝目標 `aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android` |
+| cargo-ndk | `cargo install cargo-ndk`（CI 使用 v4.1.2），構建 `PetLib` 所必需 |
+| 記憶體 | Gradle 以 `-Xmx4g` 執行（`gradle.properties`），建議 8 GB 以上記憶體 |
+
+官方 Android 工具鏈不支援在 ARM64 Linux 主機（例如 Termux/proot）上構建；請使用 x86_64 Linux、macOS、Windows 或 GitHub Actions。
 
 ### 構建步驟
 
 ```bash
-git clone git@github.com:ZalithLauncher/ZalithLauncher2.git
-# 使用 Android Studio 開啟專案並進行構建
+git clone https://github.com/ZalithLauncher/ZalithLauncher2.git
+cd ZalithLauncher2
+rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+cargo install cargo-ndk
+
+# 單一架構的 Debug APK：all（通用包，預設）| arm | arm64 | x86 | x86_64
+./gradlew :ZalithLauncher:assembleDebug -Darch=arm64
+# 輸出目錄：ZalithLauncher/build/outputs/apk/debug/
 ```
 
+### 可選金鑰
 
+從環境變數或專案根目錄下的檔案讀取（這些檔案皆已被 git 忽略）。缺少金鑰時構建仍會成功並輸出警告，但相關功能將無法使用。
 
+| 用途 | 環境變數 | 檔案 |
+|---|---|---|
+| 微軟登入（Azure OAuth Client ID） | `OAUTH_CLIENT_ID` | `.oauth_client_id.txt` |
+| CurseForge API | `CURSEFORGE_API_KEY` | `.curseforge_api.txt` |
+| 僅限 Release 簽章 | `STORE_PASSWORD`、`KEY_PASSWORD` | `.store_password.txt`、`.key_password.txt` |
+
+切勿提交這些值。
+
+### 測試與檢查
+
+```bash
+# 單元測試（-PciExcludedTests 會略過依賴外部服務或開發者本機檔案的測試，以及 2 個已知有誤的上游斷言）
+./gradlew :ZalithLauncher:testDebugUnitTest :CardGrid:testDebugUnitTest :Guide:testDebugUnitTest -Darch=arm64 -PciExcludedTests
+
+# 檢查 APK 中 64 位元原生函式庫的 16 KB 頁面對齊
+scripts/check-16kb-alignment.sh --allowlist .github/16kb-alignment-allowlist.txt ZalithLauncher/build/outputs/apk/debug/*.apk
+```
+
+拉取請求會由 `.github/workflows/pr_ci.yml` 自動驗證。
 
 ## 📜 License
 

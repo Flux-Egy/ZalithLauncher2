@@ -35,6 +35,11 @@ object DriverPluginManager: ApkPluginManager() {
 
     fun getDriverList(): List<Driver> = driverList.toList()
 
+    /** Registers a Turnip driver imported from a drop-in package (LocalPluginStore) */
+    fun addLocalDriver(driver: Driver) {
+        if (driverList.none { it.id == driver.id }) driverList.add(driver)
+    }
+
     fun getDriver(driverId: String): Driver =
         driverList.find { it.id == driverId } ?: driverList[0]
 

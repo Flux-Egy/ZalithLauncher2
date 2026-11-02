@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.main.control_editor.edit_widget
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -32,7 +33,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -182,7 +182,7 @@ private fun ChoseLayersLayout(
                 contentPadding = PaddingValues(horizontal = 4.dp),
                 state = listState
             ) {
-                items(layers) { layer ->
+                uniqueItems(layers, id = { it.uuid }, contentType = { "layer" }) { layer ->
                     SelectLayerListItem(
                         modifier = Modifier
                             .fillMaxWidth()

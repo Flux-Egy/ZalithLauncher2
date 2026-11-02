@@ -55,6 +55,11 @@ object AllSettings : SettingsRegistry() {
     val renderer = stringSetting("renderer", "")
 
     /**
+     * 未手动选择渲染器时，根据 GPU、游戏版本与光影模组自动选择（规则见 assets/renderer_compat.json）
+     */
+    val rendererAutoSelect = boolSetting("rendererAutoSelect", true)
+
+    /**
      * 为渲染器插件叠加 SFPEW 兼容层
      */
     val sfpewPluginLayer = boolSetting("sfpewPluginLayer", false)
@@ -154,6 +159,17 @@ object AllSettings : SettingsRegistry() {
      * 游戏内存分配大小
      */
     val ramAllocation = intSetting("ramAllocation", null, min = 256)
+
+    /**
+     * 内存安全上限：启动时将游戏堆内存限制在物理内存的一半以内，降低被系统低内存机制杀死的风险
+     * （见 JvmTuning）
+     */
+    val ramSafetyLimit = boolSetting("ramSafetyLimit", true)
+
+    /**
+     * 优化的 GC 参数：按 Java 版本自动添加 G1 相关参数（用户自定义的 GC 参数优先）
+     */
+    val jvmGcTuning = boolSetting("jvmGcTuning", true)
 
     /**
      * 自定义Jvm启动参数

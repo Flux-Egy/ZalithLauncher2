@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings
 
+import com.movtery.zalithlauncher.ui.screens.content.settings.elements.LocalPluginPackagesSettings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -175,6 +176,14 @@ fun RendererSettingsScreen(
                     SwitchSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
                         position = CardPosition.Middle,
+                        unit = AllSettings.rendererAutoSelect,
+                        title = stringResource(R.string.settings_renderer_auto_select_title),
+                        summary = stringResource(R.string.settings_renderer_auto_select_summary)
+                    )
+
+                    SwitchSettingsCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle,
                         unit = AllSettings.sfpewPluginLayer,
                         enabled = currentRenderer is Plugin,
                         title = stringResource(R.string.settings_renderer_sfpew_plugin_layer_title),
@@ -226,6 +235,9 @@ fun RendererSettingsScreen(
                             }
                         }
                     )
+
+                    //从 .zip 导入渲染器 / Turnip 驱动，并管理已导入的包
+                    LocalPluginPackagesSettings()
 
                     ListSettingsCard(
                         modifier = Modifier.fillMaxWidth(),

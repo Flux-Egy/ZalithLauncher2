@@ -21,6 +21,8 @@ package com.movtery.zalithlauncher.utils.platform
 import android.app.ActivityManager
 import android.content.Context
 import androidx.annotation.WorkerThread
+import com.movtery.zalithlauncher.game.launch.JvmTuning
+import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.utils.device.Architecture
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -72,7 +74,12 @@ fun getMaxMemoryForSettings(context: Context): Int {
         //To have a minimum for the device to breathe
         (deviceRam - (if (deviceRam < 3064) 800 else 1024)).toInt()
     }
-    return maxRam
+    //内存安全上限开启时，与启动时的限制保持一致（见 JvmTuning），避免滑块允许设置一个启动时会被下调的值
+    return if (AllSettings.ramSafetyLimit.getValue()) {
+        min(maxRam, JvmTuning.heapCeilingMb(deviceRam.toLong(), is64Bit = !Architecture.is32BitsDevice))
+    } else {
+        maxRam
+    }
 }
 
 /**

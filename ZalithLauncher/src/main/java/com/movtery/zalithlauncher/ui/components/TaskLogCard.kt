@@ -93,7 +93,13 @@ fun TaskLogCard(
             state = listState,
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)
         ) {
-            items(lines) { line ->
+            //日志是有上限的环形缓冲（takeLast），且重复文本很常见：按位置作为键即为正确的标识
+            items(
+                count = lines.size,
+                key = { index -> index },
+                contentType = { "log_line" }
+            ) { index ->
+                val line = lines[index]
                 Text(
                     text = line,
                     style = MaterialTheme.typography.labelSmall,

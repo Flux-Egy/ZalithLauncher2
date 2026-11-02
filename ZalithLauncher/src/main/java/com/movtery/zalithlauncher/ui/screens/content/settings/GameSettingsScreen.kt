@@ -233,6 +233,22 @@ fun GameSettingsScreen(
                         }
                     )
 
+                    SwitchSettingsCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle,
+                        unit = AllSettings.ramSafetyLimit,
+                        title = stringResource(R.string.settings_game_ram_safety_limit_title),
+                        summary = stringResource(R.string.settings_game_ram_safety_limit_summary)
+                    )
+
+                    SwitchSettingsCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle,
+                        unit = AllSettings.jvmGcTuning,
+                        title = stringResource(R.string.settings_game_jvm_gc_tuning_title),
+                        summary = stringResource(R.string.settings_game_jvm_gc_tuning_summary)
+                    )
+
                     TextInputSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
                         position = CardPosition.Bottom,

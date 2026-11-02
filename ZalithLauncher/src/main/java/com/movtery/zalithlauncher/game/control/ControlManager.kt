@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.control
 
+import com.movtery.zalithlauncher.coroutine.managedScope
 import android.content.Context
 import com.movtery.layer_controller.layout.ControlLayout
 import com.movtery.layer_controller.layout.loadLayoutFromFile
@@ -31,7 +32,6 @@ import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.utils.file.readString
 import com.movtery.zalithlauncher.utils.logging.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,7 +50,7 @@ private const val TAG = "ControlManager"
  * 控制布局管理者
  */
 object ControlManager {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = managedScope("ControlManager", Dispatchers.IO)
 
     private val _dataList = MutableStateFlow<List<ControlData>>(emptyList())
     val dataList = _dataList.asStateFlow()

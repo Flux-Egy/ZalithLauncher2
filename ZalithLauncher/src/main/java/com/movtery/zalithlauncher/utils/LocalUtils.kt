@@ -18,12 +18,10 @@
 
 package com.movtery.zalithlauncher.utils
 
+import com.movtery.zalithlauncher.game.renderer.auto.GpuDetector
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.opengl.EGL14
-import android.opengl.EGLConfig
-import android.opengl.GLES20
 import android.os.Build
 import android.os.Process
 import android.util.Log
@@ -239,87 +237,11 @@ fun getDisplayFriendlyRes(displaySideRes: Int, scaling: Float): Int {
 }
 
 fun isAdrenoGPU(): Boolean {
-    val eglDisplay = EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY)
-    if (eglDisplay == EGL14.EGL_NO_DISPLAY) {
-        Logger.error(TAG, "Failed to get EGL display")
-        return false
-    }
-
-    if (!EGL14.eglInitialize(eglDisplay, null, 0, null, 0)) {
-        Logger.error(TAG, "Failed to initialize EGL")
-        return false
-    }
-
-    val eglAttributes = intArrayOf(
-        EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
-        EGL14.EGL_NONE
-    )
-
-    val configs = arrayOfNulls<EGLConfig>(1)
-    val numConfigs = IntArray(1)
-    if (!EGL14.eglChooseConfig(
-            eglDisplay,
-            eglAttributes,
-            0,
-            configs,
-            0,
-            1,
-            numConfigs,
-            0
-        ) || numConfigs[0] == 0
-    ) {
-        EGL14.eglTerminate(eglDisplay)
-        Logger.error(TAG, "Failed to choose an EGL config")
-        return false
-    }
-
-    val contextAttributes = intArrayOf(
-        EGL14.EGL_CONTEXT_CLIENT_VERSION, 2,
-        EGL14.EGL_NONE
-    )
-
-    val context = EGL14.eglCreateContext(
-        eglDisplay,
-        configs[0]!!,
-        EGL14.EGL_NO_CONTEXT,
-        contextAttributes,
-        0
-    )
-    if (context == EGL14.EGL_NO_CONTEXT) {
-        EGL14.eglTerminate(eglDisplay)
-        Logger.error(TAG, "Failed to create EGL context")
-        return false
-    }
-
-    if (!EGL14.eglMakeCurrent(
-            eglDisplay,
-            EGL14.EGL_NO_SURFACE,
-            EGL14.EGL_NO_SURFACE,
-            context
-        )
-    ) {
-        EGL14.eglDestroyContext(eglDisplay, context)
-        EGL14.eglTerminate(eglDisplay)
-        Logger.error(TAG, "Failed to make EGL context current")
-        return false
-    }
-
-    val vendor = GLES20.glGetString(GLES20.GL_VENDOR)
-    val renderer = GLES20.glGetString(GLES20.GL_RENDERER)
+    //EGL 查询逻辑已移至 GpuDetector，此处保持原有判定语义
+    val (vendor, renderer) = GpuDetector.queryGlStrings() ?: return false
     val isAdreno = vendor != null && renderer != null &&
             vendor.equals("Qualcomm", ignoreCase = true) &&
             renderer.contains("adreno", ignoreCase = true)
-
-    // Cleanup
-    EGL14.eglMakeCurrent(
-        eglDisplay,
-        EGL14.EGL_NO_SURFACE,
-        EGL14.EGL_NO_SURFACE,
-        EGL14.EGL_NO_CONTEXT
-    )
-    EGL14.eglDestroyContext(eglDisplay, context)
-    EGL14.eglTerminate(eglDisplay)
-
     Logger.debug(TAG, "Running on Adreno GPU: $isAdreno")
     return isAdreno
 }

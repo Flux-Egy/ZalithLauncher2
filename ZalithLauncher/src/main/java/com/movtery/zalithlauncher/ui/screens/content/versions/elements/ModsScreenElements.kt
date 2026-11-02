@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.versions.elements
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.content.Context
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +34,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -320,7 +320,7 @@ private fun ModsUpdateListDialog(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(vertical = 12.dp)
                     ) {
-                        items(manifests) { entry ->
+                        uniqueItems(manifests, id = { it.data.file.absolutePath }, contentType = { "mod_update" }) { entry ->
                             ModsUpdateEntryItem(
                                 modifier = Modifier.fillMaxWidth(),
                                 entry = entry

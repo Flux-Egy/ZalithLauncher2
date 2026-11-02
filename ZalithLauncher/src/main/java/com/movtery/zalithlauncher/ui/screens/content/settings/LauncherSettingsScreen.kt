@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings
 
+import com.movtery.zalithlauncher.ui.components.lazy.uniqueItems
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
@@ -38,7 +39,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
@@ -564,7 +564,7 @@ private fun CustomThemeDialog(
                                     )
                                 }
 
-                                items(PaletteStyle.entries) { style ->
+                                uniqueItems(PaletteStyle.entries, id = { it.name }) { style ->
                                     RadioCard(
                                         selected = paletteStyle == style,
                                         text = style.name,
