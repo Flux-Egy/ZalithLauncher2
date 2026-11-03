@@ -63,6 +63,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
+import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
@@ -674,15 +675,24 @@ private fun BackgroundImage(
 ) {
     val context = LocalContext.current
 
+    //Android 9+ 使用平台 AnimatedImageDrawable：按目标尺寸解码、在 RenderThread 上自行播放，
+    //比 Movie（GifDecoder）占用更少内存，也不需要逐帧手动重绘。
+    //背景只显示一张，关闭内存缓存，避免同一张大图在缓存与界面中各存一份
+    val nativeAnimated = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
     val imageLoader = remember(refreshTrigger) {
         ImageLoader.Builder(context)
-            .components { add(GifDecoder.Factory()) }
+            .components {
+                if (nativeAnimated) add(AnimatedImageDecoder.Factory()) else add(GifDecoder.Factory())
+            }
+            .memoryCache { null }
             .build()
     }
-    val request = remember(refreshTrigger) {
+    //静态图片可用硬件位图（像素存放在显存而非应用内存）；Android 12 以下的前景毛玻璃需要读取像素，保留软件位图
+    val blurNeedsPixels = Build.VERSION.SDK_INT < Build.VERSION_CODES.S && AllSettings.backgroundBlur.state > 0
+    val request = remember(refreshTrigger, blurNeedsPixels) {
         ImageRequest.Builder(context)
             .data(imageFile)
-            .allowHardware(false)
+            .allowHardware(!blurNeedsPixels)
             .crossfade(false)
             .build()
     }
@@ -698,7 +708,8 @@ private fun BackgroundImage(
     val isAnimated = isAnimatedState.value
 
     val frameTick = remember { mutableIntStateOf(0) }
-    if (isAnimated) {
+    //逐帧驱动只用于 Movie 实现（Android 8.x）；AnimatedImageDrawable 自行播放
+    if (isAnimated && !nativeAnimated) {
         LaunchedEffect(Unit) {
             while (isActive) {
                 withFrameNanos { }
@@ -709,7 +720,7 @@ private fun BackgroundImage(
 
     AsyncImage(
         modifier = modifier.then(
-            if (isAnimated) {
+            if (isAnimated && !nativeAnimated) {
                 Modifier.drawBehind {
                     frameTick.intValue
                 }

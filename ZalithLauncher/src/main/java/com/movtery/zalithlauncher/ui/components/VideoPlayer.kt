@@ -39,6 +39,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -68,7 +69,11 @@ fun VideoPlayer(
         val renderersFactory = DefaultRenderersFactory(context)
             .setEnableDecoderFallback(true) //开启解码器 fallback
 
-        ExoPlayer.Builder(context, renderersFactory).build().apply {
+        //背景视频来自本地文件：只需很小的缓冲（默认会缓冲约 50 秒）
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(2_000, 5_000, 500, 1_000)
+            .build()
+        ExoPlayer.Builder(context, renderersFactory).setLoadControl(loadControl).build().apply {
             val audioAttr = AudioAttributes.Builder()
                 .setUsage(C.USAGE_MEDIA)
                 .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
@@ -106,6 +111,10 @@ fun VideoPlayer(
 
     LaunchedEffect(muted, volume) {
         player.volume = volume
+        //静音时不解码音轨
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, volume <= 0f)
+            .build()
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -114,10 +123,14 @@ fun VideoPlayer(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_START -> {
+                    //从后台返回：重新准备（ON_STOP 时已释放解码器与缓冲）
+                    if (player.playbackState == Player.STATE_IDLE) player.prepare()
                     player.playWhenReady = autoPlay
                 }
                 Lifecycle.Event.ON_STOP -> {
+                    //进入后台（例如开始游戏）：停止并释放解码器与缓冲，不占用内存
                     player.playWhenReady = false
+                    player.stop()
                 }
                 else -> {}
             }
