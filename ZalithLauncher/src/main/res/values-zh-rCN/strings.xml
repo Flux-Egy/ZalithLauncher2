@@ -1211,7 +1211,7 @@ ABI：%2$s
     <string name="advisor_setting_summary">基于硬件的建议（内存、光影包、驱动）以及上次游戏的实测帧率</string>
     <string name="settings_launcher_style_title">启动器样式</string>
     <string name="settings_launcher_style_summary">更改启动器的布局与外观。所有功能在每种样式下均可使用。</string>
-    <string name="settings_launcher_style_default">Zalith（默认）</string>
+    <string name="settings_launcher_style_default">经典（默认）</string>
     <string name="settings_launcher_style_pc">PC 启动器</string>
     <string name="settings_launcher_style_modrinth">Modrinth 风格</string>
     <string name="settings_launcher_style_console">主机风格</string>

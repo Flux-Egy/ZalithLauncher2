@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.main.shells
 
+import com.movtery.zalithlauncher.BuildKeys
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
@@ -146,7 +147,7 @@ fun PcLauncherShell(
         ) {
             Text(
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-                text = "ZALITH",
+                text = BuildKeys.LAUNCHER_SHORT_NAME.uppercase(),
                 fontFamily = PixelHeadingFontFamily,
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.primary
@@ -281,7 +282,7 @@ fun ModrinthShell(
                 }
                 Text(
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    text = "Zalith",
+                    text = BuildKeys.LAUNCHER_SHORT_NAME,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.ExtraBold,
                     color = MaterialTheme.colorScheme.primary

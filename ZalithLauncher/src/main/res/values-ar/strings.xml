@@ -423,7 +423,7 @@ ABI: %2$s
     <string name="advisor_setting_summary">اقتراحات حسب العتاد (الذاكرة، حزم التظليل، التعريفات) ومعدل الإطارات المقيس في جلستك الأخيرة</string>
     <string name="settings_launcher_style_title">نمط المشغّل</string>
     <string name="settings_launcher_style_summary">غيّر تخطيط المشغّل ومظهره. كل الميزات متاحة في كل نمط.</string>
-    <string name="settings_launcher_style_default">Zalith (الافتراضي)</string>
+    <string name="settings_launcher_style_default">الكلاسيكي (الافتراضي)</string>
     <string name="settings_launcher_style_pc">مشغّل الحاسوب</string>
     <string name="settings_launcher_style_modrinth">نمط Modrinth</string>
     <string name="settings_launcher_style_console">نمط منصّة الألعاب</string>

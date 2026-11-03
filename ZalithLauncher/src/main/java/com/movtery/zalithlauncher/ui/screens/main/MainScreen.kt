@@ -470,7 +470,7 @@ private fun <E: TitledNavKey> TopBar(
                 if (parent == null) {
                     if (festivals.isEmpty()) {
                         Text(
-                            text = BuildKeys.LAUNCHER_IDENTIFIER,
+                            text = BuildKeys.LAUNCHER_NAME,
                             style = style,
                             softWrap = softWarp,
                             maxLines = maxLines

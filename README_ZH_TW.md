@@ -1,4 +1,12 @@
-# Zalith Launcher 2
+# Flux Launcher
+
+**Flux Launcher** 是 MovTery 等人開發的 [Zalith Launcher 2](https://github.com/ZalithLauncher/ZalithLauncher2) 的分支，與原專案一樣以 **GPL-3.0** 授權，保留全部上游版權聲明，詳見 [LICENSE](LICENSE)。功能說明見 [README_EN_US.md](README_EN_US.md)。
+
+以下為上游 README。
+
+---
+
+## Zalith Launcher 2 (upstream)
 ![Downloads](https://img.shields.io/github/downloads/ZalithLauncher/ZalithLauncher2/total)
 [![Sponsor](https://img.shields.io/badge/sponsor-30363D?logo=GitHub-Sponsors)](https://afdian.com/a/MovTery)
 

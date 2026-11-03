@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.main.shells
 
+import com.movtery.zalithlauncher.BuildKeys
 import android.graphics.Bitmap
 import android.text.format.DateFormat
 import androidx.annotation.DrawableRes
@@ -358,7 +359,7 @@ fun GlassShell(
                     if (!inLauncherScreen) BackButton(nav)
                     Text(
                         modifier = Modifier.padding(horizontal = 8.dp),
-                        text = "Zalith",
+                        text = BuildKeys.LAUNCHER_SHORT_NAME,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -416,7 +417,7 @@ fun RetroPixelShell(
                 }
                 Text(
                     modifier = Modifier.align(Alignment.Center),
-                    text = "ZALITH",
+                    text = BuildKeys.LAUNCHER_SHORT_NAME.uppercase(),
                     style = TextStyle(
                         fontFamily = PixelHeadingFontFamily,
                         fontSize = MaterialTheme.typography.headlineMedium.fontSize,

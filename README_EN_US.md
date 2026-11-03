@@ -1,4 +1,19 @@
-# Zalith Launcher 2
+# Flux Launcher
+
+**Flux Launcher** is a fork of [Zalith Launcher 2](https://github.com/ZalithLauncher/ZalithLauncher2) by MovTery and contributors, licensed under the **GPL-3.0** like the original. All upstream copyright notices are kept; see [LICENSE](LICENSE).
+
+What the fork adds:
+- Eight launcher styles (Classic, PC launcher, Modrinth, Console, Material You, Glass, Retro pixel, Custom) with JSON theme import/export
+- Renderer auto-selection by GPU (Adreno, Mali, PowerVR, Xclipse), drop-in renderer/driver packages, `Extras/renderer_rules`
+- GPU-aware upscaling of the game image (Snapdragon GSR 1, AMD CAS) and a performance preset
+- Smart Advisor with signed recommendations and measured per-instance FPS
+- Mod dependency checks with version ranges, OkHttp-based downloads, user CurseForge API key, Keystore-encrypted account tokens
+
+The rest of this document is the upstream README.
+
+---
+
+## Zalith Launcher 2 (upstream)
 ![Downloads](https://img.shields.io/github/downloads/ZalithLauncher/ZalithLauncher2/total)
 [![Sponsor](https://img.shields.io/badge/sponsor-30363D?logo=GitHub-Sponsors)](https://afdian.com/a/MovTery)
 

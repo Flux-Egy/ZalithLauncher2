@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.account.auth_server
 
+import com.movtery.zalithlauncher.game.account.LEGACY_CLIENT_TOKEN_SEED
 import android.content.Context
 import com.google.gson.Gson
 import com.movtery.zalithlauncher.BuildKeys
@@ -76,7 +77,7 @@ class AuthServerApi(private var baseUrl: String) {
                 version = 1
             ),
             requestUser = true,
-            clientToken = BuildKeys.LAUNCHER_NAME.toUuidStr().replace("-", "")
+            clientToken = LEGACY_CLIENT_TOKEN_SEED.toUuidStr().replace("-", "")
         )
 
         return requestAuth(Gson().toJson(authRequest), "/authserver/authenticate")
