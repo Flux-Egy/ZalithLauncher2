@@ -1118,6 +1118,8 @@ ABI：%2$s
     <string name="advisor_shaders_risky">已安裝光影模組，但此裝置記憶體較小或不支援 Vulkan，影格率可能較低。可嘗試更輕量的光影包或降低解析度比例。</string>
     <string name="advisor_setting_title">首頁顯示智慧建議</string>
     <string name="advisor_setting_summary">基於硬體的建議（記憶體、光影包、驅動）以及上次遊戲的實測影格率</string>
+    <string name="download_error_retry">重試</string>
+    <string name="download_error_resolve_network">網路設定</string>
     <string name="settings_launcher_style_title">啟動器樣式</string>
     <string name="settings_launcher_style_summary">變更啟動器的版面與外觀。所有功能在每種樣式下皆可使用。</string>
     <string name="settings_launcher_style_default">經典（預設）</string>

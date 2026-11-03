@@ -427,6 +427,8 @@ ABI: %2$s
     <string name="advisor_shaders_risky">إضافة التظليل مثبتة لكن ذاكرة الجهاز قليلة أو لا يدعم Vulkan؛ توقّع إطارات منخفضة. جرّب حزمة أخف أو نسبة دقة أقل.</string>
     <string name="advisor_setting_title">المستشار الذكي في الشاشة الرئيسية</string>
     <string name="advisor_setting_summary">اقتراحات حسب العتاد (الذاكرة، حزم التظليل، التعريفات) ومعدل الإطارات المقيس في جلستك الأخيرة</string>
+    <string name="download_error_retry">إعادة المحاولة</string>
+    <string name="download_error_resolve_network">إعدادات الشبكة</string>
     <string name="settings_launcher_style_title">نمط المشغّل</string>
     <string name="settings_launcher_style_summary">غيّر تخطيط المشغّل ومظهره. كل الميزات متاحة في كل نمط.</string>
     <string name="settings_launcher_style_default">الكلاسيكي (الافتراضي)</string>

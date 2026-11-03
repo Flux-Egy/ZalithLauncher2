@@ -2255,6 +2255,8 @@ This package contains native code that runs inside the game. Only install packag
     <string name="advisor_shaders_risky">A shader mod is installed, but this device has little RAM or no Vulkan; expect low FPS. Try a lighter pack or a lower render scale.</string>
     <string name="advisor_setting_title">Smart Advisor on the home screen</string>
     <string name="advisor_setting_summary">Hardware-based suggestions (memory, shader packs, drivers) and the FPS measured in your last session</string>
+    <string name="download_error_retry">Retry</string>
+    <string name="download_error_resolve_network">Network settings</string>
     <string name="settings_launcher_style_title">Launcher style</string>
     <string name="settings_launcher_style_summary">Change the layout and look of the launcher. All features are available in every style.</string>
     <string name="settings_launcher_style_default">Classic (default)</string>

@@ -87,7 +87,11 @@ fun downloadSingleForVersions(
             submitError(
                 ErrorViewModel.ThrowableMessage(
                     title = androidText(R.string.download_assets_install_failed),
-                    message = mapExceptionToMessage(e)
+                    message = mapExceptionToMessage(e),
+                    //重新下载同一文件（断点续传的下载会从已完成的部分继续）
+                    retry = {
+                        downloadSingleForVersions(version, versions, folder, onFileCopied, onFileCancelled, submitError)
+                    }
                 )
             )
         },

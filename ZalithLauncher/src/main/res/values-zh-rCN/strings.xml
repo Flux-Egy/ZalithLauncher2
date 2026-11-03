@@ -1215,6 +1215,8 @@ ABI：%2$s
     <string name="advisor_shaders_risky">已安装光影模组，但此设备内存较小或不支持 Vulkan，帧率可能较低。可尝试更轻量的光影包或降低分辨率比例。</string>
     <string name="advisor_setting_title">主页显示智能建议</string>
     <string name="advisor_setting_summary">基于硬件的建议（内存、光影包、驱动）以及上次游戏的实测帧率</string>
+    <string name="download_error_retry">重试</string>
+    <string name="download_error_resolve_network">网络设置</string>
     <string name="settings_launcher_style_title">启动器样式</string>
     <string name="settings_launcher_style_summary">更改启动器的布局与外观。所有功能在每种样式下均可使用。</string>
     <string name="settings_launcher_style_default">经典（默认）</string>
