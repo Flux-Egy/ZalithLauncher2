@@ -93,6 +93,7 @@ class ControlEditorActivity : BaseAppCompatActivity() {
 
         setContent {
             ZalithLauncherTheme(
+                applyLauncherStyle = false,
                 backgroundViewModel = backgroundViewModel
             ) {
                 val guides = rememberAppGuides()

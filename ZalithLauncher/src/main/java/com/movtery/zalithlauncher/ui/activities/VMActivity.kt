@@ -573,7 +573,8 @@ class VMActivity : BaseAppCompatActivity(), SurfaceTextureListener {
         }
 
         setContent {
-            ZalithLauncherTheme {
+            //游戏内界面保持经典外观，避免样式影响游戏覆盖层的可读性
+            ZalithLauncherTheme(applyLauncherStyle = false) {
                 ObserveFullScreenSetting(AllSettings.gameFullScreen.state)
                 //游戏内菜单切换“请求最高刷新率”后自动重应用策略
                 LaunchedEffect(AllSettings.requestMaxRefreshRate.state) {

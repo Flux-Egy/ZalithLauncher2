@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.theme
 
+import com.movtery.zalithlauncher.ui.theme.style.LauncherStyleTheme
 import android.os.Build
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialExpressiveTheme
@@ -610,6 +611,8 @@ fun ZalithLauncherTheme(
     dynamicColor: Boolean = true,
     backgroundViewModel: BackgroundViewModel? = null,
     festivals: List<Festival> = emptyList(),
+    /** Apply the selected launcher style (Settings > Launcher > Launcher style) to every screen */
+    applyLauncherStyle: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorTheme = AllSettings.launcherColorTheme.state
@@ -684,8 +687,14 @@ fun ZalithLauncherTheme(
         MaterialExpressiveTheme(
             colorScheme = currentDisplayScheme,
             motionScheme = MotionScheme.expressive(),
-            typography = AppTypography,
-            content = content
-        )
+            typography = AppTypography
+        ) {
+            //启动页、错误页、登录等所有界面统一跟随所选样式的配色、形状与字体
+            if (applyLauncherStyle) {
+                LauncherStyleTheme(AllSettings.launcherStyle.state, content)
+            } else {
+                content()
+            }
+        }
     }
 }
