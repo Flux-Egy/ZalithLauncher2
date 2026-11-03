@@ -18,6 +18,11 @@
 
 package com.movtery.zalithlauncher.game.download.engine
 
+import com.movtery.zalithlauncher.path.DOWNLOAD_OKHTTP_CLIENT
+import java.util.concurrent.TimeUnit
+import okhttp3.Response
+import okhttp3.Request
+import okhttp3.OkHttpClient
 import com.movtery.zalithlauncher.path.URL_USER_AGENT
 import com.movtery.zalithlauncher.utils.logging.Logger
 import kotlinx.coroutines.CancellationException
@@ -54,6 +59,9 @@ class ResponseInfo(
         /**
          * 按索引枚举响应头
          */
+        fun of(response: Response): ResponseInfo =
+            ResponseInfo(response.code, response.request.url.toUrl(), response.headers.toMultimap())
+
         fun of(code: Int, url: URL, connection: HttpURLConnection): ResponseInfo {
             val headers = LinkedHashMap<String, MutableList<String>>()
             var index = 0
@@ -335,22 +343,32 @@ object Fetcher {
         }
 
         var currentUri = url
-        var connection: HttpURLConnection?
+        var connection: Response?
         var response: ResponseInfo?
 
         while (true) {
-            val conn = openConnection(currentUri)
+            val request = Request.Builder()
+                .url(currentUri)
+                .header("User-Agent", URL_USER_AGENT)
+                .apply { headers.forEach { (name, value) -> header(name, value) } }
+                .build()
+            val call = client.newCall(request)
+            val resp = try {
+                call.execute()
+            } catch (e: InterruptedIOException) {
+                call.cancel()
+                throw e
+            }
             var keep = false
             try {
-                headers.forEach { (name, value) -> conn.setRequestProperty(name, value) }
-                val code = conn.responseCode
-                response = ResponseInfo.of(code, conn.url, conn)
+                val code = resp.code
+                response = ResponseInfo.of(resp)
 
                 if (code in 300..308 && code != HttpURLConnection.HTTP_NOT_MODIFIED && code != 306) {
                     val seen = redirects ?: mutableListOf<URL>().also { redirects = it }
                     if (seen.size >= MAX_REDIRECTS) throw IOException("Too much redirects")
 
-                    val location = conn.getHeaderField("Location")
+                    val location = resp.header("Location")
                     if (location.isNullOrBlank()) throw IOException("Redirected to an empty location")
 
                     val target = currentUri.toURI().resolve(location).toURL()
@@ -359,14 +377,31 @@ object Fetcher {
                     currentUri = target
                 } else {
                     keep = true
-                    connection = conn
+                    connection = resp
                     break
                 }
             } finally {
-                if (!keep) disconnectQuietly(conn)
+                if (!keep) resp.close()
             }
         }
 
+        //响应在下方所有路径结束时关闭（含提前返回与异常），以便连接回到连接池
+        val finalConnection: Response = connection
+        val finalResponse: ResponseInfo = response
+        return finalConnection.use { resp ->
+            transferResponse(url, resp, finalResponse, resumeRequested, targetFile, sha1, state)
+        }
+    }
+
+    private fun transferResponse(
+        url: URL,
+        connection: Response,
+        response: ResponseInfo,
+        resumeRequested: Boolean,
+        targetFile: File,
+        sha1: String?,
+        state: CandidateState
+    ): AttemptResult {
         val code = response.code
 
         if (resumeRequested && code == 416 /* HTTP_RANGE_NOT_SATISFIABLE */) {
@@ -399,13 +434,8 @@ object Fetcher {
             state.resume = ResumeContext.of(response)
         }
 
-        var inputStream: InputStream? = null
-        var bodyConsumed = false
         try {
-            inputStream = connection.inputStream
-            transfer(state.sink!!, state.resume, inputStream, contentLength, contentEncoding, state::reportBytes)
-            inputStream = null
-            bodyConsumed = true
+            transfer(state.sink!!, state.resume, connection.body.byteStream(), contentLength, contentEncoding, state::reportBytes)
         } catch (e: Throwable) {
             if (state.sink?.broken == true) {
                 //写盘失败（磁盘错误等）：整个上下文作废，重试从零开始
@@ -413,9 +443,6 @@ object Fetcher {
                 state.discardSink()
             }
             throw e
-        } finally {
-            runCatching { inputStream?.close() }
-            if (!bodyConsumed) disconnectQuietly(connection)
         }
 
         try {
@@ -458,21 +485,22 @@ object Fetcher {
         }
     }
 
-    private fun openConnection(url: URL): HttpURLConnection {
-        val connection = url.openConnection() as HttpURLConnection
-        connection.connectTimeout = TIMEOUT_MILLIS
-        connection.readTimeout = TIMEOUT_MILLIS
-        connection.instanceFollowRedirects = false
-        connection.setRequestProperty("User-Agent", URL_USER_AGENT)
-        return connection
+    /**
+     * 下载用 OkHttp 客户端：复用全局下载客户端的连接池、DNS 回退（ResilientDns）与 TLS 配置，
+     * 并在失效的复用连接上自动重试（retryOnConnectionFailure），这正是此前
+     * HttpURLConnection 频繁出现 "unexpected end of stream" 的场景。
+     * 重定向由 [attempt] 手动跟随；Accept-Encoding 由本类显式设置，因此 OkHttp 不会自动解压，
+     * gzip 仍由 [ContentEncoding] 处理。
+     */
+    private val client: OkHttpClient by lazy {
+        DOWNLOAD_OKHTTP_CLIENT.newBuilder()
+            .followRedirects(false)
+            .followSslRedirects(false)
+            .connectTimeout(TIMEOUT_MILLIS.toLong(), TimeUnit.MILLISECONDS)
+            .readTimeout(TIMEOUT_MILLIS.toLong(), TimeUnit.MILLISECONDS)
+            .build()
     }
 
     private fun isHttpUri(url: URL): Boolean =
         url.protocol.equals("http", ignoreCase = true) || url.protocol.equals("https", ignoreCase = true)
-
-    private fun disconnectQuietly(connection: HttpURLConnection?) {
-        if (connection == null) return
-        runCatching { connection.errorStream?.close() }
-        connection.disconnect()
-    }
 }

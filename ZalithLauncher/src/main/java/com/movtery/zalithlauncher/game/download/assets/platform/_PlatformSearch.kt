@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.game.download.assets.platform
 
+import com.movtery.zalithlauncher.game.download.assets.platform.curseforge.CurseForgeApiKey
+import com.movtery.zalithlauncher.game.download.assets.platform.curseforge.CurseForgeProxy
 import android.util.Log
 import com.movtery.zalithlauncher.game.addons.mirror.MirrorPriority
 import com.movtery.zalithlauncher.game.addons.mirror.resolveMirrorPriority
@@ -114,10 +116,15 @@ fun mirroredCurseForgeSource(
 ): List<CurseForgeSearcher> {
     val source = resolveMirrorPriority(AllSettings.assetPlatformSource.getValue(), mainland = enabledMirror)
     val mirrorSource = mirrorCurseForgeSearcher.takeIf { enabledMirror }
+    //用户自建代理：没有可用 API Key 时优先使用代理，否则作为官方源失败后的回退
+    val proxy = CurseForgeProxy.apiRoot(AllSettings.curseForgeProxyUrl.getValue())
+        ?.let { CurseForgeSearcher(api = it, source = "CurseForge proxy") }
+    val hasKey = CurseForgeApiKey.source() != CurseForgeApiKey.Source.NONE
+    val officialAndProxy = if (hasKey) listOfNotNull(curseForgeSearcher, proxy) else listOfNotNull(proxy, curseForgeSearcher)
     return when (source) {
-        MirrorPriority.OFFICIAL -> listOf(curseForgeSearcher)
+        MirrorPriority.OFFICIAL -> officialAndProxy
         MirrorPriority.MIRROR_FIRST ->
-            listOfNotNull(mirrorSource, curseForgeSearcher)
+            listOfNotNull(mirrorSource) + officialAndProxy
     }
 }
 

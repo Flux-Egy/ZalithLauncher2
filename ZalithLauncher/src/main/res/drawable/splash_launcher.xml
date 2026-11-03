@@ -1,26 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Zalith Launcher 2
+  ~ Flux Launcher (based on Zalith Launcher 2)
   ~ Copyright (C) 2025-2026 MovTery <movtery228@qq.com> and contributors
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
   ~ the Free Software Foundation, either version 3 of the License, or
   ~ (at your option) any later version.
-  ~
-  ~ This program is distributed in the hope that it will be useful,
-  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  ~ See the GNU General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
   -->
-
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:drawable="@drawable/ic_launcher_foreground"
-        android:width="220dp"
-        android:height="220dp"
-        android:gravity="center"/>
-</layer-list>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M54,18 A36,36 0 1,1 53.99,18 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="18" android:startY="18" android:endX="90" android:endY="90"
+                android:startColor="#FF4F46E5" android:endColor="#FF06B6D4"/>
+        </aapt:attr>
+    </path>
+    <group android:translateX="-4" android:pivotX="54" android:pivotY="54" android:scaleX="0.8" android:scaleY="0.8">
+        <path android:pathData="M46.5,37 L46.5,71" android:strokeWidth="9" android:strokeLineCap="round" android:strokeColor="#FFFFFFFF"/>
+        <path android:pathData="M46.5,37 L69,37" android:strokeWidth="9" android:strokeLineCap="round" android:strokeColor="#FFFFFFFF"/>
+        <path android:pathData="M46.5,54 L62,54" android:strokeWidth="9" android:strokeLineCap="round" android:strokeColor="#FFFFFFFF"/>
+        <path android:pathData="M79,37 L84,37" android:strokeWidth="5" android:strokeLineCap="round" android:strokeColor="#FFFFFFFF" android:strokeAlpha="0.55"/>
+        <path android:pathData="M71,54 L74,54" android:strokeWidth="5" android:strokeLineCap="round" android:strokeColor="#FFFFFFFF" android:strokeAlpha="0.35"/>
+    </group>
+</vector>

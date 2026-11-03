@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.path
 
+import com.movtery.zalithlauncher.game.download.assets.platform.curseforge.CurseForgeApiKey
 import com.movtery.zalithlauncher.BuildConfig
 import com.movtery.zalithlauncher.BuildKeys
 import com.movtery.zalithlauncher.utils.network.ResilientDns
@@ -74,12 +75,13 @@ private fun isCurseForgeHost(host: String): Boolean =
  * An [Interceptor] for CurseForge API requests.
  *
  * It automatically injects the `x-api-key` header when the request targets a
- * CurseForge host, provided the API key is not blank.
+ * CurseForge host, provided the API key is not blank. The user's own key (Settings)
+ * takes precedence over the key embedded at build time, see [CurseForgeApiKey].
  */
 private val CURSEFORGE_INTERCEPTOR = Interceptor { chain ->
     val request = chain.request()
     if (isCurseForgeHost(request.url.host)) {
-        val apiKey = BuildKeys.CURSEFORGE_API
+        val apiKey = CurseForgeApiKey.effective()
         if (apiKey.isNotBlank()) {
             val newRequest = request.newBuilder()
                 .header("x-api-key", apiKey)
@@ -144,7 +146,7 @@ val GLOBAL_CLIENT = HttpClient(OkHttp) {
 }.apply {
     requestPipeline.intercept(HttpRequestPipeline.State) {
         if (isCurseForgeHost(context.url.host)) {
-            val apiKey = BuildKeys.CURSEFORGE_API
+            val apiKey = CurseForgeApiKey.effective()
             if (apiKey.isNotBlank()) {
                 context.header("x-api-key", apiKey)
             }

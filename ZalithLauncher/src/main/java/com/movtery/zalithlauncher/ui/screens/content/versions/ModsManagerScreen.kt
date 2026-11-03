@@ -1590,10 +1590,17 @@ private fun ModLoader.toDepLoader(): DepLoader? = when (this) {
 @Composable
 private fun ModIssue.describe(): String = when (this) {
     is ModIssue.MissingDependency -> stringResource(R.string.mods_issue_missing, mod.name, dependencyId)
-    is ModIssue.Incompatible -> stringResource(
-        if (hard) R.string.mods_issue_breaks else R.string.mods_issue_conflicts,
-        mod.name, other.name
+    is ModIssue.VersionMismatch -> stringResource(
+        R.string.mods_issue_version_mismatch, mod.name, dependencyId, requiredRange, found.joinToString()
     )
+    is ModIssue.Incompatible -> {
+        val base = stringResource(
+            if (hard) R.string.mods_issue_breaks else R.string.mods_issue_conflicts,
+            mod.name, other.name
+        )
+        //附上声明的版本范围与实际安装的版本，便于判断该升级哪一个
+        if (range != null) base + " " + stringResource(R.string.mods_issue_range_detail, range, other.version.orEmpty()) else base
+    }
     is ModIssue.Duplicate -> stringResource(R.string.mods_issue_duplicate, id, mods.joinToString { it.fileName })
     is ModIssue.WrongLoader -> stringResource(R.string.mods_issue_wrong_loader, mod.name, instanceLoader.displayName)
 }

@@ -144,6 +144,32 @@ class PluginPackageInspectorTest {
         assertInvalid(zip("meta.json" to meta.b(), "vulkan.ad07XX.so" to arm32), contains = "armeabi-v7a")
     }
 
+    @Test
+    fun panVkPackagesKeepAPanfrostName() {
+        // meta.json naming a PanVK library
+        val m = """{"schemaVersion":1,"name":"PanVK 25.1","libraryName":"libvulkan_panfrost.so","driverVersion":"Vulkan 1.1"}"""
+        val d = PluginPackageInspector.inspect(zip("meta.json" to m.b(), "libvulkan_panfrost.so" to arm64Aligned), "arm64-v8a", 34)
+        assertEquals(PluginPackageInspector.PANVK_INSTALL_NAME, d.libraries.single().installName)
+        // gpu hint in meta.json
+        val m2 = """{"name":"PanVK","libraryName":"vulkan.mali.so","gpu":"mali"}"""
+        val d2 = PluginPackageInspector.inspect(zip("meta.json" to m2.b(), "vulkan.mali.so" to arm64Aligned), "arm64-v8a", 34)
+        assertEquals(PluginPackageInspector.PANVK_INSTALL_NAME, d2.libraries.single().installName)
+    }
+
+    @Test
+    fun bareDriverZipsAreAccepted() {
+        val panvk = PluginPackageInspector.inspect(zip("lib/arm64-v8a/libvulkan_panfrost.so" to arm64Aligned), "arm64-v8a", 34)
+        assertEquals(PluginPackageInspector.Type.DRIVER, panvk.type)
+        assertEquals(PluginPackageInspector.PANVK_INSTALL_NAME, panvk.libraries.single().installName)
+        val turnip = PluginPackageInspector.inspect(zip("libvulkan_freedreno.so" to arm64Aligned), "arm64-v8a", 34)
+        assertEquals(PluginPackageInspector.DRIVER_INSTALL_NAME, turnip.libraries.single().installName)
+        // two candidate libraries: ambiguous, rejected
+        assertInvalid(
+            zip("a/libvulkan_panfrost.so" to arm64Aligned, "b/libvulkan_freedreno.so" to arm64Aligned),
+            contains = "Not a renderer package"
+        )
+    }
+
     // -------------------------------------------------------------- general
 
     @Test

@@ -170,7 +170,8 @@ object LocalPluginStore {
                                 name = record.name,
                                 summary = context.getString(R.string.local_plugin_imported_summary),
                                 path = dir,
-                                isLauncher = false
+                                isLauncher = false,
+                                vulkanLibrary = record.libraries.firstOrNull()?.name
                             )
                         )
                     }

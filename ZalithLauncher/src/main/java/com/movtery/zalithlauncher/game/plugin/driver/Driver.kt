@@ -29,6 +29,8 @@ class Driver(
     val summary: String? = null,
     val path: String,
     val isLauncher: Boolean,
+    /** Vulkan library file inside [path] for imported drivers (Turnip or PanVK); null = default */
+    val vulkanLibrary: String? = null,
 ): ApkPlugin(
     packageName = id,
     appName = appName,

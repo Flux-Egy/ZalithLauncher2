@@ -31,7 +31,8 @@ val defaultCurseForgeApiKey = project.findProperty("curseforge_api_key") as? Str
 val projectArch: String = System.getProperty("arch", "all")
 
 fun getKeyFromLocal(envKey: String, fileName: String? = null, default: String? = null): String {
-    val key = System.getenv(envKey)
+    //GitHub Actions passes an empty string for a missing secret; treat it as unset
+    val key = System.getenv(envKey)?.takeIf { it.isNotBlank() }
     return key ?: fileName?.let {
         val file = File(rootDir, fileName)
         if (file.canRead() && file.isFile) file.readText() else null
@@ -207,7 +208,7 @@ androidComponents {
                 }
 
                 (output.getFilter(ABI)?.identifier ?: "all").let { abi ->
-                    val baseName = "$launcherName-${if (variant.buildType == "release") launcherVersionName else "Debug-$launcherVersionName"}"
+                    val baseName = "${launcherAPPName.replace(" ", "")}-${if (variant.buildType == "release") launcherVersionName else "Debug-$launcherVersionName"}"
                     output.outputFileName = if (abi == "all") "$baseName.apk" else "$baseName-$abi.apk"
                 }
             }

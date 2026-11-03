@@ -54,12 +54,28 @@ class ErrorViewModel : ViewModel() {
             MaterialAlertDialogBuilder(context)
                 .setTitle(tm.title.toAndroidString(context))
                 .setMessage(tm.message.toAndroidString(context))
-                .setPositiveButton(R.string.generic_confirm) { dialog, _ ->
-                    dialog.dismiss()
+                .apply {
+                    val retry = tm.retry
+                    if (retry != null) {
+                        setPositiveButton(R.string.download_error_retry) { dialog, _ ->
+                            dialog.dismiss()
+                            retry()
+                        }
+                        setNegativeButton(R.string.generic_close) { dialog, _ -> dialog.dismiss() }
+                    } else {
+                        setPositiveButton(R.string.generic_confirm) { dialog, _ -> dialog.dismiss() }
+                    }
                 }.setCancelable(false)
                 .showThemed()
         }
     }
 
-    data class ThrowableMessage(val title: AndroidStringText, val message: AndroidStringText)
+    /**
+     * @param retry when set, the dialog offers "Retry" (e.g. re-runs a failed download)
+     */
+    data class ThrowableMessage(
+        val title: AndroidStringText,
+        val message: AndroidStringText,
+        val retry: (() -> Unit)? = null
+    )
 }

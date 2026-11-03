@@ -37,6 +37,7 @@ import com.movtery.cardgrid.model.CardType
 import com.movtery.zalithlauncher.BuildConfig
 import com.movtery.zalithlauncher.BuildKeys
 import com.movtery.zalithlauncher.R
+import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.components.BackgroundCard
 import com.movtery.zalithlauncher.ui.screens.content.home.server.ServerCardContent
 import com.movtery.zalithlauncher.ui.screens.content.home.version.VersionCardContent
@@ -96,9 +97,13 @@ object HomeCards {
     val userCardTypes: List<CardType> = listOf(versionCardType, serverCardType)
 
     /** 系统卡片（不可变更） */
+    @Composable
     fun systemCards(): List<SystemCard> = buildList {
         if (BuildConfig.DEBUG) {
             add(debugWarningCard())
+        }
+        if (AllSettings.showSmartAdvisor.state) {
+            add(SystemCard(id = "system_smart_advisor") { SmartAdvisorCard() })
         }
     }
 

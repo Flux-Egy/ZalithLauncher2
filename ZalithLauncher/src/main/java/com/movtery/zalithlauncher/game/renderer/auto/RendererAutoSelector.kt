@@ -47,6 +47,23 @@ data class RendererCompat(
 
     data class Rule(val id: String, val condition: Condition, val prefer: List<String>)
 
+    /**
+     * Adds user rules (Extras/renderer_rules) in front of the bundled ones, so they are
+     * evaluated first. Renderer constraints can only be added for renderers the bundled
+     * file does not describe: user files cannot lift a safety constraint such as
+     * "Freedreno only on Adreno".
+     */
+    fun withExtras(extras: List<Pair<String, RendererCompat>>): RendererCompat {
+        if (extras.isEmpty()) return this
+        val extraRules = extras.flatMap { (source, compat) ->
+            compat.rules.map { it.copy(id = "extra:$source:${it.id}") }
+        }
+        val extraRenderers = extras.flatMap { it.second.renderers.entries }
+            .filter { it.key !in renderers }
+            .associate { it.key to it.value }
+        return copy(renderers = renderers + extraRenderers, rules = extraRules + rules)
+    }
+
     companion object {
         const val SUPPORTED_SCHEMA = 1
 

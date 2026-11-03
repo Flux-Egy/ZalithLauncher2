@@ -90,8 +90,8 @@ private sealed interface GameInstallOperation {
     data class WarningForNotification(val info: GameDownloadInfo) : GameInstallOperation
     /** 警告正在使用流量 */
     data class WarningForMobileData(val info: GameDownloadInfo) : GameInstallOperation
-    /** 游戏安装出现异常 */
-    data class Error(val th: Throwable) : GameInstallOperation
+    /** 游戏安装出现异常；[info] 用于“重试” */
+    data class Error(val th: Throwable, val info: GameDownloadInfo? = null) : GameInstallOperation
     /** 游戏已成功安装 */
     data object Success : GameInstallOperation
 }
@@ -133,7 +133,7 @@ private class GameDownloadViewModel: ViewModel() {
                 },
                 onError = { th ->
                     installer = null
-                    installOperation = GameInstallOperation.Error(th)
+                    installOperation = GameInstallOperation.Error(th, info)
                     refreshVersionNameCheck()
                     onStop()
                 },
@@ -361,31 +361,11 @@ private fun GameInstallOperation(
                     else -> th.localizedMessage ?: th.message ?: th::class.qualifiedName ?: "Unknown error"
                 }
             }
-            val dismiss = {
-                updateOperation(GameInstallOperation.None)
-            }
-            AlertDialog(
-                onDismissRequest = dismiss,
-                title = {
-                    Text(text = stringResource(R.string.download_install_error_title))
-                },
-                text = {
-                    val scrollState = rememberScrollState()
-                    Column(
-                        modifier = Modifier
-                            .fadeEdge(state = scrollState)
-                            .verticalScrollWithBar(state = scrollState),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(text = stringResource(R.string.download_install_error_message))
-                        Text(text = message)
-                    }
-                },
-                confirmButton = {
-                    Button(onClick = dismiss) {
-                        MarqueeText(text = stringResource(R.string.generic_confirm))
-                    }
-                }
+            InstallErrorDialog(
+                message = message,
+                error = th,
+                onRetry = gameInstallOperation.info?.let { info -> { onInstall(info) } },
+                onDismiss = { updateOperation(GameInstallOperation.None) }
             )
         }
         is GameInstallOperation.Success -> {

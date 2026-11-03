@@ -15,7 +15,8 @@
 //#define ADRENO_POSSIBLE
 #ifdef ADRENO_POSSIBLE
 
-bool checkAdrenoGraphics() {
+/* GPU vendor of the default EGL display: 1 = Qualcomm Adreno, 2 = ARM Mali, 0 = other/unknown */
+static int queryGpuVendor() {
     EGLDisplay eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (eglDisplay == EGL_NO_DISPLAY || eglInitialize(eglDisplay, NULL, NULL) != EGL_TRUE) 
         return false;
@@ -51,13 +52,15 @@ bool checkAdrenoGraphics() {
     const char* vendor = (const char*)glGetString(GL_VENDOR);
     const char* renderer = (const char*)glGetString(GL_RENDERER);
 
-    bool is_adreno = (vendor && renderer && strcmp(vendor, "Qualcomm") == 0 && strstr(renderer, "Adreno") != NULL);
+    int gpu = 0;
+    if (vendor && renderer && strcmp(vendor, "Qualcomm") == 0 && strstr(renderer, "Adreno") != NULL) gpu = 1;
+    else if (vendor && renderer && strcmp(vendor, "ARM") == 0 && strstr(renderer, "Mali") != NULL) gpu = 2;
 
     eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(eglDisplay, context);
     eglTerminate(eglDisplay);
 
-    return is_adreno;
+    return gpu;
 }
 
 /**
@@ -89,16 +92,36 @@ static uint32_t turnipDeviceCount(void* libvulkan) {
     return result == VK_SUCCESS ? count : 0;
 }
 
+bool checkAdrenoGraphics() {
+    return queryGpuVendor() == 1;
+}
+
+/*
+ * Loads a custom Vulkan HAL driver (Mesa Turnip for Adreno, Mesa PanVK for Mali) through
+ * the linker hook. The library comes from driver_path, else $VULKAN_DRIVER_LIB, else the
+ * bundled Turnip name. A driver is only loaded on the GPU family it is built for; anything
+ * else returns NULL and the caller uses the system driver.
+ */
 void* loadTurnipVulkan(const char* driver_path, const char* native_dir, const char* cache_dir) {
-    if (!checkAdrenoGraphics())
+    const char* env_lib = getenv("VULKAN_DRIVER_LIB");
+    const char* requested = (driver_path && strlen(driver_path) > 0) ? driver_path
+                          : (env_lib && strlen(env_lib) > 0) ? env_lib
+                          : "libvulkan_freedreno.so";
+    bool is_panvk = strstr(requested, "panfrost") != NULL;
+    int gpu = queryGpuVendor();
+    if (!(gpu == 1 && !is_panvk) && !(gpu == 2 && is_panvk)) {
+        if (is_panvk || gpu == 1) {
+            printf("AdrenoSupp: %s does not match this GPU; using the system driver\n", requested);
+        }
         return NULL;
+    }
 
     if (!native_dir || !linker_ns_load(native_dir)) return NULL;
 
     void* linkerhook = linker_ns_dlopen("liblinkerhook.so", RTLD_LOCAL | RTLD_NOW);
     if (!linkerhook) return NULL;
 
-    const char* target_driver = (driver_path && strlen(driver_path) > 0) ? driver_path : "libvulkan_freedreno.so";
+    const char* target_driver = requested;
     void* turnip_driver_handle = linker_ns_dlopen(target_driver, RTLD_LOCAL | RTLD_NOW);
 
     if (!turnip_driver_handle) {

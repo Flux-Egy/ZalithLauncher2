@@ -18,6 +18,12 @@
 
 package com.movtery.zalithlauncher.ui.screens.game
 
+import kotlinx.coroutines.NonCancellable
+import com.movtery.zalithlauncher.setting.enums.ResolutionRule
+import com.movtery.zalithlauncher.game.renderer.upscale.GameUpscaler
+import com.movtery.zalithlauncher.game.renderer.Renderers
+import com.movtery.zalithlauncher.game.advisor.FpsSessionStore
+import com.movtery.zalithlauncher.game.advisor.FpsRecord
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -592,6 +598,41 @@ fun GameScreen(
         eventViewModel = eventViewModel,
         getUserName = getAccountName
     )
+
+    //记录本次游戏的实测帧率（中位数 / 10% 低值），供启动页“上次实测帧率”显示
+    LaunchedEffect(version) {
+        withContext(Dispatchers.Default) {
+            val samples = ArrayList<Int>()
+            val config = buildString {
+                append(runCatching { Renderers.getCurrentRenderer().getRendererName() }.getOrDefault("?"))
+                if (AllSettings.resolutionRule.getValue() == ResolutionRule.PERCENTAGE) {
+                    append(" · ").append(AllSettings.resolutionRatio.getValue()).append('%')
+                }
+                val upscaler = AllSettings.gameUpscaler.getValue()
+                if (upscaler != GameUpscaler.OFF) append(" · ").append(upscaler.name)
+            }
+            fun persist() {
+                FpsRecord.fromSamples(samples, config, System.currentTimeMillis())?.let {
+                    FpsSessionStore.save(context, version.getVersionName(), it)
+                }
+            }
+            try {
+                //跳过加载阶段
+                delay(20_000L)
+                while (true) {
+                    val fps = CallbackBridge.getCurrentFps()
+                    if (fps > 0) {
+                        samples.add(fps)
+                        if (samples.size > 1800) samples.removeAt(0)
+                    }
+                    if (samples.size % 30 == 0 && samples.isNotEmpty()) persist()
+                    delay(2_000L)
+                }
+            } finally {
+                withContext(NonCancellable) { persist() }
+            }
+        }
+    }
 
     LaunchedEffect(viewModel.isEditingLayout, viewModel.gameMenuState) {
         //向VMActivity同步状态，编辑控制布局或打开游戏菜单时，不会继续处理按键事件

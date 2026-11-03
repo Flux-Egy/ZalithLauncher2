@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.account.microsoft
 
+import com.movtery.zalithlauncher.game.account.LEGACY_CLIENT_TOKEN_SEED
 import com.movtery.zalithlauncher.BuildKeys
 import com.movtery.zalithlauncher.game.account.Account
 import com.movtery.zalithlauncher.game.account.AccountType
@@ -441,7 +442,7 @@ private suspend fun createAccount(
         this.accessToken = authResponse.accessToken
         this.expiresAt = System.currentTimeMillis() + authResponse.expiresIn * 1000
         this.accountType = AccountType.MICROSOFT.tag
-        this.clientToken = BuildKeys.LAUNCHER_NAME.toUuidStr().replace("-", "")
+        this.clientToken = LEGACY_CLIENT_TOKEN_SEED.toUuidStr().replace("-", "")
         this.profileId = profileId
         this.refreshToken = refreshToken.ifEmpty { "None" }
         this.xUid = uhs

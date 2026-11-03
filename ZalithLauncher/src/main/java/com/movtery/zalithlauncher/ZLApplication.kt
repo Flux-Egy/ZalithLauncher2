@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher
 
+import android.os.Build
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import com.movtery.zalithlauncher.game.renderer.auto.GpuDetector
@@ -31,6 +32,7 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.disk.DiskCache
+import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
 import coil3.memory.MemoryCache
 import coil3.network.ktor3.KtorNetworkFetcherFactory
@@ -149,7 +151,8 @@ class ZLApplication : Application(), SingletonImageLoader.Factory {
             }
             .components {
                 add(KtorNetworkFetcherFactory(IMAGE_LOADER_CLIENT))
-                add(GifDecoder.Factory())
+                //Android 9+：平台 AnimatedImageDrawable 按目标尺寸解码、在 RenderThread 播放，内存更省
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) add(AnimatedImageDecoder.Factory()) else add(GifDecoder.Factory())
                 add(SvgDecoder.Factory())
             }
             .crossfade(true)

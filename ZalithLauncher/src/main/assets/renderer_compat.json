@@ -17,6 +17,12 @@
   },
   "rules": [
     {
+      "id": "shaders-adreno-8xx-no-turnip",
+      "when": { "shaderMod": true, "minMc": "1.17", "gpuVendors": ["ADRENO"], "minGpuModel": 800 },
+      "prefer": ["opengles3_mobileglues", "opengles3_desktopgl_zink_kopper"],
+      "note": "fact (device-tested on Adreno 825): the bundled Turnip (Mesa 24.3) exposes no Vulkan device on Adreno 8xx, so Zink would run on the Qualcomm driver; MobileGlues is preferred. Without shaders the default rule picks NG-GL4ES (Krypton)."
+    },
+    {
       "id": "shaders-adreno-vulkan",
       "when": { "shaderMod": true, "minMc": "1.17", "gpuVendors": ["ADRENO"], "minGpuModel": 600 },
       "prefer": ["opengles3_desktopgl_zink_kopper", "opengles3_mobileglues"],

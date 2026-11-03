@@ -18,6 +18,9 @@
 
 package com.movtery.zalithlauncher.setting
 
+import com.movtery.zalithlauncher.game.renderer.upscale.GameUpscaler
+import com.movtery.zalithlauncher.ui.theme.style.LauncherStyle
+import com.movtery.zalithlauncher.ui.theme.style.ThemeFont
 import android.os.Build
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -88,6 +91,16 @@ object AllSettings : SettingsRegistry() {
      * 分辨率规则
      */
     val resolutionRule = enumSetting("resolutionRule", ResolutionRule.PERCENTAGE)
+
+    /**
+     * 游戏画面放大方式（Android 13+，见 GameUpscalerEffect）
+     */
+    val gameUpscaler = enumSetting("gameUpscaler", GameUpscaler.OFF)
+
+    /**
+     * CAS 锐化强度（0~100）
+     */
+    val gameUpscalerSharpness = intSetting("gameUpscalerSharpness", 50, 0..100)
 
     /**
      * 自定义分辨率宽度，0 表示尚未初始化
@@ -419,6 +432,29 @@ object AllSettings : SettingsRegistry() {
     val launcherDarkMode = enumSetting("launcherDarkMode", DarkMode.FollowSystem)
 
     /**
+     * 启动器整体外观样式（默认 / PC 启动器 / Modrinth 风格），见 LauncherStyle
+     */
+    val launcherStyle = enumSetting("launcherStyle", LauncherStyle.ZALITH_DEFAULT)
+
+    /** 主页显示“智能建议”卡片 */
+    val showSmartAdvisor = boolSetting("showSmartAdvisor", true)
+
+    /** 自定义主题：布局（LauncherStyle 中除 CUSTOM 以外的项） */
+    val customThemeLayout = enumSetting("customThemeLayout", LauncherStyle.ZALITH_DEFAULT)
+
+    /** 自定义主题：次要颜色（ARGB），0 表示由主色自动推导 */
+    val customThemeSecondary = intSetting("customThemeSecondary", 0)
+
+    /** 自定义主题：圆角大小（dp） */
+    val customThemeCornerRadius = intSetting("customThemeCornerRadius", 12, 0..32)
+
+    /** 自定义主题：字体 */
+    val customThemeFont = enumSetting("customThemeFont", ThemeFont.DEFAULT)
+
+    /** 自定义主题：名称（用于导出） */
+    val customThemeName = stringSetting("customThemeName", "")
+
+    /**
      * 启动器语言
      */
     val launcherLanguage = enumSetting("launcherLanguage", AppLanguage.FOLLOW_SYSTEM)
@@ -495,6 +531,16 @@ object AllSettings : SettingsRegistry() {
         MirrorSourceType.AUTO,
         MirrorSourceType.LEGACY_NAMES
     )
+
+    /**
+     * 用户自行提供的 CurseForge API Key（经 Android Keystore 加密存储，见 CurseForgeApiKey）
+     */
+    val curseForgeUserApiKey = stringSetting("curseForgeUserApiKey", "")
+
+    /**
+     * 用户自建的 CurseForge API 代理地址（代理在服务端添加 API Key，见 tools/curseforge-proxy）
+     */
+    val curseForgeProxyUrl = stringSetting("curseForgeProxyUrl", "")
 
     //Control
     /**

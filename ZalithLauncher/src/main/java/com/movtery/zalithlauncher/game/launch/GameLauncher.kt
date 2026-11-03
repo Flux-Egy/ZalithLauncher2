@@ -209,7 +209,10 @@ class GameLauncher(
     override fun initEnv(screenSize: IntSize): MutableMap<String, String> {
         val envMap = super.initEnv(screenSize)
 
-        envMap["DRIVER_PATH"] = DriverPluginManager.getDriver(version.getDriver()).path
+        val driver = DriverPluginManager.getDriver(version.getDriver())
+        envMap["DRIVER_PATH"] = driver.path
+        //导入的驱动（Turnip 或 PanVK）告知加载器库名；加载器只在匹配的 GPU 上使用它
+        driver.vulkanLibrary?.let { envMap["VULKAN_DRIVER_LIB"] = it }
 
         checkAndUsedJSPH(envMap, runtime)
         version.getVersionInfo()?.loaderInfos?.forEach { info ->

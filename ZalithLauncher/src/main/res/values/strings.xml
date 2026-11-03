@@ -859,7 +859,7 @@
     <!-- Warning dialog on game launch; %s is the renderer name, which does not support this game version -->
     <string name="renderer_version_unsupported_warning">The current renderer %s does not support this game version. Continuing to use it may cause rendering errors or crashes! Are you sure you want to proceed?</string>
     <string name="local_plugin_import_title">Import renderer or driver package</string>
-    <string name="local_plugin_import_summary">Install a renderer (renderer.json) or a Turnip Vulkan driver (AdrenoTools meta.json) from a .zip file</string>
+    <string name="local_plugin_import_summary">Install a renderer (renderer.json) or a Vulkan driver from a .zip file: Turnip for Adreno or PanVK for Mali (AdrenoTools meta.json, or just the driver library)</string>
     <string name="local_plugin_imported_summary">Imported package</string>
     <string name="local_plugin_installed_title">Imported packages (%1$d)</string>
     <string name="local_plugin_installed_summary">Renderers and drivers imported from .zip files</string>
@@ -874,7 +874,7 @@ ABI: %2$s
 
 This package contains native code that runs inside the game. Only install packages from sources you trust.</string>
     <string name="local_plugin_type_renderer">Renderer</string>
-    <string name="local_plugin_type_driver">Vulkan driver (Turnip)</string>
+    <string name="local_plugin_type_driver">Vulkan driver (Turnip / PanVK)</string>
     <string name="local_plugin_warning_16k">Warning: %1$s is not aligned to 16 KB pages and may fail to load on devices that use 16 KB pages.</string>
     <string name="local_plugin_invalid">This package cannot be imported: %1$s</string>
     <string name="local_plugin_installed_ok">%1$s was installed</string>
@@ -1541,6 +1541,8 @@ This package contains native code that runs inside the game. Only install packag
     <string name="mods_manage_no_loader">No mod loader for the current version, mods cannot be used</string>
     <string name="mods_issues_title">Mod problems found (%1$d)</string>
     <string name="mods_issue_missing">%1$s requires %2$s, which is not installed</string>
+    <string name="mods_issue_version_mismatch">%1$s requires %2$s %3$s, but %4$s is installed. Install a matching %2$s version, or a version of %1$s that supports it.</string>
+    <string name="mods_issue_range_detail">(affects %1$s; installed: %2$s)</string>
     <string name="mods_issue_breaks">%1$s is incompatible with %2$s</string>
     <string name="mods_issue_conflicts">%1$s may not work well with %2$s</string>
     <string name="mods_issue_duplicate">%1$s is installed more than once: %2$s</string>
@@ -2214,6 +2216,95 @@ This package contains native code that runs inside the game. Only install packag
     <string name="settings_launcher_color_theme_style">Palette Style</string>
     <!-- Title of the dark mode picker in Launcher settings -->
     <string name="settings_launcher_dark_mode_title">Dark Mode</string>
+    <string name="curseforge_api_key_missing">CurseForge needs an API key, and this build doesn’t include one. Add your own key or a CurseForge proxy in Settings → Launcher, or browse Modrinth instead.</string>
+    <string name="curseforge_api_key_rejected">CurseForge rejected the API key (403). Check the key in Settings → Launcher → CurseForge API key.</string>
+    <string name="settings_curseforge_proxy_title">CurseForge proxy (optional)</string>
+    <string name="settings_curseforge_proxy_summary">A server that adds an API key for you, e.g. your own Cloudflare Worker (tools/curseforge-proxy in the source). Used when this build has no key, or when CurseForge fails.</string>
+    <string name="settings_curseforge_api_key_title">CurseForge API key</string>
+    <string name="settings_curseforge_api_key_user">Using your own key (stored encrypted)</string>
+    <string name="settings_curseforge_api_key_builtin">Using the key built into this version. You can set your own.</string>
+    <string name="settings_curseforge_api_key_none">Not set. CurseForge browsing and downloads won’t work until you add a key.</string>
+    <string name="settings_curseforge_api_key_label">API key (leave empty to remove yours)</string>
+    <string name="settings_curseforge_api_key_help">Get a free key at console.curseforge.com. It is stored encrypted on this device and only sent to CurseForge.</string>
+    <string name="settings_upscaler_title">Upscaling</string>
+    <string name="settings_upscaler_summary">How the game image (rendered at the resolution scale above) is brought to screen size. Lower the scale for more FPS; an upscaler keeps it sharper.</string>
+    <string name="settings_upscaler_unsupported">Requires Android 13 or newer</string>
+    <string name="settings_upscaler_off">Off (plain stretch)</string>
+    <string name="settings_upscaler_sgsr">Snapdragon GSR 1</string>
+    <string name="settings_upscaler_cas">Sharpen (AMD CAS)</string>
+    <string name="settings_upscaler_fsr1">AMD FSR 1</string>
+    <string name="settings_upscaler_fsr1_desc" formatted="false">Edge-adaptive upscaling (EASU) plus sharpening (RCAS). Works on every GPU; best below 100 % scale.</string>
+    <string name="settings_upscaler_off_desc">Plain bilinear stretch, as before</string>
+    <string name="settings_upscaler_sgsr_desc" formatted="false">Edge-aware upscaling from the lower resolution, one shader pass. Best below 100 % scale.</string>
+    <string name="settings_upscaler_cas_desc">Contrast-adaptive sharpening after the stretch. Works at any scale.</string>
+    <string name="settings_upscaler_recommended">recommended</string>
+    <string name="settings_upscaler_recommended_for">recommended for %1$s</string>
+    <string name="settings_upscaler_sharpness">Sharpness</string>
+    <string name="settings_performance_preset_title">Performance preset</string>
+    <string name="settings_performance_preset_summary" formatted="false">Render at 50 % resolution, upscale with the recommended upscaler and keep the tuned GC flags on. Every value can be changed afterwards.</string>
+    <string name="settings_performance_preset_applied_detail">Best settings applied: %1$.1f GB RAM, %2$d%% render scale, %3$s</string>
+    <string name="advisor_upscaler">Best upscaler for this GPU: %1$s (Renderer settings › Upscaling)</string>
+    <string name="settings_performance_preset_applied">Performance preset applied</string>
+    <string name="advisor_title">Smart Advisor</string>
+    <string name="advisor_hide">Hide</string>
+    <string name="advisor_fps_measured">Last session (measured): %1$d FPS median, %2$d FPS low · %3$s</string>
+    <string name="advisor_fps_none">No FPS measured for this instance yet. Play for a minute and it will show here.</string>
+    <string name="advisor_ram">Suggested game memory: %1$s</string>
+    <string name="advisor_ram_with_current">Suggested game memory: %1$s (currently %2$s)</string>
+    <string name="advisor_shaders">Shader packs that suit this GPU: %1$s</string>
+    <string name="advisor_shaders_risky">A shader mod is installed, but this device has little RAM or no Vulkan; expect low FPS. Try a lighter pack or a lower render scale.</string>
+    <string name="advisor_setting_title">Smart Advisor on the home screen</string>
+    <string name="advisor_setting_summary">Hardware-based suggestions (memory, shader packs, drivers) and the FPS measured in your last session</string>
+    <string name="download_error_retry">Retry</string>
+    <string name="download_error_resolve_network">Network settings</string>
+    <string name="settings_launcher_style_title">Launcher style</string>
+    <string name="settings_launcher_style_summary">Change the layout and look of the launcher. All features are available in every style.</string>
+    <string name="settings_launcher_style_default">Classic (default)</string>
+    <string name="settings_launcher_style_pc">PC launcher</string>
+    <string name="settings_launcher_style_modrinth">Modrinth style</string>
+    <string name="settings_launcher_style_console">Console</string>
+    <string name="settings_launcher_style_material_you">Material You (wallpaper colors)</string>
+    <string name="settings_launcher_style_glass">Glass</string>
+    <string name="settings_launcher_style_retro">Retro pixel</string>
+    <string name="settings_launcher_style_custom">Custom theme</string>
+    <string name="custom_theme_layout">Layout</string>
+    <string name="custom_theme_primary">Primary color</string>
+    <string name="custom_theme_secondary">Secondary color</string>
+    <string name="custom_theme_secondary_auto">Automatic (derived from the primary color)</string>
+    <string name="custom_theme_secondary_reset_hint">tap, then Cancel to reset to automatic</string>
+    <string name="custom_theme_palette">Palette style</string>
+    <string name="custom_theme_corner_radius">Corner radius</string>
+    <string name="custom_theme_font">Font</string>
+    <string name="custom_theme_font_default">System default</string>
+    <string name="custom_theme_font_sans">Sans serif</string>
+    <string name="custom_theme_font_serif">Serif</string>
+    <string name="custom_theme_font_mono">Monospace</string>
+    <string name="custom_theme_font_cursive">Handwriting</string>
+    <string name="custom_theme_font_pixel">Pixel</string>
+    <string name="custom_theme_export">Export theme to JSON</string>
+    <string name="custom_theme_export_summary">Save colors, layout, corners, font and background settings to a file you can share</string>
+    <string name="custom_theme_export_done">Theme exported</string>
+    <string name="custom_theme_export_failed">Could not export the theme</string>
+    <string name="custom_theme_import">Import theme from JSON</string>
+    <string name="custom_theme_import_summary">Load a theme file. The background image or video itself is not included in theme files.</string>
+    <string name="custom_theme_import_done">Theme “%1$s” applied</string>
+    <string name="custom_theme_import_failed">Not a valid theme file: %1$s</string>
+    <string name="custom_theme_extras_title">Themes in the Extras folder (%1$d)</string>
+    <string name="custom_theme_extras_summary">Put shared theme files in %1$s; they appear below</string>
+    <string name="custom_theme_extras_apply">Apply · from %1$s</string>
+    <string name="local_plugin_status_16k_ok">16 KB aligned</string>
+    <string name="local_plugin_status_16k_bad">not 16 KB aligned</string>
+    <string name="local_plugin_device_page_size">This device uses %1$d KB memory pages.</string>
+    <string name="style_nav_play">Play</string>
+    <string name="style_nav_home">Home</string>
+    <string name="style_nav_installations">Installations</string>
+    <string name="style_nav_accounts">Accounts &amp; skins</string>
+    <string name="style_nav_files">Files</string>
+    <string name="style_nav_mods">Mods</string>
+    <string name="style_nav_modpacks">Modpacks</string>
+    <string name="style_nav_resource_packs">Resource packs</string>
+    <string name="style_search_hint">Search mods…</string>
+    <string name="style_sign_in">Sign in</string>
     <!-- Title of the launcher language picker in Launcher settings -->
     <string name="settings_launcher_language">Language</string>
     <!-- Title of the fullscreen switch in Launcher settings -->

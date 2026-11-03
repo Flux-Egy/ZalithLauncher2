@@ -152,4 +152,55 @@ class RendererAutoSelectorTest {
         val ok = RendererCompat.parse("""{"schemaVersion":1,"rules":[{"id":"d","when":{"gpuVendors":["adreno","bogus"]},"prefer":["a"]}]}""")
         assertEquals(setOf(GpuVendor.ADRENO), ok.rules.single().condition.gpuVendors)
     }
+
+    @Test
+    fun extrasRulesComeFirstButCannotLiftConstraints() {
+        val base = RendererCompat.parse(
+            """{"schemaVersion":1,
+               "renderers":{"freedreno":{"gpuVendors":["ADRENO"]}},
+               "rules":[{"id":"default","when":{},"prefer":["opengles3"]}]}"""
+        )
+        val extra = RendererCompat.parse(
+            """{"schemaVersion":1,
+               "renderers":{"freedreno":{},"myrenderer":{"requiresVulkan":true}},
+               "rules":[{"id":"mine","when":{"gpuVendors":["MALI"]},"prefer":["myrenderer"]}]}"""
+        )
+        val merged = base.withExtras(listOf("user.json" to extra))
+        assertEquals("extra:user.json:mine", merged.rules.first().id)
+        assertEquals("default", merged.rules.last().id)
+        // bundled constraint kept; new renderer constraint added
+        assertEquals(setOf(GpuVendor.ADRENO), merged.renderers.getValue("freedreno").gpuVendors)
+        assertTrue(merged.renderers.getValue("myrenderer").requiresVulkan)
+        assertEquals(base, base.withExtras(emptyList()))
+    }
+
+    @Test
+    fun adreno8xxAvoidsZinkAndUsesKryptonWithoutShaders() {
+        val a825 = GpuInfo.fromGlStrings("Qualcomm", "Adreno (TM) 825", vulkanSupported = true)
+        val withShaders = pick(a825, shaders = true, mc = "1.21.1")!!
+        assertEquals("opengles3_mobileglues", withShaders.rendererId)
+        assertEquals("shaders-adreno-8xx-no-turnip", withShaders.ruleId)
+        // no shaders: NG-GL4ES ("Krypton Wrapper")
+        assertEquals("opengles3", pick(a825, shaders = false, mc = "1.21.1")!!.rendererId)
+        // Adreno 7xx keeps Zink + Turnip
+        assertEquals("opengles3_desktopgl_zink_kopper", pick(adreno740, shaders = true, mc = "1.21.1")!!.rendererId)
+    }
+
+    @Test
+    fun everyVendorGetsAWorkingDefault() {
+        val xclipse = GpuInfo.fromGlStrings("Samsung Electronics Co., Ltd.", "Samsung Xclipse 940", vulkanSupported = true)
+        for (gpu in listOf(adreno740, adreno505, mali, powervr, xclipse, GpuInfo.UNKNOWN)) {
+            for (shaders in listOf(true, false)) {
+                for (mc in listOf("1.12.2", "1.20.1", "1.21.4")) {
+                    val pick = pick(gpu, shaders, mc)
+                    assertTrue("no renderer for $gpu shaders=$shaders mc=$mc", pick != null)
+                    // never a vendor-locked Mesa driver on the wrong GPU
+                    if (gpu.vendor != GpuVendor.ADRENO) assertTrue(pick!!.rendererId != "gallium_freedreno")
+                    if (gpu.vendor != GpuVendor.MALI) assertTrue(pick!!.rendererId != "gallium_panfrost")
+                    // no Zink without Vulkan
+                    if (gpu.vulkanSupported == false) assertTrue(pick!!.rendererId != "opengles3_desktopgl_zink_kopper")
+                }
+            }
+        }
+    }
 }

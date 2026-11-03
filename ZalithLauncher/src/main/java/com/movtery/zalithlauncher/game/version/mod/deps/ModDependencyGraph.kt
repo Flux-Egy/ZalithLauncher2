@@ -28,11 +28,22 @@ sealed interface ModIssue {
         override val severity = Severity.ERROR
     }
 
-    /** [mod] declares it breaks / conflicts with the installed [other] */
+    /** [mod] requires [dependencyId] in [requiredRange], but only [found] is installed */
+    data class VersionMismatch(
+        val mod: ModDependencyInfo,
+        val dependencyId: String,
+        val requiredRange: String,
+        val found: List<String>
+    ) : ModIssue {
+        override val severity = Severity.ERROR
+    }
+
+    /** [mod] declares it breaks / conflicts with the installed [other] (optionally only versions in [range]) */
     data class Incompatible(
         val mod: ModDependencyInfo,
         val other: ModDependencyInfo,
-        val hard: Boolean
+        val hard: Boolean,
+        val range: String? = null
     ) : ModIssue {
         override val severity = if (hard) Severity.ERROR else Severity.WARNING
     }
@@ -53,6 +64,9 @@ sealed interface ModIssue {
  * Pure function of its inputs (unit tested). Version ranges are not evaluated.
  */
 object ModDependencyGraph {
+
+    /** A mod (possibly nested in [top]) that supplies an id, with its parsed version */
+    private class Supplier(val top: ModDependencyInfo, val info: ModDependencyInfo, val version: ModVersion?)
 
     /** Ids supplied by the platform itself, never "missing" */
     val BUILTIN_IDS: Set<String> = setOf(
@@ -75,17 +89,54 @@ object ModDependencyGraph {
         val byProvidedId: Map<String, ModDependencyInfo> = buildMap {
             mods.forEach { mod -> mod.allProvidedIds().forEach { putIfAbsent(it, mod) } }
         }
+        // id -> every (top-level or nested) mod supplying it, with that supplier's version
+        val suppliers: Map<String, List<Supplier>> = buildMap<String, MutableList<Supplier>> {
+            fun add(top: ModDependencyInfo, info: ModDependencyInfo) {
+                val version = ModVersion.parse(info.version)
+                (setOf(info.id) + info.provides).forEach { getOrPut(it) { mutableListOf() }.add(Supplier(top, info, version)) }
+                info.nested.forEach { add(top, it) }
+            }
+            mods.forEach { add(it, it) }
+        }
 
         for (mod in mods) {
             for (relation in mod.relations) {
                 when (relation.kind) {
                     RelationKind.REQUIRED -> if (relation.targetId !in provided) {
                         issues += ModIssue.MissingDependency(mod, relation.targetId)
+                    } else {
+                        val range = relation.range ?: continue
+                        val candidates = suppliers[relation.targetId].orEmpty()
+                        // builtin ids (minecraft, loader, java) are not versioned here;
+                        // an unknown version gets the benefit of the doubt
+                        val satisfied = candidates.isEmpty() ||
+                                candidates.any { it.version == null || range.matches(it.version) }
+                        if (!satisfied) {
+                            issues += ModIssue.VersionMismatch(
+                                mod = mod,
+                                dependencyId = relation.targetId,
+                                requiredRange = relation.rangeText ?: "?",
+                                found = candidates.map { it.info.version.orEmpty() }.distinct()
+                            )
+                        }
                     }
                     RelationKind.BREAKS, RelationKind.CONFLICTS -> {
-                        val other = byProvidedId[relation.targetId]
-                        if (other != null && other !== mod) {
-                            issues += ModIssue.Incompatible(mod, other, hard = relation.kind == RelationKind.BREAKS)
+                        val hard = relation.kind == RelationKind.BREAKS
+                        val range = relation.range
+                        val hit = suppliers[relation.targetId].orEmpty().firstOrNull { s ->
+                            s.top !== mod && when {
+                                range == null || range === ModVersionRange.ANY -> true
+                                // only flag versions known to be inside the declared range
+                                s.version == null -> false
+                                else -> range.matches(s.version)
+                            }
+                        }
+                        if (hit != null) {
+                            issues += ModIssue.Incompatible(mod, hit.top, hard, relation.rangeText?.takeIf { range !== ModVersionRange.ANY })
+                        } else if (range == null) {
+                            // fallback (should not happen: suppliers covers byProvidedId)
+                            val other = byProvidedId[relation.targetId]
+                            if (other != null && other !== mod) issues += ModIssue.Incompatible(mod, other, hard)
                         }
                     }
                 }

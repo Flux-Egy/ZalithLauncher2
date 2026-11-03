@@ -1,0 +1,45 @@
+{
+  "format": "zalith-recommendations",
+  "version": 1,
+  "issued": "2026-11-03",
+  "ram": [
+    { "deviceMaxMb": 4096, "allocMb": 1024 },
+    { "deviceMaxMb": 6144, "allocMb": 2048 },
+    { "deviceMaxMb": 8192, "allocMb": 3072 },
+    { "deviceMaxMb": 12288, "allocMb": 4096 },
+    { "deviceMaxMb": 2147483647, "allocMb": 6144 }
+  ],
+  "extraMbPer50Mods": 512,
+  "gpus": [
+    {
+      "vendor": "ADRENO", "minModel": 730, "maxModel": 999,
+      "shaders": ["Complementary Reimagined (Potato or Low profile)", "MakeUp - Ultra Fast", "Sildur's Vibrant (Lite)"],
+      "note": "Shaders run best with Zink (Vulkan) on this GPU; the launcher picks it automatically when Iris is installed."
+    },
+    {
+      "vendor": "ADRENO", "minModel": 600, "maxModel": 729,
+      "shaders": ["MakeUp - Ultra Fast", "Sildur's Vibrant (Lite)"],
+      "note": "Prefer light shader packs and a render scale of 50-75 %."
+    },
+    {
+      "vendor": "MALI", "minModel": 0, "maxModel": 9999,
+      "shaders": ["MakeUp - Ultra Fast"],
+      "note": "Use MobileGlues for shaders on Mali. Freedreno/Turnip drivers are Adreno-only."
+    },
+    {
+      "vendor": "XCLIPSE", "minModel": 0, "maxModel": 9999,
+      "shaders": ["MakeUp - Ultra Fast"],
+      "note": null
+    }
+  ],
+  "drivers": [
+    {
+      "vendor": "ADRENO", "minModel": 825, "maxModel": 825,
+      "note": "The bundled Turnip (Mesa 24.3) does not support Adreno 825; the launcher falls back to the system Vulkan driver. Community Turnip builds with Adreno 825 support can be imported in Settings > Renderer > Local plugins."
+    },
+    {
+      "vendor": "ADRENO", "minModel": 600, "maxModel": 740,
+      "note": "The bundled Turnip driver supports this GPU and is usually faster than the system driver with Zink."
+    }
+  ]
+}

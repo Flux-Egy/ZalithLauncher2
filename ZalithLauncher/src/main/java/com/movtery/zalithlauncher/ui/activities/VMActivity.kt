@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.ui.activities
 
+import com.movtery.zalithlauncher.game.renderer.upscale.GameUpscalerEffect
+import com.movtery.zalithlauncher.game.renderer.upscale.GameUpscaler
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -416,6 +418,20 @@ class VMActivity : BaseAppCompatActivity(), SurfaceTextureListener {
         return vmViewModel.session.launcher.block()
     }
 
+    /** 按设置为游戏画面应用放大/锐化效果（仅游戏窗口；需要 Android 13+） */
+    private fun applyGameUpscaler() {
+        val view = gameTextureView ?: return
+        val size = lastWindowSize ?: return
+        val upscaler = if (withHandler { type } == HandlerType.GAME) AllSettings.gameUpscaler.getValue() else GameUpscaler.OFF
+        GameUpscalerEffect.apply(
+            view = view,
+            upscaler = upscaler,
+            bufferWidth = size.width,
+            bufferHeight = size.height,
+            sharpness = AllSettings.gameUpscalerSharpness.getValue() / 100f
+        )
+    }
+
     private fun captureMagnifierFrame() {
         if (!vmViewModel.inputMagnifierState.isVisible) return
         val textureView = gameTextureView ?: return
@@ -557,7 +573,8 @@ class VMActivity : BaseAppCompatActivity(), SurfaceTextureListener {
         }
 
         setContent {
-            ZalithLauncherTheme {
+            //游戏内界面保持经典外观，避免样式影响游戏覆盖层的可读性
+            ZalithLauncherTheme(applyLauncherStyle = false) {
                 ObserveFullScreenSetting(AllSettings.gameFullScreen.state)
                 //游戏内菜单切换“请求最高刷新率”后自动重应用策略
                 LaunchedEffect(AllSettings.requestMaxRefreshRate.state) {
@@ -706,6 +723,7 @@ class VMActivity : BaseAppCompatActivity(), SurfaceTextureListener {
         lastWindowSize = newSize
 
         gameTextureView?.surfaceTexture?.setDefaultBufferSize(newSize.width, newSize.height)
+        applyGameUpscaler()
         ZLBridgeStates.onWindowChange()
         CallbackBridge.sendUpdateWindowSize(newSize.width, newSize.height)
         if (SdlBridge.sdlEnabled) {
@@ -1018,6 +1036,10 @@ class VMActivity : BaseAppCompatActivity(), SurfaceTextureListener {
                         }
                     }.also { texture ->
                         gameTextureView = texture
+                        //视图尺寸变化时重新计算放大参数
+                        texture.addOnLayoutChangeListener { _, l, t, r, b, ol, ot, or, ob ->
+                            if (r - l != or - ol || b - t != ob - ot) applyGameUpscaler()
+                        }
                     }
                 }
             )

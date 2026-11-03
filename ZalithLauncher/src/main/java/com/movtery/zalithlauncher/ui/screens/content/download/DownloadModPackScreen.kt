@@ -102,7 +102,8 @@ private sealed interface ModPackInstallOperation {
     /** 警告通知权限，可以无视，并直接开始安装 */
     data class WarningForNotification(val version: PlatformVersion, val iconUrl: String?) : ModPackInstallOperation
     /** 整合包安装出现异常 */
-    data class Error(val th: Throwable) : ModPackInstallOperation
+    /** [version] / [iconUrl] 用于“重试” */
+    data class Error(val th: Throwable, val version: PlatformVersion? = null, val iconUrl: String? = null) : ModPackInstallOperation
     /** 整合包已成功安装 */
     data object Success : ModPackInstallOperation
 }
@@ -193,7 +194,7 @@ private class ModPackViewModel: ViewModel() {
                 },
                 onError = { th ->
                     installer = null
-                    installOperation = ModPackInstallOperation.Error(th)
+                    installOperation = ModPackInstallOperation.Error(th, version, iconUrl)
                     onStop()
                 }
             )
@@ -425,31 +426,11 @@ private fun ModPackInstallOperation(
                     else -> th.localizedMessage ?: th.message ?: th::class.qualifiedName ?: "Unknown error"
                 }
             }
-            val dismiss = {
-                updateOperation(ModPackInstallOperation.None)
-            }
-            AlertDialog(
-                onDismissRequest = dismiss,
-                title = {
-                    Text(text = stringResource(R.string.download_install_error_title))
-                },
-                text = {
-                    val scrollState = rememberScrollState()
-                    Column(
-                        modifier = Modifier
-                            .fadeEdge(state = scrollState)
-                            .verticalScrollWithBar(state = scrollState),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(text = stringResource(R.string.download_install_error_message))
-                        Text(text = message)
-                    }
-                },
-                confirmButton = {
-                    Button(onClick = dismiss) {
-                        MarqueeText(text = stringResource(R.string.generic_confirm))
-                    }
-                }
+            InstallErrorDialog(
+                message = message,
+                error = th,
+                onRetry = operation.version?.let { v -> { onInstall(v, operation.iconUrl) } },
+                onDismiss = { updateOperation(ModPackInstallOperation.None) }
             )
         }
         is ModPackInstallOperation.Success -> {
