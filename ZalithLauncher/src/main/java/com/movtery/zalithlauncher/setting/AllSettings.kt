@@ -537,6 +537,11 @@ object AllSettings : SettingsRegistry() {
      */
     val curseForgeUserApiKey = stringSetting("curseForgeUserApiKey", "")
 
+    /**
+     * 用户自建的 CurseForge API 代理地址（代理在服务端添加 API Key，见 tools/curseforge-proxy）
+     */
+    val curseForgeProxyUrl = stringSetting("curseForgeProxyUrl", "")
+
     //Control
     /**
      * 全局默认控制布局文件名

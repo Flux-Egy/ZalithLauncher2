@@ -1176,8 +1176,10 @@ ABI：%2$s
     <string name="settings_launcher_color_theme_summary">更改启动器的整体颜色主题</string>
     <string name="settings_launcher_color_theme_style">配色风格</string>
     <string name="settings_launcher_dark_mode_title">深色模式</string>
-    <string name="curseforge_api_key_missing">CurseForge 需要 API Key，而此版本未内置。请在 设置 → 启动器 → CurseForge API Key 中填写你自己的 Key，或改用 Modrinth。</string>
+    <string name="curseforge_api_key_missing">CurseForge 需要 API Key，而此版本未内置。请在 设置 → 启动器 中填写你自己的 Key 或 CurseForge 代理，或改用 Modrinth。</string>
     <string name="curseforge_api_key_rejected">CurseForge 拒绝了 API Key（403）。请在 设置 → 启动器 → CurseForge API Key 中检查。</string>
+    <string name="settings_curseforge_proxy_title">CurseForge 代理（可选）</string>
+    <string name="settings_curseforge_proxy_summary">由服务器替你添加 API Key，例如你自己的 Cloudflare Worker（见源码中的 tools/curseforge-proxy）。在此版本没有 Key 或 CurseForge 请求失败时使用。</string>
     <string name="settings_curseforge_api_key_title">CurseForge API Key</string>
     <string name="settings_curseforge_api_key_user">正在使用你自己的 Key（已加密存储）</string>
     <string name="settings_curseforge_api_key_builtin">正在使用此版本内置的 Key，你也可以设置自己的 Key。</string>

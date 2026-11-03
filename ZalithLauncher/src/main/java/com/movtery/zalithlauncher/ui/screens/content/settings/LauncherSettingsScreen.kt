@@ -18,6 +18,8 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings
 
+import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.TextInputSettingsCard
+import com.movtery.zalithlauncher.game.download.assets.platform.curseforge.CurseForgeProxy
 import com.movtery.zalithlauncher.ui.screens.content.settings.elements.displayName
 import com.movtery.zalithlauncher.ui.screens.content.settings.elements.CustomThemeSettings
 import com.movtery.zalithlauncher.game.download.assets.platform.curseforge.CurseForgeApiKey
@@ -442,6 +444,17 @@ fun LauncherSettingsScreen(
                             }
                         )
                     }
+
+                    val proxyText = AllSettings.curseForgeProxyUrl.state
+                    TextInputSettingsCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle,
+                        unit = AllSettings.curseForgeProxyUrl,
+                        title = stringResource(R.string.settings_curseforge_proxy_title),
+                        summary = stringResource(R.string.settings_curseforge_proxy_summary),
+                        label = "https://…",
+                        isError = proxyText.isNotBlank() && CurseForgeProxy.apiRoot(proxyText) == null
+                    )
 
                     IntSliderSettingsCard(
                         modifier = Modifier.fillMaxWidth(),

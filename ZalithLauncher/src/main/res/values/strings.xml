@@ -2216,8 +2216,10 @@ This package contains native code that runs inside the game. Only install packag
     <string name="settings_launcher_color_theme_style">Palette Style</string>
     <!-- Title of the dark mode picker in Launcher settings -->
     <string name="settings_launcher_dark_mode_title">Dark Mode</string>
-    <string name="curseforge_api_key_missing">CurseForge needs an API key, and this build doesn’t include one. Add your own key in Settings → Launcher → CurseForge API key, or browse Modrinth instead.</string>
+    <string name="curseforge_api_key_missing">CurseForge needs an API key, and this build doesn’t include one. Add your own key or a CurseForge proxy in Settings → Launcher, or browse Modrinth instead.</string>
     <string name="curseforge_api_key_rejected">CurseForge rejected the API key (403). Check the key in Settings → Launcher → CurseForge API key.</string>
+    <string name="settings_curseforge_proxy_title">CurseForge proxy (optional)</string>
+    <string name="settings_curseforge_proxy_summary">A server that adds an API key for you, e.g. your own Cloudflare Worker (tools/curseforge-proxy in the source). Used when this build has no key, or when CurseForge fails.</string>
     <string name="settings_curseforge_api_key_title">CurseForge API key</string>
     <string name="settings_curseforge_api_key_user">Using your own key (stored encrypted)</string>
     <string name="settings_curseforge_api_key_builtin">Using the key built into this version. You can set your own.</string>

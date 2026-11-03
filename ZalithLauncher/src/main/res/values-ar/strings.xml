@@ -388,8 +388,10 @@ ABI: %2$s
     <string name="renderer_version_storage_permissions_sdk30">يمكن ضبط العارض الحالي %s عبر ملف إعدادات. يرجى تفعيل إذن \'إدارة جميع الملفات\' للمشغل أولاً، وإلا فلن يتمكن من قراءة وتحميل إعدادات العارض!</string>
     <string name="account_no_account">لا توجد حسابات متاحة</string>
     <string name="account_credentials_insecure">التخزين الآمن لبيانات الاعتماد غير متاح على هذا الجهاز. يتم حفظ رموز حساباتك وكلمات المرور دون تشفير.</string>
-    <string name="curseforge_api_key_missing">يحتاج CurseForge إلى مفتاح API، وهذا الإصدار لا يتضمّن مفتاحًا. أضف مفتاحك في الإعدادات ← المشغّل ← مفتاح CurseForge API، أو تصفّح Modrinth بدلًا منه.</string>
+    <string name="curseforge_api_key_missing">يحتاج CurseForge إلى مفتاح API، وهذا الإصدار لا يتضمّن مفتاحًا. أضف مفتاحك أو وكيل CurseForge في الإعدادات ← المشغّل، أو تصفّح Modrinth بدلًا منه.</string>
     <string name="curseforge_api_key_rejected">رفض CurseForge مفتاح API ‏(403). تحقّق من المفتاح في الإعدادات ← المشغّل ← مفتاح CurseForge API.</string>
+    <string name="settings_curseforge_proxy_title">وكيل CurseForge (اختياري)</string>
+    <string name="settings_curseforge_proxy_summary">خادم يضيف مفتاح API نيابةً عنك، مثل Cloudflare Worker خاص بك (tools/curseforge-proxy في الشيفرة المصدرية). يُستخدم عندما لا يتضمّن هذا الإصدار مفتاحًا أو عند فشل CurseForge.</string>
     <string name="settings_curseforge_api_key_title">مفتاح CurseForge API</string>
     <string name="settings_curseforge_api_key_user">يُستخدم مفتاحك الخاص (مخزّن مشفّرًا)</string>
     <string name="settings_curseforge_api_key_builtin">يُستخدم المفتاح المضمَّن في هذا الإصدار. يمكنك تعيين مفتاحك الخاص.</string>
