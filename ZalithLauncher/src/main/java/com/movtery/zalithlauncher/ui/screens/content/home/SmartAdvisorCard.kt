@@ -139,6 +139,10 @@ fun SmartAdvisorCard() {
                     is Advice.GpuNote -> advice.text
                     is Advice.DriverNote -> advice.text
                     Advice.ShadersRisky -> stringResource(R.string.advisor_shaders_risky)
+                    is Advice.Upscaler -> stringResource(
+                        R.string.advisor_upscaler,
+                        stringResource(if (advice.name == "SGSR") R.string.settings_upscaler_sgsr else R.string.settings_upscaler_fsr1)
+                    )
                 }
                 Text(text = "• $text", style = MaterialTheme.typography.bodySmall)
             }

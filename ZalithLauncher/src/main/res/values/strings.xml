@@ -2230,6 +2230,8 @@ This package contains native code that runs inside the game. Only install packag
     <string name="settings_upscaler_off">Off (plain stretch)</string>
     <string name="settings_upscaler_sgsr">Snapdragon GSR 1</string>
     <string name="settings_upscaler_cas">Sharpen (AMD CAS)</string>
+    <string name="settings_upscaler_fsr1">AMD FSR 1</string>
+    <string name="settings_upscaler_fsr1_desc" formatted="false">Edge-adaptive upscaling (EASU) plus sharpening (RCAS). Works on every GPU; best below 100 % scale.</string>
     <string name="settings_upscaler_off_desc">Plain bilinear stretch, as before</string>
     <string name="settings_upscaler_sgsr_desc" formatted="false">Edge-aware upscaling from the lower resolution, one shader pass. Best below 100 % scale.</string>
     <string name="settings_upscaler_cas_desc">Contrast-adaptive sharpening after the stretch. Works at any scale.</string>
@@ -2238,6 +2240,8 @@ This package contains native code that runs inside the game. Only install packag
     <string name="settings_upscaler_sharpness">Sharpness</string>
     <string name="settings_performance_preset_title">Performance preset</string>
     <string name="settings_performance_preset_summary" formatted="false">Render at 50 % resolution, upscale with the recommended upscaler and keep the tuned GC flags on. Every value can be changed afterwards.</string>
+    <string name="settings_performance_preset_applied_detail">Best settings applied: %1$.1f GB RAM, %2$d%% render scale, %3$s</string>
+    <string name="advisor_upscaler">Best upscaler for this GPU: %1$s (Renderer settings › Upscaling)</string>
     <string name="settings_performance_preset_applied">Performance preset applied</string>
     <string name="advisor_title">Smart Advisor</string>
     <string name="advisor_hide">Hide</string>

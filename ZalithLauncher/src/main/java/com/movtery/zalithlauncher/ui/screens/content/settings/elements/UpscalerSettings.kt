@@ -18,6 +18,16 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings.elements
 
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import java.io.File
+import com.movtery.zalithlauncher.game.version.installed.VersionsManager
+import com.movtery.zalithlauncher.game.advisor.SmartAdvisor
+import com.movtery.zalithlauncher.game.advisor.RecommendationsRepository
+import com.movtery.zalithlauncher.game.advisor.HardwareProfiler
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -37,12 +47,16 @@ import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.IntSliderS
 import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.ListSettingsCard
 import com.movtery.zalithlauncher.ui.screens.content.settings.layouts.SettingsCard
 
-/** The upscaler suggested for this device at the given render scale */
-fun recommendedUpscaler(renderScalePercent: Int): GameUpscaler = when {
+/**
+ * The upscaler suggested for this device at the given render scale:
+ * Snapdragon GSR on Adreno (Qualcomm's own mobile upscaler), FSR 1 on Mali, PowerVR,
+ * Xclipse and unknown GPUs; CAS sharpening when nothing is upscaled.
+ */
+fun recommendedUpscaler(renderScalePercent: Int, vendor: GpuVendor? = GpuDetector.cached()?.vendor): GameUpscaler = when {
     !GameUpscalerEffect.isSupported() -> GameUpscaler.OFF
-    // SGSR reconstructs from the low-res image; it is plain shader math and runs on any GPU
-    renderScalePercent < 100 -> GameUpscaler.SGSR
-    else -> GameUpscaler.CAS
+    renderScalePercent >= 100 -> GameUpscaler.CAS
+    vendor == GpuVendor.ADRENO -> GameUpscaler.SGSR
+    else -> GameUpscaler.FSR1
 }
 
 /**
@@ -52,6 +66,7 @@ fun recommendedUpscaler(renderScalePercent: Int): GameUpscaler = when {
 @Composable
 fun UpscalerSettings(modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val supported = remember { GameUpscalerEffect.isSupported() }
     val vendor = remember { GpuDetector.cached()?.vendor }
     val scale = if (AllSettings.resolutionRule.state == ResolutionRule.PERCENTAGE) AllSettings.resolutionRatio.state else 100
@@ -83,6 +98,7 @@ fun UpscalerSettings(modifier: Modifier = Modifier) {
                     GameUpscaler.OFF -> R.string.settings_upscaler_off
                     GameUpscaler.SGSR -> R.string.settings_upscaler_sgsr
                     GameUpscaler.CAS -> R.string.settings_upscaler_cas
+                    GameUpscaler.FSR1 -> R.string.settings_upscaler_fsr1
                 }
             )
             if (upscaler == recommended && upscaler != GameUpscaler.OFF) {
@@ -100,6 +116,7 @@ fun UpscalerSettings(modifier: Modifier = Modifier) {
                         GameUpscaler.OFF -> R.string.settings_upscaler_off_desc
                         GameUpscaler.SGSR -> R.string.settings_upscaler_sgsr_desc
                         GameUpscaler.CAS -> R.string.settings_upscaler_cas_desc
+                        GameUpscaler.FSR1 -> R.string.settings_upscaler_fsr1_desc
                     }
                 ),
                 style = androidx.compose.material3.MaterialTheme.typography.labelSmall
@@ -107,7 +124,7 @@ fun UpscalerSettings(modifier: Modifier = Modifier) {
         }
     )
 
-    if (supported && AllSettings.gameUpscaler.state == GameUpscaler.CAS) {
+    if (supported && (AllSettings.gameUpscaler.state == GameUpscaler.CAS || AllSettings.gameUpscaler.state == GameUpscaler.FSR1)) {
         IntSliderSettingsCard(
             modifier = modifier,
             position = CardPosition.Middle,
@@ -124,20 +141,46 @@ fun UpscalerSettings(modifier: Modifier = Modifier) {
         title = stringResource(R.string.settings_performance_preset_title),
         summary = stringResource(R.string.settings_performance_preset_summary),
         onClick = {
-            applyPerformancePreset()
-            Toast.makeText(context, R.string.settings_performance_preset_applied, Toast.LENGTH_SHORT).show()
+            scope.launch {
+                val result = withContext(Dispatchers.IO) { applyPerformancePreset(context) }
+                Toast.makeText(
+                    context,
+                    context.getString(
+                        R.string.settings_performance_preset_applied_detail,
+                        result.ramMb / 1024f,
+                        result.scalePercent,
+                        result.upscaler.name
+                    ),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     )
 }
 
+data class PresetResult(val ramMb: Int, val scalePercent: Int, val upscaler: GameUpscaler)
+
 /**
- * One-tap preset: render at 50 % of the screen resolution, reconstruct with the
- * recommended upscaler, and keep the tuned G1 GC flags on. Every value stays
- * individually adjustable afterwards.
+ * One-tap "best settings": game memory from the Smart Advisor (never above half of the
+ * device RAM), tuned G1 GC flags with the RAM safety limit on, 50 % render scale and the
+ * upscaler recommended for this GPU (Snapdragon GSR on Adreno, FSR 1 elsewhere).
+ * Every value stays individually adjustable afterwards. Call off the main thread.
+ *
+ * Per-instance memory settings, if an instance has them, still take precedence.
  */
-fun applyPerformancePreset() {
-    AllSettings.resolutionRule.save(ResolutionRule.PERCENTAGE)
-    AllSettings.resolutionRatio.save(50)
-    AllSettings.gameUpscaler.save(recommendedUpscaler(50))
+fun applyPerformancePreset(context: Context): PresetResult {
+    val hw = HardwareProfiler.snapshot(context)
+    val matrix = RecommendationsRepository.load(context)
+    val modCount = VersionsManager.currentVersion.value
+        ?.let { File(it.getGameDir(), "mods").list()?.count { name -> name.endsWith(".jar", true) } } ?: 0
+    val ram = SmartAdvisor.recommendedRam(hw, matrix, modCount)
+    val scale = 50
+    val upscaler = recommendedUpscaler(scale)
+    AllSettings.ramAllocation.save(ram)
+    AllSettings.ramSafetyLimit.save(true)
     AllSettings.jvmGcTuning.save(true)
+    AllSettings.resolutionRule.save(ResolutionRule.PERCENTAGE)
+    AllSettings.resolutionRatio.save(scale)
+    AllSettings.gameUpscaler.save(upscaler)
+    return PresetResult(ram, scale, upscaler)
 }

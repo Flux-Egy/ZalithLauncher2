@@ -99,4 +99,14 @@ class SmartAdvisorTest {
         assertNull(Recommendations.parse("""{"format":"zalith-recommendations","version":99,"ram":[{"deviceMaxMb":1,"allocMb":1}]}"""))
         assertNull(Recommendations.parse("""{"format":"zalith-recommendations","version":1,"ram":[]}"""))
     }
+
+    @Test
+    fun upscalerAdviceFollowsGpuFamily() {
+        fun up(v: String) = SmartAdvisor.advise(hw(v, 700, 8), bundled).filterIsInstance<Advice.Upscaler>().single().name
+        assertEquals("SGSR", up("ADRENO"))
+        assertEquals("FSR1", up("MALI"))
+        assertEquals("FSR1", up("POWERVR"))
+        assertEquals("FSR1", up("XCLIPSE"))
+        assertEquals("FSR1", up("UNKNOWN"))
+    }
 }

@@ -133,6 +133,9 @@ sealed interface Advice {
 
     /** Shaders installed, but the device is unlikely to handle them (no Vulkan / low RAM) */
     data object ShadersRisky : Advice
+
+    /** Best upscaler for this GPU family: "SGSR" (Adreno) or "FSR1" (Mali, PowerVR, Xclipse, others) */
+    data class Upscaler(val name: String) : Advice
 }
 
 object SmartAdvisor {
@@ -163,7 +166,11 @@ object SmartAdvisor {
         if (hasShaderMod && (hw.vulkanSupported == false || hw.totalRamMb < 6 * 1024)) {
             add(Advice.ShadersRisky)
         }
+        add(Advice.Upscaler(upscalerFor(hw.gpuVendor)))
     }
+
+    /** Snapdragon GSR is Qualcomm's upscaler for Adreno; FSR 1 for every other GPU family */
+    fun upscalerFor(gpuVendor: String): String = if (gpuVendor == "ADRENO") "SGSR" else "FSR1"
 
     /**
      * Memory to allocate: the matrix value for the device's RAM, plus headroom for large

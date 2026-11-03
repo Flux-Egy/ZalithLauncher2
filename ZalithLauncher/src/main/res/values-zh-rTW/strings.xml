@@ -1093,6 +1093,8 @@ ABI：%2$s
     <string name="settings_upscaler_off">關閉（直接拉伸）</string>
     <string name="settings_upscaler_sgsr">Snapdragon GSR 1</string>
     <string name="settings_upscaler_cas">銳化（AMD CAS）</string>
+    <string name="settings_upscaler_fsr1">AMD FSR 1</string>
+    <string name="settings_upscaler_fsr1_desc" formatted="false">邊緣自適應放大（EASU）加銳化（RCAS），適用於所有 GPU，適合低於 100% 的比例。</string>
     <string name="settings_upscaler_off_desc">與先前相同的雙線性拉伸</string>
     <string name="settings_upscaler_sgsr_desc" formatted="false">以低解析度畫面進行邊緣感知放大，單次著色器處理。適合低於 100% 的比例。</string>
     <string name="settings_upscaler_cas_desc">拉伸後進行對比度自適應銳化，適用於任意比例。</string>
@@ -1101,6 +1103,8 @@ ABI：%2$s
     <string name="settings_upscaler_sharpness">銳化強度</string>
     <string name="settings_performance_preset_title">效能預設</string>
     <string name="settings_performance_preset_summary" formatted="false">以 50% 解析度渲染，使用推薦的放大演算法，並保持 GC 最佳化參數開啟。之後可個別調整每一項。</string>
+    <string name="settings_performance_preset_applied_detail">已套用最佳設定：記憶體 %1$.1f GB，解析度比例 %2$d%%，%3$s</string>
+    <string name="advisor_upscaler">此 GPU 最適合的放大演算法：%1$s（渲染器設定 › 畫面放大）</string>
     <string name="settings_performance_preset_applied">已套用效能預設</string>
     <string name="advisor_title">智慧建議</string>
     <string name="advisor_hide">隱藏</string>

@@ -74,6 +74,7 @@ val libraryData = listOf(
     LibraryInfo("Pixelify Sans (font)", "Copyright 2021 The Pixelify Sans Project Authors", License("SIL Open Font License 1.1", R.raw.ofl_pixelify_sans), "https://github.com/eifetx/Pixelify-Sans"),
     LibraryInfo("Snapdragon Game Super Resolution 1 (shader, AGSL port)", "Copyright (c) 2023-2025, Qualcomm Innovation Center, Inc.", License("BSD 3-Clause License", R.raw.license_snapdragon_gsr), "https://github.com/SnapdragonGameStudios/snapdragon-gsr"),
     LibraryInfo("AMD FidelityFX CAS (shader, AGSL port)", "Copyright (c) 2017-2019 Advanced Micro Devices, Inc.", License("MIT License", R.raw.license_amd_cas), "https://github.com/GPUOpen-Effects/FidelityFX-CAS"),
+    LibraryInfo("AMD FidelityFX Super Resolution 1 (shader, AGSL port)", "Copyright (c) 2021 Advanced Micro Devices, Inc.", License("MIT License", R.raw.license_amd_fsr1), "https://github.com/GPUOpen-Effects/FidelityFX-FSR"),
     LibraryInfo("OkHttp", "Copyright © 2019 Square, Inc.", LICENSE_APACHE_2, "https://github.com/square/okhttp"),
     LibraryInfo("Okio", "Copyright © 2013 Square, Inc.", LICENSE_APACHE_2, "https://square.github.io/okio/"),
     LibraryInfo("OpenNBT", "Copyright © 2013-2021 Steveice10.", License(LICENSE_MIT, R.raw.opennbt_license), "https://github.com/GeyserMC/OpenNBT"),

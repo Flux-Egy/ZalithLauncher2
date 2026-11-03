@@ -38,7 +38,10 @@ enum class GameUpscaler {
     SGSR,
 
     /** Bilinear stretch followed by AMD FidelityFX Contrast Adaptive Sharpening */
-    CAS
+    CAS,
+
+    /** AMD FidelityFX Super Resolution 1: EASU edge-adaptive upscale + RCAS sharpening */
+    FSR1
 }
 
 /**
@@ -113,6 +116,28 @@ object GameUpscalerEffect {
                     setFloatUniform("peak", -1f / (8f + (5f - 8f) * s))
                 }
                 view.setRenderEffect(RenderEffect.createRuntimeShaderEffect(shader, "content"))
+            }
+            GameUpscaler.FSR1 -> {
+                // RCAS strength: sharpness 1 = 0 stops (strongest), 0 = 2 stops
+                val stops = (1f - sharpness.coerceIn(0f, 1f)) * 2f
+                val rcas = RuntimeShader(FSR1_RCAS_AGSL).apply {
+                    setFloatUniform("sharp", Math.pow(2.0, -stops.toDouble()).toFloat())
+                }
+                val rcasEffect = RenderEffect.createRuntimeShaderEffect(rcas, "content")
+                if (!upscaling) {
+                    // nothing to upscale: RCAS only
+                    view.setTransform(null)
+                    view.setRenderEffect(rcasEffect)
+                    return
+                }
+                view.setTransform(Matrix().apply { setScale(inW.toFloat() / outW, inH.toFloat() / outH) })
+                val easu = RuntimeShader(FSR1_EASU_AGSL).apply {
+                    setFloatUniform("inSize", inW.toFloat(), inH.toFloat())
+                    setFloatUniform("outSize", outW.toFloat(), outH.toFloat())
+                }
+                val easuEffect = RenderEffect.createRuntimeShaderEffect(easu, "content")
+                // inner (EASU) runs first, then RCAS on its output
+                view.setRenderEffect(RenderEffect.createChainEffect(rcasEffect, easuEffect))
             }
             GameUpscaler.OFF -> clear(view)
         }
@@ -263,6 +288,170 @@ half4 main(float2 p) {
     float rcpWeight = 1.0 / (1.0 + 4.0 * w);
     float3 outColor = clamp((b * w + d * w + f * w + h * w + e) * rcpWeight, 0.0, 1.0);
     return half4(half3(outColor), 1.0);
+}
+"""
+
+    /**
+     * AGSL port of AMD FidelityFX Super Resolution 1 EASU (ffx_fsr1.h, FsrEasuF,
+     * 32-bit path). The 12 taps are fetched directly at integer offsets from the 'f'
+     * texel instead of through textureGather; AMD's approximate reciprocals are
+     * replaced by guarded exact ones (an AGSL 1/0 would turn 0*rcp into NaN).
+     *
+     * Copyright (c) 2021 Advanced Micro Devices, Inc. All rights reserved.
+     * MIT License (full text: res/raw/license_amd_fsr1.txt)
+     */
+    private const val FSR1_EASU_AGSL = """
+uniform shader content;
+uniform float2 inSize;
+uniform float2 outSize;
+
+float3 T(float x, float y) {
+    float2 p = clamp(float2(x, y), float2(0.0), inSize - 1.0) + 0.5;
+    return float3(content.eval(p).rgb);
+}
+
+// luma times 2
+float L(float3 c) { return c.b * 0.5 + (c.r * 0.5 + c.g); }
+
+void easuSet(inout float2 dir, inout float len, float w, float lA, float lB, float lC, float lD, float lE) {
+    float dc = lD - lC;
+    float cb = lC - lB;
+    float lenX = 1.0 / max(max(abs(dc), abs(cb)), 1.0 / 32768.0);
+    float dirX = lD - lB;
+    dir.x += dirX * w;
+    lenX = clamp(abs(dirX) * lenX, 0.0, 1.0);
+    lenX *= lenX;
+    len += lenX * w;
+    float ec = lE - lC;
+    float ca = lC - lA;
+    float lenY = 1.0 / max(max(abs(ec), abs(ca)), 1.0 / 32768.0);
+    float dirY = lE - lA;
+    dir.y += dirY * w;
+    lenY = clamp(abs(dirY) * lenY, 0.0, 1.0);
+    lenY *= lenY;
+    len += lenY * w;
+}
+
+void easuTap(inout float3 aC, inout float aW, float2 off, float2 dir, float2 len, float lob, float clp, float3 c) {
+    float2 v;
+    v.x = (off.x * dir.x) + (off.y * dir.y);
+    v.y = (off.x * (-dir.y)) + (off.y * dir.x);
+    v *= len;
+    float d2 = min(v.x * v.x + v.y * v.y, clp);
+    float wB = (2.0 / 5.0) * d2 - 1.0;
+    float wA = lob * d2 - 1.0;
+    wB *= wB;
+    wA *= wA;
+    wB = (25.0 / 16.0) * wB - (25.0 / 16.0 - 1.0);
+    float w = wB * wA;
+    aC += c * w;
+    aW += w;
+}
+
+half4 main(float2 fragCoord) {
+    // fragCoord = integer pixel + 0.5, so this equals ip*scale + 0.5*scale - 0.5
+    float2 pp = fragCoord * (inSize / outSize) - 0.5;
+    float2 fp = floor(pp);
+    pp -= fp;
+
+    //    b c
+    //  e f g h
+    //  i j k l
+    //    n o
+    float3 b = T(fp.x, fp.y - 1.0);
+    float3 c = T(fp.x + 1.0, fp.y - 1.0);
+    float3 e = T(fp.x - 1.0, fp.y);
+    float3 f = T(fp.x, fp.y);
+    float3 g = T(fp.x + 1.0, fp.y);
+    float3 h = T(fp.x + 2.0, fp.y);
+    float3 i = T(fp.x - 1.0, fp.y + 1.0);
+    float3 j = T(fp.x, fp.y + 1.0);
+    float3 k = T(fp.x + 1.0, fp.y + 1.0);
+    float3 l = T(fp.x + 2.0, fp.y + 1.0);
+    float3 n = T(fp.x, fp.y + 2.0);
+    float3 o = T(fp.x + 1.0, fp.y + 2.0);
+
+    float bL = L(b); float cL = L(c); float eL = L(e); float fL = L(f);
+    float gL = L(g); float hL = L(h); float iL = L(i); float jL = L(j);
+    float kL = L(k); float lL = L(l); float nL = L(n); float oL = L(o);
+
+    float2 dir = float2(0.0);
+    float len = 0.0;
+    easuSet(dir, len, (1.0 - pp.x) * (1.0 - pp.y), bL, eL, fL, gL, jL);
+    easuSet(dir, len, pp.x * (1.0 - pp.y), cL, fL, gL, hL, kL);
+    easuSet(dir, len, (1.0 - pp.x) * pp.y, fL, iL, jL, kL, nL);
+    easuSet(dir, len, pp.x * pp.y, gL, jL, kL, lL, oL);
+
+    float2 dir2 = dir * dir;
+    float dirR = dir2.x + dir2.y;
+    bool zro = dirR < (1.0 / 32768.0);
+    dirR = inversesqrt(max(dirR, 1e-30));
+    if (zro) {
+        dirR = 1.0;
+        dir.x = 1.0;
+    }
+    dir *= dirR;
+    len = len * 0.5;
+    len *= len;
+    float stretch = (dir.x * dir.x + dir.y * dir.y) / max(max(abs(dir.x), abs(dir.y)), 1e-8);
+    float2 len2 = float2(1.0 + (stretch - 1.0) * len, 1.0 - 0.5 * len);
+    float lob = 0.5 + ((1.0 / 4.0 - 0.04) - 0.5) * len;
+    float clp = 1.0 / lob;
+
+    float3 min4 = min(min(f, g), min(j, k));
+    float3 max4 = max(max(f, g), max(j, k));
+
+    float3 aC = float3(0.0);
+    float aW = 0.0;
+    easuTap(aC, aW, float2( 0.0, -1.0) - pp, dir, len2, lob, clp, b);
+    easuTap(aC, aW, float2( 1.0, -1.0) - pp, dir, len2, lob, clp, c);
+    easuTap(aC, aW, float2(-1.0,  1.0) - pp, dir, len2, lob, clp, i);
+    easuTap(aC, aW, float2( 0.0,  1.0) - pp, dir, len2, lob, clp, j);
+    easuTap(aC, aW, float2( 0.0,  0.0) - pp, dir, len2, lob, clp, f);
+    easuTap(aC, aW, float2(-1.0,  0.0) - pp, dir, len2, lob, clp, e);
+    easuTap(aC, aW, float2( 1.0,  1.0) - pp, dir, len2, lob, clp, k);
+    easuTap(aC, aW, float2( 2.0,  1.0) - pp, dir, len2, lob, clp, l);
+    easuTap(aC, aW, float2( 2.0,  0.0) - pp, dir, len2, lob, clp, h);
+    easuTap(aC, aW, float2( 1.0,  0.0) - pp, dir, len2, lob, clp, g);
+    easuTap(aC, aW, float2( 1.0,  2.0) - pp, dir, len2, lob, clp, o);
+    easuTap(aC, aW, float2( 0.0,  2.0) - pp, dir, len2, lob, clp, n);
+
+    float3 pix = min(max4, max(min4, aC / max(aW, 1e-8)));
+    return half4(half3(pix), 1.0);
+}
+"""
+
+    /**
+     * AGSL port of AMD FidelityFX Super Resolution 1 RCAS (ffx_fsr1.h, FsrRcasF,
+     * 32-bit path, no denoise), run on the EASU output at display resolution.
+     *
+     * Copyright (c) 2021 Advanced Micro Devices, Inc. All rights reserved.
+     * MIT License (full text: res/raw/license_amd_fsr1.txt)
+     */
+    private const val FSR1_RCAS_AGSL = """
+uniform shader content;
+uniform float sharp; // exp2(-stops)
+
+half4 main(float2 p) {
+    //    b
+    //  d e f
+    //    h
+    float3 b = float3(content.eval(p + float2(0.0, -1.0)).rgb);
+    float3 d = float3(content.eval(p + float2(-1.0, 0.0)).rgb);
+    float3 e = float3(content.eval(p).rgb);
+    float3 f = float3(content.eval(p + float2(1.0, 0.0)).rgb);
+    float3 h = float3(content.eval(p + float2(0.0, 1.0)).rgb);
+
+    float3 mn4 = min(min(b, d), min(f, h));
+    float3 mx4 = max(max(b, d), max(f, h));
+    float3 hitMin = min(mn4, e) / max(4.0 * mx4, float3(1e-5));
+    float3 hitMax = (1.0 - max(mx4, e)) / min(4.0 * mn4 - 4.0, float3(-1e-5));
+    float3 lobeRGB = max(-hitMin, hitMax);
+    const float limit = 0.25 - (1.0 / 16.0);
+    float lobe = max(-limit, min(max(max(lobeRGB.r, lobeRGB.g), lobeRGB.b), 0.0)) * sharp;
+    float rcpL = 1.0 / (4.0 * lobe + 1.0);
+    float3 pix = (lobe * b + lobe * d + lobe * h + lobe * f + e) * rcpL;
+    return half4(half3(clamp(pix, 0.0, 1.0)), 1.0);
 }
 """
 }

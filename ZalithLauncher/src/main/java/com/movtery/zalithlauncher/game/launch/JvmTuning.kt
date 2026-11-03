@@ -31,6 +31,9 @@ object JvmTuning {
     /** Never clamp below this; smaller heaps are only used if the user asked for them */
     const val MIN_HEAP_MB = 512
 
+    /** Smallest ceiling ever applied; below this the JVM cannot start Minecraft at all */
+    const val JVM_FLOOR_MB = 256
+
     /** A 32-bit process cannot reliably reserve a larger contiguous Java heap */
     const val MAX_HEAP_32BIT_MB = 1024
 
@@ -63,7 +66,9 @@ object JvmTuning {
     fun heapCeilingMb(totalRamMb: Long, is64Bit: Boolean): Int {
         val byRam = (totalRamMb * MAX_HEAP_FRACTION_OF_RAM).toLong().coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
         val bounded = if (is64Bit) byRam else min(byRam, MAX_HEAP_32BIT_MB)
-        return max(bounded, MIN_HEAP_MB)
+        // strict: never above half of RAM, even on very small devices (only the JVM's own
+        // practical minimum can exceed it, on devices below 512 MB that cannot run the game anyway)
+        return max(bounded, JVM_FLOOR_MB)
     }
 
     /**

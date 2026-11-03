@@ -66,7 +66,20 @@ class JvmTuningTest {
     fun thirtyTwoBitIsCappedAndTinyDevicesKeepMinimumCeiling() {
         assertEquals(1024, JvmTuning.heapCeilingMb(7600, is64Bit = false))
         assertEquals(696, JvmTuning.resolveHeap(696, 3700, -1, is64Bit = false, safetyLimit = true).heapMb)
-        assertEquals(JvmTuning.MIN_HEAP_MB, JvmTuning.heapCeilingMb(700, is64Bit = true))
+        // strict 50 %: a 700 MB device gets at most 350 MB
+        assertEquals(350, JvmTuning.heapCeilingMb(700, is64Bit = true))
+    }
+
+    @Test
+    fun ceilingNeverExceedsHalfOfRam() {
+        for (ram in listOf(512L, 700L, 900L, 1024L, 1400L, 2048L, 3072L, 4096L, 6144L, 8192L, 11500L, 16384L)) {
+            for (is64 in listOf(true, false)) {
+                val c = JvmTuning.heapCeilingMb(ram, is64)
+                assertTrue("RAM $ram 64=$is64 ceiling $c", c <= ram / 2)
+                // and a huge request is clamped to it
+                assertEquals(c, JvmTuning.resolveHeap(100_000, ram, -1, is64, safetyLimit = true).heapMb)
+            }
+        }
     }
 
     @Test
