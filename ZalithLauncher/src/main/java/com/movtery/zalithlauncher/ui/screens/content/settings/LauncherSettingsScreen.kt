@@ -210,6 +210,14 @@ fun LauncherSettingsScreen(
                         CustomThemeSettings(modifier = Modifier.fillMaxWidth())
                     }
 
+                    SwitchSettingsCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        position = CardPosition.Middle,
+                        unit = AllSettings.showSmartAdvisor,
+                        title = stringResource(R.string.advisor_setting_title),
+                        summary = stringResource(R.string.advisor_setting_summary)
+                    )
+
                     ListSettingsCard(
                         modifier = Modifier.fillMaxWidth(),
                         position = CardPosition.Middle,

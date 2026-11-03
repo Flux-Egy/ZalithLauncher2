@@ -411,6 +411,16 @@ ABI: %2$s
     <string name="settings_performance_preset_title">إعداد الأداء المسبق</string>
     <string name="settings_performance_preset_summary">الرسم بدقة 50٪ والتكبير بالمكبِّر الموصى به مع إبقاء إعدادات GC المحسّنة. يمكن تغيير كل قيمة لاحقًا.</string>
     <string name="settings_performance_preset_applied">طُبّق إعداد الأداء المسبق</string>
+    <string name="advisor_title">المستشار الذكي</string>
+    <string name="advisor_hide">إخفاء</string>
+    <string name="advisor_fps_measured">الجلسة السابقة (مقيس): الوسيط %1$d إطار/ث، الأدنى %2$d إطار/ث · %3$s</string>
+    <string name="advisor_fps_none">لا توجد قياسات للإطارات لهذا الإصدار بعد. العب دقيقة وستظهر هنا.</string>
+    <string name="advisor_ram">الذاكرة المقترحة للعبة: %1$s</string>
+    <string name="advisor_ram_with_current">الذاكرة المقترحة للعبة: %1$s (الحالية %2$s)</string>
+    <string name="advisor_shaders">حزم تظليل تناسب هذا المعالج الرسومي: %1$s</string>
+    <string name="advisor_shaders_risky">إضافة التظليل مثبتة لكن ذاكرة الجهاز قليلة أو لا يدعم Vulkan؛ توقّع إطارات منخفضة. جرّب حزمة أخف أو نسبة دقة أقل.</string>
+    <string name="advisor_setting_title">المستشار الذكي في الشاشة الرئيسية</string>
+    <string name="advisor_setting_summary">اقتراحات حسب العتاد (الذاكرة، حزم التظليل، التعريفات) ومعدل الإطارات المقيس في جلستك الأخيرة</string>
     <string name="settings_launcher_style_title">نمط المشغّل</string>
     <string name="settings_launcher_style_summary">غيّر تخطيط المشغّل ومظهره. كل الميزات متاحة في كل نمط.</string>
     <string name="settings_launcher_style_default">Zalith (الافتراضي)</string>

@@ -436,6 +436,9 @@ object AllSettings : SettingsRegistry() {
      */
     val launcherStyle = enumSetting("launcherStyle", LauncherStyle.ZALITH_DEFAULT)
 
+    /** 主页显示“智能建议”卡片 */
+    val showSmartAdvisor = boolSetting("showSmartAdvisor", true)
+
     /** 自定义主题：布局（LauncherStyle 中除 CUSTOM 以外的项） */
     val customThemeLayout = enumSetting("customThemeLayout", LauncherStyle.ZALITH_DEFAULT)
 

@@ -1102,6 +1102,16 @@ ABI：%2$s
     <string name="settings_performance_preset_title">效能預設</string>
     <string name="settings_performance_preset_summary" formatted="false">以 50% 解析度渲染，使用推薦的放大演算法，並保持 GC 最佳化參數開啟。之後可個別調整每一項。</string>
     <string name="settings_performance_preset_applied">已套用效能預設</string>
+    <string name="advisor_title">智慧建議</string>
+    <string name="advisor_hide">隱藏</string>
+    <string name="advisor_fps_measured">上次實測：中位數 %1$d FPS，低值 %2$d FPS · %3$s</string>
+    <string name="advisor_fps_none">此實例還沒有實測影格率。遊戲一分鐘後會顯示在這裡。</string>
+    <string name="advisor_ram">建議的遊戲記憶體：%1$s</string>
+    <string name="advisor_ram_with_current">建議的遊戲記憶體：%1$s（目前 %2$s）</string>
+    <string name="advisor_shaders">適合此 GPU 的光影包：%1$s</string>
+    <string name="advisor_shaders_risky">已安裝光影模組，但此裝置記憶體較小或不支援 Vulkan，影格率可能較低。可嘗試更輕量的光影包或降低解析度比例。</string>
+    <string name="advisor_setting_title">首頁顯示智慧建議</string>
+    <string name="advisor_setting_summary">基於硬體的建議（記憶體、光影包、驅動）以及上次遊戲的實測影格率</string>
     <string name="settings_launcher_style_title">啟動器樣式</string>
     <string name="settings_launcher_style_summary">變更啟動器的版面與外觀。所有功能在每種樣式下皆可使用。</string>
     <string name="settings_launcher_style_default">Zalith（預設）</string>
