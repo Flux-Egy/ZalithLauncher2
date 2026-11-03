@@ -107,7 +107,15 @@ object PluginPackageInspector {
 
             text("renderer.json")?.let { return inspectRenderer(z, parseObject(it, "renderer.json"), deviceAbi) }
             text("meta.json")?.let { return inspectDriver(z, parseObject(it, "meta.json"), deviceAbi, deviceApi) }
-            fail("Not a renderer package (renderer.json) or driver package (meta.json)")
+            // bare driver zip (common for community PanVK/Turnip builds): just the Vulkan library
+            bareDriverEntry(z)?.let { entry ->
+                val meta = JsonObject().apply {
+                    addProperty("libraryName", entry)
+                    addProperty("name", entry.substringAfterLast('/').removeSuffix(".so"))
+                }
+                return inspectDriver(z, meta, deviceAbi, deviceApi)
+            }
+            fail("Not a renderer package (renderer.json) or driver package (meta.json, or a libvulkan_freedreno.so / libvulkan_panfrost.so)")
         }
     }
 
@@ -158,15 +166,30 @@ object PluginPackageInspector {
         )
     }
 
+    /** Entry of a known Vulkan driver library in a zip without meta.json, if exactly one */
+    private fun bareDriverEntry(z: ZipFile): String? = z.entries().asSequence()
+        .map { it.name }
+        .filter { it.substringAfterLast('/') in BARE_DRIVER_NAMES }
+        .toList()
+        .singleOrNull()
+
+    private val BARE_DRIVER_NAMES = setOf("libvulkan_freedreno.so", "libvulkan_panfrost.so")
+
+    /** Mesa PanVK (Mali) driver, as opposed to Turnip (Adreno) */
+    fun isPanVk(libraryName: String, gpu: String?): Boolean =
+        libraryName.contains("panfrost", ignoreCase = true) || gpu.equals("mali", ignoreCase = true)
+
     private fun inspectDriver(z: ZipFile, json: JsonObject, deviceAbi: String, deviceApi: Int): Inspection {
-        if (deviceAbi != "arm64-v8a") fail("Turnip driver packages require an arm64-v8a device")
+        if (deviceAbi != "arm64-v8a") fail("Vulkan driver packages require an arm64-v8a device")
         val libraryName = json.str("libraryName") ?: fail("meta.json: missing libraryName")
-        if (!LIB_NAME_PATTERN.matches(libraryName)) fail("meta.json: invalid libraryName")
+        if (!LIB_NAME_PATTERN.matches(libraryName.substringAfterLast('/'))) fail("meta.json: invalid libraryName")
         val name = json.str("name") ?: libraryName
         val minApi = json.get("minApi")?.takeIf { it.isJsonPrimitive }?.asInt
         if (minApi != null && deviceApi < minApi) fail("Driver requires Android API $minApi (device has $deviceApi)")
         z.getEntry(libraryName) ?: fail("meta.json references $libraryName, which is not in the package")
-        val library = readLibrary(z, libraryName, installName = DRIVER_INSTALL_NAME, deviceAbi = deviceAbi)
+        // PanVK keeps a name the native loader recognizes (it only loads PanVK on Mali)
+        val installName = if (isPanVk(libraryName, json.str("gpu"))) PANVK_INSTALL_NAME else DRIVER_INSTALL_NAME
+        val library = readLibrary(z, libraryName, installName = installName, deviceAbi = deviceAbi)
 
         val id = "driver_" + library.sha256.take(16)
         return Inspection(
@@ -182,6 +205,9 @@ object PluginPackageInspector {
 
     /** The driver loader dlopens this name from DRIVER_PATH (driver_helper.c) */
     const val DRIVER_INSTALL_NAME = "libvulkan_freedreno.so"
+
+    /** PanVK install name; passed to the loader as VULKAN_DRIVER_LIB */
+    const val PANVK_INSTALL_NAME = "libvulkan_panfrost.so"
 
     private fun readLibrary(z: ZipFile, entryName: String, installName: String, deviceAbi: String): Library {
         val entry = z.getEntry(entryName)

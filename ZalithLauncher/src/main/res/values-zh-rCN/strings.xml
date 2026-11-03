@@ -470,7 +470,7 @@
     <string name="renderer_version_support">MC 版本支持：</string>
     <string name="renderer_version_unsupported_warning">当前渲染器 %s 不支持该游戏版本，继续使用可能导致渲染错误或游戏崩溃！您确定要无视风险坚持访问吗？</string>
     <string name="local_plugin_import_title">导入渲染器或驱动包</string>
-    <string name="local_plugin_import_summary">从 .zip 文件安装渲染器（renderer.json）或 Turnip Vulkan 驱动（AdrenoTools meta.json）</string>
+    <string name="local_plugin_import_summary">从 .zip 文件安装渲染器（renderer.json）或 Vulkan 驱动：Adreno 用 Turnip，Mali 用 PanVK（AdrenoTools meta.json，或仅含驱动库）</string>
     <string name="local_plugin_imported_summary">已导入的包</string>
     <string name="local_plugin_installed_title">已导入的包（%1$d）</string>
     <string name="local_plugin_installed_summary">从 .zip 文件导入的渲染器和驱动</string>
@@ -485,7 +485,7 @@ ABI：%2$s
 
 此包包含将在游戏内运行的原生代码。请只安装来自可信来源的包。</string>
     <string name="local_plugin_type_renderer">渲染器</string>
-    <string name="local_plugin_type_driver">Vulkan 驱动（Turnip）</string>
+    <string name="local_plugin_type_driver">Vulkan 驱动（Turnip / PanVK）</string>
     <string name="local_plugin_warning_16k">警告：%1$s 未按 16 KB 页对齐，在使用 16 KB 页的设备上可能无法加载。</string>
     <string name="local_plugin_invalid">无法导入此包：%1$s</string>
     <string name="local_plugin_installed_ok">已安装 %1$s</string>

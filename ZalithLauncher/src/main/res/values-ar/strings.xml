@@ -362,7 +362,7 @@
     <string name="renderer_config_mg_sgsr1_title">Snapdragon GSR 1 (تجريبي)</string>
     <string name="renderer_config_mg_sgsr1_desc">رفع الدقة باستخدام Snapdragon Game Super Resolution. يتطلب إصدارًا من MobileGlues يدعم GSR، وتتجاهل الإصدارات الحالية هذا الإعداد. لا تفعّله مع FSR 1.</string>
     <string name="local_plugin_import_title">استيراد حزمة مُصيّر أو تعريف</string>
-    <string name="local_plugin_import_summary">تثبيت مُصيّر (renderer.json) أو تعريف Vulkan من نوع Turnip (AdrenoTools meta.json) من ملف ‎.zip</string>
+    <string name="local_plugin_import_summary">تثبيت مُصيّر (renderer.json) أو تعريف Vulkan من ملف ‎.zip: ‏Turnip لـ Adreno أو PanVK لـ Mali (AdrenoTools meta.json أو مكتبة التعريف وحدها)</string>
     <string name="local_plugin_imported_summary">حزمة مستوردة</string>
     <string name="local_plugin_installed_title">الحزم المستوردة (%1$d)</string>
     <string name="local_plugin_installed_summary">المُصيّرات والتعريفات المستوردة من ملفات ‎.zip</string>
@@ -377,7 +377,7 @@ ABI: %2$s
 
 تحتوي هذه الحزمة على شيفرة أصلية تعمل داخل اللعبة. ثبّت الحزم من مصادر تثق بها فقط.</string>
     <string name="local_plugin_type_renderer">مُصيّر</string>
-    <string name="local_plugin_type_driver">تعريف Vulkan ‏(Turnip)</string>
+    <string name="local_plugin_type_driver">تعريف Vulkan ‏(Turnip / PanVK)</string>
     <string name="local_plugin_warning_16k">تحذير: %1$s غير محاذٍ لصفحات 16 كيلوبايت وقد يفشل تحميله على الأجهزة التي تستخدم صفحات 16 كيلوبايت.</string>
     <string name="local_plugin_invalid">لا يمكن استيراد هذه الحزمة: %1$s</string>
     <string name="local_plugin_installed_ok">تم تثبيت %1$s</string>

@@ -859,7 +859,7 @@
     <!-- Warning dialog on game launch; %s is the renderer name, which does not support this game version -->
     <string name="renderer_version_unsupported_warning">The current renderer %s does not support this game version. Continuing to use it may cause rendering errors or crashes! Are you sure you want to proceed?</string>
     <string name="local_plugin_import_title">Import renderer or driver package</string>
-    <string name="local_plugin_import_summary">Install a renderer (renderer.json) or a Turnip Vulkan driver (AdrenoTools meta.json) from a .zip file</string>
+    <string name="local_plugin_import_summary">Install a renderer (renderer.json) or a Vulkan driver from a .zip file: Turnip for Adreno or PanVK for Mali (AdrenoTools meta.json, or just the driver library)</string>
     <string name="local_plugin_imported_summary">Imported package</string>
     <string name="local_plugin_installed_title">Imported packages (%1$d)</string>
     <string name="local_plugin_installed_summary">Renderers and drivers imported from .zip files</string>
@@ -874,7 +874,7 @@ ABI: %2$s
 
 This package contains native code that runs inside the game. Only install packages from sources you trust.</string>
     <string name="local_plugin_type_renderer">Renderer</string>
-    <string name="local_plugin_type_driver">Vulkan driver (Turnip)</string>
+    <string name="local_plugin_type_driver">Vulkan driver (Turnip / PanVK)</string>
     <string name="local_plugin_warning_16k">Warning: %1$s is not aligned to 16 KB pages and may fail to load on devices that use 16 KB pages.</string>
     <string name="local_plugin_invalid">This package cannot be imported: %1$s</string>
     <string name="local_plugin_installed_ok">%1$s was installed</string>
