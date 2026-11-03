@@ -32,6 +32,19 @@ Alignment is not a header field that can be patched after the fact: segment file
 and virtual addresses must themselves be congruent modulo 16 KB, which requires relinking.
 The fix belongs in the JRE build.
 
+## Mitigation shipped in the app (Android 16+)
+
+`AndroidManifest.xml` sets `android:pageSizeCompat="enabled"`. On a device with 16 KB
+pages running Android 16 or newer, the package manager then runs the app in **16 KB
+backcompat mode**: the dynamic linker loads ELF files whose `LOAD` segments are only
+4 KB aligned, so the extracted JRE (`libjvm.so` etc.) can be loaded and the game starts.
+On 4 KB-page devices (almost all phones today) the attribute has no effect.
+
+This is a stopgap (Android documents backcompat mode as such, with some memory and
+performance cost on 16 KB devices). It does not help on Android 15 16 KB devices, and
+relinking the JREs (below) remains the real fix. Patching the extracted libraries is not
+possible: segment offsets and addresses themselves must be congruent modulo 16 KB.
+
 ## Fix in the JRE build (upstream)
 
 The runtimes come from the Pojav-family Android OpenJDK build scripts
