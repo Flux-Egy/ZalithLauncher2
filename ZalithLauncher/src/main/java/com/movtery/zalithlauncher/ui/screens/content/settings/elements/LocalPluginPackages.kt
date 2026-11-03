@@ -159,12 +159,18 @@ fun LocalPluginPackagesSettings(modifier: Modifier = Modifier) {
             val rendererLabel = stringResource(R.string.local_plugin_type_renderer)
             val driverLabel = stringResource(R.string.local_plugin_type_driver)
             val noneText = stringResource(R.string.local_plugin_none)
+            val alignedText = stringResource(R.string.local_plugin_status_16k_ok)
+            val notAlignedText = stringResource(R.string.local_plugin_status_16k_bad)
+            //本机是否使用 16 KB 内存页（未对齐的库只在这种设备上无法加载）
+            val pageSize = remember { runCatching { android.system.Os.sysconf(android.system.OsConstants._SC_PAGESIZE) }.getOrDefault(4096L) }
+            val pageText = stringResource(R.string.local_plugin_device_page_size, pageSize / 1024)
             val text = if (s.packages.isEmpty()) {
                 noneText
             } else {
-                s.packages.joinToString("\n") { p ->
+                pageText + "\n" + s.packages.joinToString("\n") { p ->
                     val type = if (p.record.type == PluginPackageInspector.Type.RENDERER) rendererLabel else driverLabel
-                    "• ${p.record.name} ($type)"
+                    val aligned = if (p.record.libraries.all { it.aligned16k }) alignedText else notAlignedText
+                    "• ${p.record.name} ($type) · $aligned"
                 }
             }
             SimpleAlertDialog(

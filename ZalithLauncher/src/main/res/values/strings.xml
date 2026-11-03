@@ -2281,6 +2281,12 @@ This package contains native code that runs inside the game. Only install packag
     <string name="custom_theme_import_summary">Load a theme file. The background image or video itself is not included in theme files.</string>
     <string name="custom_theme_import_done">Theme “%1$s” applied</string>
     <string name="custom_theme_import_failed">Not a valid theme file: %1$s</string>
+    <string name="custom_theme_extras_title">Themes in the Extras folder (%1$d)</string>
+    <string name="custom_theme_extras_summary">Put shared theme files in %1$s; they appear below</string>
+    <string name="custom_theme_extras_apply">Apply · from %1$s</string>
+    <string name="local_plugin_status_16k_ok">16 KB aligned</string>
+    <string name="local_plugin_status_16k_bad">not 16 KB aligned</string>
+    <string name="local_plugin_device_page_size">This device uses %1$d KB memory pages.</string>
     <string name="style_nav_play">Play</string>
     <string name="style_nav_home">Home</string>
     <string name="style_nav_installations">Installations</string>

@@ -1241,6 +1241,12 @@ ABI：%2$s
     <string name="custom_theme_import_summary">载入主题文件。主题文件不包含背景图片或视频本身。</string>
     <string name="custom_theme_import_done">已应用主题“%1$s”</string>
     <string name="custom_theme_import_failed">不是有效的主题文件：%1$s</string>
+    <string name="custom_theme_extras_title">Extras 文件夹中的主题（%1$d）</string>
+    <string name="custom_theme_extras_summary">将分享的主题文件放入 %1$s，即会显示在下方</string>
+    <string name="custom_theme_extras_apply">应用 · 来自 %1$s</string>
+    <string name="local_plugin_status_16k_ok">已 16 KB 对齐</string>
+    <string name="local_plugin_status_16k_bad">未 16 KB 对齐</string>
+    <string name="local_plugin_device_page_size">本设备使用 %1$d KB 内存页。</string>
     <string name="style_nav_play">开始游戏</string>
     <string name="style_nav_home">主页</string>
     <string name="style_nav_installations">游戏版本</string>

@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.game.renderer.auto
 
+import com.movtery.zalithlauncher.game.extras.CommunityExtras
 import com.movtery.zalithlauncher.context.GlobalContext
 import com.movtery.zalithlauncher.game.addons.modloader.ModLoader
 import com.movtery.zalithlauncher.game.renderer.RendererInterface
@@ -43,7 +44,11 @@ object RendererResolver {
 
     val compat: RendererCompat? by lazy {
         runCatching {
-            GlobalContext.assets.open(COMPAT_ASSET).use { RendererCompat.parse(it.readBytes().toString(Charsets.UTF_8)) }
+            val bundled = GlobalContext.assets.open(COMPAT_ASSET).use { RendererCompat.parse(it.readBytes().toString(Charsets.UTF_8)) }
+            //用户在 Extras/renderer_rules 放置的规则优先于内置规则（两个进程读取相同文件，结果一致）
+            val extras = runCatching { CommunityExtras.rendererRules() }.getOrDefault(emptyList())
+            if (extras.isNotEmpty()) Logger.info(TAG, "Renderer rules from Extras: ${extras.joinToString { it.first }}")
+            bundled.withExtras(extras)
         }.onFailure { Logger.error(TAG, "Failed to load $COMPAT_ASSET", it) }.getOrNull()
     }
 

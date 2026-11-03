@@ -453,6 +453,12 @@ ABI: %2$s
     <string name="custom_theme_import_summary">حمّل ملف سمة. لا تتضمّن ملفات السمات صورة الخلفية أو الفيديو نفسه.</string>
     <string name="custom_theme_import_done">طُبّقت السمة «%1$s»</string>
     <string name="custom_theme_import_failed">ليس ملف سمة صالحًا: %1$s</string>
+    <string name="custom_theme_extras_title">السمات في مجلد Extras ‏(%1$d)</string>
+    <string name="custom_theme_extras_summary">ضع ملفات السمات المشتركة في %1$s لتظهر أدناه</string>
+    <string name="custom_theme_extras_apply">تطبيق · من %1$s</string>
+    <string name="local_plugin_status_16k_ok">محاذاة 16 كيلوبايت</string>
+    <string name="local_plugin_status_16k_bad">غير محاذٍ لـ 16 كيلوبايت</string>
+    <string name="local_plugin_device_page_size">يستخدم هذا الجهاز صفحات ذاكرة بحجم %1$d كيلوبايت.</string>
     <string name="style_nav_play">اللعب</string>
     <string name="style_nav_home">الرئيسية</string>
     <string name="style_nav_installations">الإصدارات المثبّتة</string>

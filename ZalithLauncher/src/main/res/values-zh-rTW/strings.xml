@@ -1144,6 +1144,12 @@ ABI：%2$s
     <string name="custom_theme_import_summary">載入主題檔案。主題檔案不包含背景圖片或影片本身。</string>
     <string name="custom_theme_import_done">已套用主題「%1$s」</string>
     <string name="custom_theme_import_failed">不是有效的主題檔案：%1$s</string>
+    <string name="custom_theme_extras_title">Extras 資料夾中的主題（%1$d）</string>
+    <string name="custom_theme_extras_summary">將分享的主題檔案放入 %1$s，即會顯示在下方</string>
+    <string name="custom_theme_extras_apply">套用 · 來自 %1$s</string>
+    <string name="local_plugin_status_16k_ok">已 16 KB 對齊</string>
+    <string name="local_plugin_status_16k_bad">未 16 KB 對齊</string>
+    <string name="local_plugin_device_page_size">本裝置使用 %1$d KB 記憶體頁。</string>
     <string name="style_nav_play">開始遊戲</string>
     <string name="style_nav_home">首頁</string>
     <string name="style_nav_installations">遊戲版本</string>

@@ -18,6 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content.settings.elements
 
+import com.movtery.zalithlauncher.game.extras.CommunityExtras
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
@@ -264,6 +265,37 @@ fun CustomThemeSettings(modifier: Modifier = Modifier) {
         summary = stringResource(R.string.custom_theme_import_summary),
         onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }
     )
+
+    //Extras/themes 中的主题文件，一键应用
+    val extraThemes by androidx.compose.runtime.produceState(emptyList<Pair<String, CustomThemeSpec>>()) {
+        value = withContext(Dispatchers.IO) {
+            CommunityExtras.ensureLayout()
+            CommunityExtras.themes(
+                validLayouts = LauncherStyle.entries.filter { it != LauncherStyle.CUSTOM }.map { it.name }.toSet(),
+                validPaletteStyles = PaletteStyle.entries.map { it.name }.toSet()
+            )
+        }
+    }
+    SettingsCard(
+        modifier = modifier,
+        position = CardPosition.Middle,
+        title = stringResource(R.string.custom_theme_extras_title, extraThemes.size),
+        summary = stringResource(R.string.custom_theme_extras_summary, CommunityExtras.root().absolutePath + "/themes"),
+        onClick = {}
+    )
+    extraThemes.forEach { (fileName, spec) ->
+        SettingsCard(
+            modifier = modifier,
+            position = CardPosition.Middle,
+            title = spec.name,
+            summary = stringResource(R.string.custom_theme_extras_apply, fileName),
+            onClick = {
+                applySpec(spec)
+                Toast.makeText(context, context.getString(R.string.custom_theme_import_done, spec.name), Toast.LENGTH_SHORT).show()
+            },
+            trailingIcon = { ColorSwatch(Color(spec.primary)) }
+        )
+    }
 
     if (editPrimary) {
         val controller = rememberColorPickerController(initialColor = Color(AllSettings.launcherCustomColor.getValue()))

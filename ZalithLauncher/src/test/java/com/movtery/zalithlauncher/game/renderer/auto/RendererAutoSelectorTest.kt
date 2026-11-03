@@ -152,4 +152,25 @@ class RendererAutoSelectorTest {
         val ok = RendererCompat.parse("""{"schemaVersion":1,"rules":[{"id":"d","when":{"gpuVendors":["adreno","bogus"]},"prefer":["a"]}]}""")
         assertEquals(setOf(GpuVendor.ADRENO), ok.rules.single().condition.gpuVendors)
     }
+
+    @Test
+    fun extrasRulesComeFirstButCannotLiftConstraints() {
+        val base = RendererCompat.parse(
+            """{"schemaVersion":1,
+               "renderers":{"freedreno":{"gpuVendors":["ADRENO"]}},
+               "rules":[{"id":"default","when":{},"prefer":["opengles3"]}]}"""
+        )
+        val extra = RendererCompat.parse(
+            """{"schemaVersion":1,
+               "renderers":{"freedreno":{},"myrenderer":{"requiresVulkan":true}},
+               "rules":[{"id":"mine","when":{"gpuVendors":["MALI"]},"prefer":["myrenderer"]}]}"""
+        )
+        val merged = base.withExtras(listOf("user.json" to extra))
+        assertEquals("extra:user.json:mine", merged.rules.first().id)
+        assertEquals("default", merged.rules.last().id)
+        // bundled constraint kept; new renderer constraint added
+        assertEquals(setOf(GpuVendor.ADRENO), merged.renderers.getValue("freedreno").gpuVendors)
+        assertTrue(merged.renderers.getValue("myrenderer").requiresVulkan)
+        assertEquals(base, base.withExtras(emptyList()))
+    }
 }
