@@ -18,6 +18,12 @@
 
 package com.movtery.zalithlauncher.game.download.assets
 
+import com.movtery.zalithlauncher.context.GlobalContext
+import java.io.File
+import okhttp3.Request
+import com.movtery.zalithlauncher.path.DOWNLOAD_OKHTTP_CLIENT
+import com.movtery.zalithlauncher.game.version.mod.deps.ModVersionRange
+import com.movtery.zalithlauncher.game.version.mod.deps.DependencyVersionMatcher
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.coroutine.Task
 import com.movtery.zalithlauncher.coroutine.TaskSystem
@@ -71,8 +77,13 @@ class DependencyRequest(
     val projectId: String,
     val versionId: String?,
     val classes: PlatformClasses,
-    val projectTitle: String
-)
+    val projectTitle: String,
+    /** The version that requires this dependency; its jar declares the acceptable range */
+    val parentVersion: PlatformVersion? = null
+) {
+    fun withParent(parent: PlatformVersion) =
+        DependencyRequest(platform, projectId, versionId, classes, projectTitle, parent)
+}
 
 /**
  * 为给定的游戏版本安装选中的依赖项，并递归展开它们标注的必装依赖
@@ -143,6 +154,9 @@ private class DependencyContext(
 ) {
     /** 目标游戏版本对应的本地已安装模组项目集合 */
     val installedMemo = ConcurrentHashMap<String, Set<String>>()
+
+    /** 父版本 jar 中声明的依赖版本范围，键为父版本 id */
+    val parentRanges = ConcurrentHashMap<String, Map<String, Pair<ModVersionRange, String>>>()
     val installedMutex = Mutex()
 
     /**
@@ -285,7 +299,7 @@ private suspend fun expand(
 
             coroutineScope {
                 required.forEach { dependency ->
-                    val child = context.expandChild(dependency, request) ?: return@forEach
+                    val child = context.expandChild(dependency, request, version) ?: return@forEach
                     async { expand(child, group, context) }
                 }
             }
@@ -345,8 +359,22 @@ private suspend fun DependencyContext.resolve(
         return emptyList()
     }
 
+    // 父模组声明了版本范围（如 Iris 要求 sodium 0.6.x）时，只在满足范围的版本中挑选；
+    // 若没有任何满足范围的适配版本，则回退到原有的“最新适配版本”逻辑
+    val range = request.parentVersion?.let { parent ->
+        val ranges = rangesOf(parent)
+        DependencyVersionMatcher.rangeFor(ranges, projectCache[request.projectId]?.platformSlug(), request.projectTitle)
+    }
+    val inRange = range?.let { (r, text) ->
+        DependencyVersionMatcher.filter(allVersions, r, { it.platformVersion() }, { it.platformGameVersion().toList() })
+            .also { Logger.info(TAG, "${request.projectTitle}: parent requires $text, ${it.size}/${allVersions.size} versions match") }
+    }
+    fun pick(target: Version): PlatformVersion? =
+        inRange?.firstOrNull { it.isCompatibleWith(target, request.classes) }
+            ?: allVersions.firstOrNull { it.isCompatibleWith(target, request.classes) }
+
     return targets
-        .groupBy { target -> allVersions.firstOrNull { it.isCompatibleWith(target, request.classes) } }
+        .groupBy { target -> pick(target) }
         .mapNotNull { (version, group) ->
             if (version == null) {
                 group.forEach {
@@ -360,12 +388,37 @@ private suspend fun DependencyContext.resolve(
 }
 
 /**
+ * 读取父版本 jar 中声明的依赖版本范围（下载到缓存后解析，结果按父版本缓存）。
+ * 失败或不是 jar 时返回空表，不影响原有逻辑。
+ */
+private fun DependencyContext.rangesOf(parent: PlatformVersion): Map<String, Pair<ModVersionRange, String>> =
+    parentRanges.getOrPut("${parent.platform().name}/${parent.platformId()}") {
+        runCatching<Map<String, Pair<ModVersionRange, String>>> {
+            val url = parent.platformDownloadUrl()
+            if (!parent.platformFileName().endsWith(".jar", ignoreCase = true)) return@runCatching emptyMap()
+            if (parent.platformFileSize() > 64L * 1024 * 1024) return@runCatching emptyMap()
+            val tmp = File.createTempFile("dep_parent_", ".jar", GlobalContext.cacheDir)
+            try {
+                DOWNLOAD_OKHTTP_CLIENT.newCall(Request.Builder().url(url).build()).execute().use { response ->
+                    if (!response.isSuccessful) return@runCatching emptyMap()
+                    response.body.byteStream().use { input -> tmp.outputStream().use { input.copyTo(it) } }
+                }
+                DependencyVersionMatcher.requiredRanges(tmp)
+            } finally {
+                tmp.delete()
+            }
+        }.onFailure { Logger.warning(TAG, "Could not read version ranges of ${parent.platformFileName()}", it) }
+            .getOrDefault(emptyMap())
+    }
+
+/**
  * 将发现的传递依赖转换为可安装的依赖项
  * 同一个项目在整张依赖图中只会被处理一次
  */
 private suspend fun DependencyContext.expandChild(
     dependency: PlatformVersion.PlatformDependency,
-    parent: DependencyRequest
+    parent: DependencyRequest,
+    parentVersion: PlatformVersion
 ): DependencyRequest? = semaphore.withPermit {
     val projectId = dependency.projectId ?: run {
         val versionId = dependency.versionId ?: return@withPermit null
@@ -382,7 +435,8 @@ private suspend fun DependencyContext.expandChild(
         projectId = projectId,
         versionId = dependency.versionId,
         classes = classes,
-        projectTitle = title
+        projectTitle = title,
+        parentVersion = parentVersion
     )
 }
 

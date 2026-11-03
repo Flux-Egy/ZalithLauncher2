@@ -175,7 +175,7 @@ fun DownloadSingleOperation(
                 },
                 onInstall = { versions, dependencies ->
                     changeOperation(
-                        DownloadSingleOperation.Install(classes, operation.version, versions, dependencies)
+                        DownloadSingleOperation.Install(classes, operation.version, versions, dependencies.map { it.withParent(operation.version) })
                     )
                 },
                 onDependencyClicked = { platform, projectId, dependencyClasses ->
